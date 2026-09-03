@@ -20,6 +20,7 @@
   - [2.4 Hypothesis — 仮説を研究オブジェクト化](#24-hypothesis--仮説を研究オブジェクト化)
   - [2.5 Run — 実験実行](#25-run--実験実行)
 - [3. ステータスバー（外部接続）](#3-ステータスバー外部接続)
+  - [3.1 alphaXiv MCP](#31-alphaxiv-mcp)
 - [4. Agent 欄がこのUIの中心](#4-agent-欄がこのuiの中心)
 - [5. 裏側のアーキテクチャ](#5-裏側のアーキテクチャ)
 
@@ -52,7 +53,7 @@
 │ > Design experiment                        │
 │                                            │
 ├────────────────────────────────────────────┤
-│ Paperpile ✓  arXiv ✓  GitHub ✓  MCP ✓      │  ⑥ 外部接続
+│ Paperpile ✓ arXiv ✓ alphaXiv ✓ GitHub ✓    │  ⑥ 外部接続
 └────────────────────────────────────────────┘
 ```
 
@@ -63,7 +64,7 @@
 | ③ | 現在の研究テーマ | いま扱っているクエリ／テーマ |
 | ④ | 文献・成果物 | ヒットした論文やアウトプット一覧 |
 | ⑤ | Agent 操作 | 自然言語で Agent に指示する欄（**最重要**） |
-| ⑥ | 外部接続 | Paperpile / arXiv / GitHub / MCP の接続ステータス |
+| ⑥ | 外部接続 | Paperpile / arXiv / alphaXiv / GitHub / MCP の接続ステータス |
 
 ---
 
@@ -78,7 +79,7 @@
 | 項目 | 値 |
 |------|-----|
 | Query | `vision tactile world model` |
-| Sources | ☑ Paperpile ／ ☑ arXiv ／ ☑ Semantic Scholar |
+| Sources | ☑ Paperpile ／ ☑ arXiv ／ ☑ Semantic Scholar ／ ☑ alphaXiv |
 | Year | 2023–2026 |
 
 **出力例**
@@ -103,6 +104,7 @@
 - `> Find papers about tactile failure prediction`
 - `> Show only papers after 2024`
 - `> Add selected papers to Paperpile`
+- `> Discover related papers on alphaXiv and pull their AI summaries`
 
 ---
 
@@ -245,21 +247,56 @@ experiments/
 
 ## 3. ステータスバー（外部接続）
 
-画面下部 `Paperpile ✓  arXiv ✓  GitHub ✓  MCP ✓` はステータスバーです。
+画面下部 `Paperpile ✓  arXiv ✓  alphaXiv ✓  GitHub ✓  MCP ✓` はステータスバーです。
 
 | 表示 | 意味 |
 |------|------|
 | Paperpile ✓ | Paperpile ライブラリへアクセス可能 |
 | arXiv ✓ | 新規論文検索が可能 |
+| alphaXiv ✓ | alphaXiv MCP 経由で論文探索・全文解析・研究者検索が可能 |
 | GitHub ✓ | コード・OSS・実装の検索が可能 |
 | MCP ✓ | MCP Server 群が正常 |
 
 **将来の拡張イメージ**
 
 ```
-Paperpile ✓   arXiv ✓   GitHub ✓   Semantic Scholar ✓   OpenAlex ✓
+Paperpile ✓   arXiv ✓   alphaXiv ✓   GitHub ✓   Semantic Scholar ✓   OpenAlex ✓
 Notion ✓   Overleaf ✓   Neo4j ✓   Claude ✓
 ```
+
+### 3.1 alphaXiv MCP
+
+文献探索の主力バックエンドとして [alphaXiv MCP](https://www.alphaxiv.org/docs/mcp) を接続します。
+
+| 項目 | 値 |
+|------|-----|
+| Endpoint | `https://api.alphaxiv.org/mcp/v1` |
+| Transport | Streamable HTTP |
+| 認証 | OAuth 2.1（デフォルト）／ API キー（`Authorization: Bearer <key>`） |
+
+**導入コマンド（Claude Code）**
+
+```bash
+# OAuth（対話ログイン）
+claude mcp add --transport http alphaxiv https://api.alphaxiv.org/mcp/v1
+
+# API キー（非対話・Settings > API Keys で発行）
+claude mcp add --transport http alphaxiv https://api.alphaxiv.org/mcp/v1 \
+  --header "Authorization: Bearer <key>"
+```
+
+追加後、Claude Code で `/mcp` を開き `alphaxiv` を選んで認証すると有効化されます。
+
+**主なツール（全19種）**
+
+| 分類 | ツール | 用途 |
+|------|--------|------|
+| Research | `discover_papers` | トピックからランク付き候補論文をエージェント検索 |
+| Research | `get_paper_content` | AI 生成レポート／抽出全文の取得 |
+| Research | `answer_pdf_queries` | PDF をページ単位・引用付き（XML）で質問検索 |
+| Research | `read_files_from_github_repository` | 論文付随リポジトリの並列探索 |
+| Researcher | `find_researchers` / `get_researcher` / `get_researcher_papers` | 研究者・著者から論文をたどる |
+| Library | `list_library` / `save_papers_to_folder` / `create_folder` ほか | alphaXiv ライブラリの整理 |
 
 ---
 
@@ -284,12 +321,12 @@ Human → Goal → Agent → Plan → Tool / MCP / Skill → Result
 
 たとえば `> Find recent tactile world model papers` の一言で、Agent が次を実行します。
 
-1. arXiv 検索
+1. arXiv 検索 ＋ alphaXiv `discover_papers`
 2. Paperpile 重複確認
 3. Metadata 取得
 4. Abstract 評価
 5. 上位論文の選択
-6. PDF 解析
+6. PDF 解析（alphaXiv `answer_pdf_queries` / `get_paper_content`）
 7. 比較
 8. Paperpile 登録
 9. Knowledge Graph 更新
@@ -312,7 +349,8 @@ Human → Goal → Agent → Plan → Tool / MCP / Skill → Result
                    │           │
         ┌──────────┼───────┐   ├─ Paperpile
         ▼          ▼       ▼   ├─ arXiv
-      Search     Review   Gap  ├─ GitHub
+      Search     Review   Gap  ├─ alphaXiv
+                             │ ├─ GitHub
                              │ └─ Neo4j
                              ▼
                          Claude Code
