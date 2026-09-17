@@ -1,12 +1,17 @@
-Paper2Agentを内部にコピーして作り直すのではなく、「Paper Agent生成バックエンド」として組み込むのが一番きれいです。
+# Paper2Agent 統合構想
 
-Paper2Agent自体がClaude Code / CodexなどのCoding Agent上で動くSkillとして設計されており、論文とRepositoryから Paper Skill + 検証済みMCP Server を生成できます。
-一方、Research OSは「検索 → 読解 → 比較 → 仮説化 → 実験」をTUIから一貫して扱う研究IDEなので、役割がほぼ補完関係です。
+## 概要
 
-推奨アーキテクチャ
+Paper2Agent を内部にコピーして作り直すのではなく、**「Paper Agent 生成バックエンド」として組み込む** のが最もきれいな統合方法である。
 
-こうします。
+- Paper2Agent は、Claude Code / Codex などの Coding Agent 上で動く Skill として設計されており、論文と Repository から **Paper Skill + 検証済み MCP Server** を生成できる。
+- 一方 Research OS は、「検索 → 読解 → 比較 → 仮説化 → 実験」を TUI から一貫して扱う研究 IDE である。
 
+両者の役割はほぼ補完関係にあり、Research OS が Paper2Agent を呼び出して論文をエージェント化し、その成果物を Research OS 側で管理する構成が自然である。
+
+## 推奨アーキテクチャ
+
+```text
                          Research OS
                              │
                  ┌───────────┴───────────┐
@@ -37,29 +42,25 @@ Paper2Agent自体がClaude Code / CodexなどのCoding Agent上で動くSkillと
                          ┌───────────────┼──────────────┐
                          ▼               ▼              ▼
                        Review        Hypothesis       Experiment
+```
 
-要するに、
+要するに **「Research OS が Paper2Agent を呼び出して論文をエージェント化し、その成果物を Research OS 側で管理する」** という構成である。
 
-Research OSがPaper2Agentを呼び出して論文をAgent化し、その成果物をResearch OS側で管理する
+---
 
-という構成です。
+## 1. Research OS に「Agentify Paper」を追加する
 
-1. Research OSに「Agentify Paper」を追加する
+現在の Research OS には次の画面がある。
 
-今のResearch OSには、
+- Papers
+- Review
+- Graph
+- Hypothesis
+- Run
 
-Papers
-Review
-Graph
-Hypothesis
-Run
+ここに、Papers / Review 画面から次の操作を追加する。
 
-があります。
-
-ここにまず、
-
-Papers / Review
-
+```text
 VLA-JEPA
 ────────────────────────
 PDF       ✓
@@ -69,35 +70,31 @@ Code      ✓
 [ Review ]
 [ Compare ]
 [ Agentify ]
+```
 
-という操作を追加します。
+`Agentify` を実行すると、次の変換が行われる。
 
-Agentifyすると、
-
+```text
 Paper
-+
+  +
 GitHub Repository
        ↓
-Paper2Agent
+   Paper2Agent
        ↓
-Paper Skill
-+
-Paper MCP
+  Paper Skill
+  +
+  Paper MCP
+```
 
-を生成します。
+Research OS から見ると、Paper2Agent は **「Paper Compiler」** に相当する。
 
-Research OSから見るとPaper2Agentは、
+---
 
-Paper Compiler
+## 2. Paper2Agent 本体は Coding Agent に実行させる
 
-です。
+ここは設計上重要な判断である。Research OS の Python コードから Paper2Agent の内部 API を直接呼ぶのではなく、次の経路を採る方が Paper2Agent 本来の設計に合っている。
 
-2. Paper2AgentそのものはCoding Agentに実行させる
-
-ここは重要です。
-
-Research OS PythonコードからPaper2Agent内部APIを直接呼ぶより、
-
+```text
 Research OS
     ↓
 Agent Runtime
@@ -105,17 +102,19 @@ Agent Runtime
 Claude Code / Codex
     ↓
 Paper2Agent Skill
+```
 
-の方がPaper2Agent本来の設計に合っています。
+Paper2Agent の公式 README でも、Claude Code や Codex に Skill をインストールし、
 
-Paper2Agent公式READMEでも、Claude CodeやCodexにSkillをインストールし、
-
+```text
 Use the paper2agent skill to agentify this paper...
+```
 
-と指示する方式になっています。Claude Codeでは/paper2agent、Codexでは$paper2agentとして利用できます。
+と指示する方式が採られている（Claude Code では `/paper2agent`、Codex では `$paper2agent` として利用できる）。
 
-したがってResearch OSには、
+したがって Research OS 側には、次のような Runtime 抽象化を置くとよい。
 
+```python
 class AgentRuntime:
     def run(self, task): ...
 
@@ -124,24 +123,23 @@ class ClaudeCodeRuntime(AgentRuntime):
 
 class CodexRuntime(AgentRuntime):
     ...
+```
 
-のような抽象化を置くとよいです。
+こうしておけば、将来的に次のような Runtime を交換できる。
 
-そうすれば将来、
+- Claude Code
+- Codex
+- Gemini CLI
+- OpenHands
 
-Claude Code
-Codex
-Gemini CLI
-OpenHands
+---
 
-を交換できます。
+## 3. Research OS のディレクトリ構成
 
-3. Research OSのディレクトリ
+例えば次のような構成にする。
 
-例えばこうします。
-
+```text
 research_os/
-
 ├── research/
 │   ├── papers/
 │   ├── hypotheses/
@@ -166,27 +164,27 @@ research_os/
 │       └── mcp/
 │
 ├── experiments/
-│
 ├── evidence/
-│
 └── docs/
+```
 
-Paper2Agent自身の出力形式も、
+Paper2Agent 自身の出力形式も、次のような Skill + MCP 構成になっている。
 
+```text
 dist/<project>-agent/
 ├── skill/<paper-name>/
 └── mcp/<repository-name>-mcp/
+```
 
-というSkill + MCP構成になっています。
+そのため Research OS 側では、この成果物をほぼそのまま取り込める。
 
-そのためResearch OS側では、成果物をほぼそのまま取り込めます。
+---
 
-4. Paper Agent Registryを作る
+## 4. Paper Agent Registry を作る
 
-これがResearch OS側では重要です。
+Research OS 側にとって、これが最も重要なコンポーネントになる。
 
-例えば、
-
+```yaml
 id: paper-agent-vla-jepa
 
 paper:
@@ -216,26 +214,24 @@ validation:
     failed: 1
 
 created_at: 2026-09-17
+```
 
-Research OSはPaper2Agent内部を理解する必要はありません。
+Research OS は Paper2Agent の内部実装を理解する必要はなく、次の項目だけを見ればよい。
 
-見るのは、
+- `READY`
+- `VALIDATED`
+- `AVAILABLE TOOLS`
+- `VERSION`
+- `SOURCE PAPER`
+- `SOURCE COMMIT`
 
-READY
-VALIDATED
-AVAILABLE TOOLS
-VERSION
-SOURCE PAPER
-SOURCE COMMIT
+---
 
-だけです。
+## 5. Paper2Agent の Validation 結果を Research OS に取り込む
 
-5. Paper2AgentのValidation結果をResearch OSに取り込む
+これは必ず取り込むべきである。Paper2MCP は単純な wrapper generator ではなく、次の段階を踏んでツールを生成する。
 
-これは必ず取り込んだ方がいいです。
-
-Paper2MCPは単純なwrapper generatorではなく、
-
+```text
 Environment setup
        ↓
 Tool discovery
@@ -251,15 +247,13 @@ MCP integration
 Runtime validation
        ↓
 Delivery
+```
 
-という段階を踏みます。
+さらに、各 MCP Tool は既存 Repository のコードに紐付いていなければならず、Implementer とは別の Verifier Agent による検証も要求される。これは Research OS の Experiment 管理と非常に相性がよい。
 
-さらに、各MCP Toolは既存Repositoryコードに紐付いていなければならず、Implementerとは別のVerifier Agentによる検証も要求されています。
+Research OS の画面では、例えば次のように表示できるとよい。
 
-これはResearch OSのExperiment管理と非常に相性がいいです。
-
-Research OSの画面では、
-
+```text
 Paper Agent: VLA-JEPA
 
 Status        READY
@@ -277,15 +271,15 @@ Tools
 ✓ reproduce_table
 ✓ reproduce_figure
 ✗ export_model
+```
 
-くらい表示できるとよいです。
+---
 
-6. Paper Agentを実験のBaselineとして選択できるようにする
+## 6. Paper Agent を実験の Baseline として選択できるようにする
 
-ここからResearch OSらしくなります。
+ここから Research OS らしい価値が生まれる。今の Run 画面を、次のように拡張する。
 
-今のRun画面を、
-
+```text
 Experiment: VT-JEPA-001
 
 Baseline
@@ -302,71 +296,51 @@ Metrics
 [ Failure AUC ]
 
 [Create Experiment]
+```
 
-とします。
+この操作の裏側では、次の流れが実行される。
 
-すると裏では、
-
+```text
 Hypothesis
-
-「Tactile latent prediction improves
- failure prediction」
-
+「Tactile latent prediction improves failure prediction」
         ↓
-
 VLA-JEPA Paper MCP
-
         ↓
-
-取得
-- preprocessing
-- model
-- training
-- evaluation
-
+取得（preprocessing / model / training / evaluation）
         ↓
-
 Claude Code / Codex
-
         ↓
-
 新規実装
-
         ↓
-
 Experiment Harness
+```
 
-という流れになります。
+これは Paper2Agent 単体にはない、Research OS ならではの価値である。
 
-ここがPaper2Agent単体にはないResearch OSの価値です。
+---
 
-7. Knowledge Graphにも追加する
+## 7. Knowledge Graph にも追加する
 
-Research OSはKnowledge Graphを構想しています。
+Research OS は Knowledge Graph を構想している。Paper Agent を Node として追加すると、次のような関係が表現できる。
 
-Paper AgentをNodeとして追加すると面白いです。
-
+```text
 Paper
-  │
   ├── implements ──→ Method
-  │
   ├── provides ────→ Tool
-  │
   └── agentified_as → PaperAgent
 
 PaperAgent
-  │
   ├── exposes → MCPTool
-  │
   └── used_by → Experiment
 
 Experiment
-  │
   ├── tests → Hypothesis
   └── produces → Result
+```
 
-例えば、
+例えば VLA-JEPA の場合、次のような系譜になる。
 
+```text
 VLA-JEPA Paper
        │
        ▼
@@ -381,66 +355,65 @@ VLA-JEPA Agent
               │
               ▼
         Hypothesis H-003
+```
 
-になります。
+これにより、**「この Experiment はどの論文のどのコードを元にしたのか」** が追跡できる。これは研究の Provenance / Lineage として大きな価値を持つ。
 
-これなら、
+---
 
-「このExperimentはどの論文のどのコードを元にしたのか？」
+## 8. CLI 設計
 
-が追跡できます。
+TUI だけでなく CLI も持たせる。
 
-これは研究のProvenance / Lineageとしてかなり価値があります。
-
-8. CLIはこうしたい
-
-TUIだけでなくCLIを持たせます。
-
+```bash
 # 論文登録
 research paper add <paper-url>
 
-# GitHub repositoryを紐付け
+# GitHub repository を紐付け
 research paper repo <paper-id> <github-url>
 
-# Paper2Agent実行
+# Paper2Agent 実行
 research paper agentify <paper-id>
+```
 
-Agent Runtimeも指定できます。
+Agent Runtime も指定できるようにする。
 
-research paper agentify <paper-id> \
-  --runtime claude
+```bash
+research paper agentify <paper-id> --runtime claude
+# または
+research paper agentify <paper-id> --runtime codex
+```
 
-または、
+登録状況の確認:
 
-research paper agentify <paper-id> \
-  --runtime codex
-
-確認：
-
-research agent list
+```bash
+$ research agent list
 NAME            STATUS      TOOLS
 VLA-JEPA        READY       7
 SAM2            READY       12
 Marigold-V2     READY       5
 Tactile-WM      BUILDING    -
+```
 
-詳細：
+詳細確認:
 
+```bash
 research agent inspect vla-jepa
+```
 
-そして、
+最終的には、次のように Experiment 作成までつながると理想的である。
 
-research experiment create \
-  --baseline paper-agent:vla-jepa
+```bash
+research experiment create --baseline paper-agent:vla-jepa
+```
 
-までつながればかなり良いです。
+---
 
-9. Research OSから投げるプロンプト
+## 9. Research OS から投げるプロンプト
 
-MVPならAPI連携すら必要ありません。
+MVP であれば API 連携すら不要である。Research OS から Claude Code / Codex を subprocess で起動し、次のようなプロンプトを渡すだけで十分である。
 
-Research OSからClaude Code/Codexをsubprocessで起動し、
-
+```text
 Use the installed paper2agent skill.
 
 Paper:
@@ -464,13 +437,11 @@ Return a JSON summary containing:
 - runtime_requirements
 - excluded_tools
 - limitations
+```
 
-くらいで十分です。
+Research OS は stdout に出力された JSON だけを受け取ればよい。つまり最初の実装は、次の経路で十分である。
 
-そしてstdoutのJSONだけResearch OSが受け取ります。
-
-つまり最初は、
-
+```text
 Research OS
  ↓ subprocess
 Claude Code
@@ -480,102 +451,87 @@ Paper2Agent Skill
 filesystem
  ↓
 Research OS Registry
+```
 
-でいいです。
+無理に LangGraph などのオーケストレーションを挟む必要はない。
 
-無理にLangGraphを挟む必要もありません。
+---
 
-10. 3段階で実装するのがおすすめ
-v0.1 — Paper2Agent Launcher
+## 10. 実装は 3 段階で進める
 
-まずこれだけ。
+### v0.1 — Paper2Agent Launcher
 
+まずはここだけを実装する。
+
+```text
 Paper selection
       ↓
-[Agentify]
+  [Agentify]
       ↓
 Claude Code / Codex
       ↓
-Paper2Agent
+   Paper2Agent
       ↓
-MCP生成
+   MCP 生成
+```
 
-追加するもの：
+追加するもの:
 
-agents/runtimes/
-paper_agents/
+- `agents/runtimes/`
+- `paper_agents/`
 
-これならかなり小さい変更です。
+これなら既存コードへの変更はかなり小さく済む。
 
-v0.2 — Paper Agent Registry
+### v0.2 — Paper Agent Registry
 
-次に、
+次に、次の関係を永続化する。
 
-Paper
-  ↓
-Paper Agent
-  ↓
-MCP Tools
+```text
+Paper → Paper Agent → MCP Tools
+```
 
-を永続化。
+TUI 側では、次のいずれかの形で表示する。
 
-TUIから、
+- ナビゲーションに `Agents` 画面を新設する（`Papers / Review / Agents / Graph / Hypothesis / Run`）
+- あるいは Paper 詳細画面に Agent Status を表示する
 
-Papers
-Review
-Agents ← NEW
-Graph
-Hypothesis
-Run
+### v0.3 — Experiment Integration
 
-またはPaper詳細にAgent statusを表示します。
+最後に、次の流れを実装する。
 
-v0.3 — Experiment Integration
+```text
+Paper Agent → Hypothesis → Experiment → Coding Agent → Harness → Evidence
+```
 
-最後に、
+ここまで来れば、**Research OS = Paper Agent を利用して研究を回す Control Plane** になる。
 
-Paper Agent
-      ↓
-Hypothesis
-      ↓
-Experiment
-      ↓
-Coding Agent
-      ↓
-Harness
-      ↓
-Evidence
+---
 
-を作ります。
+## 重要: Paper2Agent を fork して埋め込まない
 
-ここまで来れば、
+ここは強く分離すべき部分である。
 
-Research OS = Paper Agentを利用して研究を回すControl Plane
+**避けるべき構成:**
 
-になります。
+```text
+Research OS
+   └── Paper2Agent のソースコードを大量コピー
+```
 
-重要：Paper2Agentをforkして中に埋め込まない方がいい
+**採用すべき構成:**
 
-私はここは強く分離します。
-
-× Research OS
-   └── Paper2Agent source codeを大量コピー
-
-ではなく、
-
-○ Research OS
-     │
+```text
+Research OS
      ├── AgentRuntime
-     │
      └── PaperAgentBackend
                 │
                 ▼
            Paper2Agent Skill
+```
 
-とします。
+Interface だけを決めておく。
 
-例えばInterfaceだけ決めます。
-
+```python
 class PaperAgentBackend:
     def agentify(
         self,
@@ -583,23 +539,21 @@ class PaperAgentBackend:
         repository=None,
     ) -> PaperAgentArtifact:
         ...
+```
 
-最初の実装：
+最初の実装は `Paper2AgentBackend` のみとし、将来的には次のような Backend を追加できるようにする。
 
-Paper2AgentBackend
+- `Paper2AgentBackend`
+- `Paper2CodeBackend`
+- `CustomBackend`
 
-将来、
+---
 
-Paper2AgentBackend
-Paper2CodeBackend
-CustomBackend
+## 最終的な Research OS 像
 
-を追加できます。
+最終形としては、次の構成が最もきれいだと考えられる。
 
-最終的なResearch OS像
-
-一番きれいなのはこれだと思います。
-
+```text
                   Research OS
               Research Control Plane
 
@@ -630,7 +584,8 @@ CustomBackend
               │
               ▼
         Next Hypothesis
+```
 
-Research OSがすでに持っている「研究オブジェクトを永続化する」「ADRや実験ログなど証跡を残す」という思想とも非常に相性がいいです。現在のCLAUDE.mdでも、テスト失敗ログを残してAgentが原因を追跡できることや、設計判断をADRとして保存する方針が明示されています。
+Research OS がすでに持っている「研究オブジェクトを永続化する」「ADR や実験ログなどの証跡を残す」という思想とも非常に相性がよい。現在の `CLAUDE.md` でも、テスト失敗ログを残して Agent が原因を追跡できるようにすることや、設計判断を ADR として保存する方針が明示されている。
 
-なので、最初に実装するなら research paper agentify + Paper Agent Registryまでをおすすめします。ここなら既存のResearch OS思想を壊さず、Paper2Agentの強みをそのまま取り込めます。
+したがって、最初に実装するなら `research paper agentify` + Paper Agent Registry までをおすすめする。ここまでであれば、既存の Research OS の思想を壊さず、Paper2Agent の強みをそのまま取り込むことができる。
