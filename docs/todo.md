@@ -9,7 +9,7 @@
 
 - [ ] TUI フレームワーク選定（Textual / Bubble Tea など）
 - [ ] アプリ骨格：① ヘッダ ② フェーズタブ ③ 研究対象 ④ Agent 欄 ⑤ ステータスバー の4層レイアウト
-- [ ] フェーズタブの切り替え（Papers / Review / Graph / Hypothesis / Run）
+- [ ] フェーズタブの切り替え（Papers / Review / Graph / Hypothesis / Run ＋ 並走トラックの Intel）
 - [ ] グローバル状態管理（現在のテーマ・選択論文・接続状態）
 - [ ] 設定ファイル読み込み（API キー、MCP エンドポイント、保存先）
 - [ ] ロギング / エラーハンドリング基盤
@@ -18,7 +18,7 @@
 
 - [ ] `Human → Goal → Agent → Plan → Tool/MCP/Skill → Result` のループ実装
 - [ ] Router：ユーザー発話 → Skill 自動選択
-- [ ] Skill レジストリ（literature-review / graph / hypothesis / experiment）
+- [ ] Skill レジストリ（literature-review / graph / hypothesis / experiment / intel-watch）
 - [ ] Subagent 起動・結果集約
 - [ ] Agent 欄 UI（自然言語入力、実行ログ、ステップ表示）
 
@@ -31,7 +31,8 @@
 - [ ] GitHub 連携（リポジトリ・コード検索）
 - [ ] Semantic Scholar / OpenAlex（将来）
 - [ ] Neo4j 接続（Knowledge Graph 永続化）
-- [ ] ステータスバー：各接続のヘルスチェックと表示（`Paperpile ✓ arXiv ✓ alphaXiv ✓ GitHub ✓`）
+- [ ] ステータスバー：各接続のヘルスチェックと表示（`Paperpile ✓ arXiv ✓ alphaXiv ✓ GitHub ✓ Feeds ✓`）
+- [ ] Feeds 接続：Intel 監視対象ソースの巡回状態を集計して表示（`Feeds ✓ 8/9`、失敗ソースがあれば警告）
 
 ### alphaXiv MCP ツール割り当て
 
@@ -71,6 +72,7 @@
 - [ ] グラフの TUI 描画（ツリー / ネットワーク表示）
 - [ ] Agent 問い合わせ：`Show papers connecting JEPA and tactile sensing` / `What research areas are disconnected?`
 - [ ] Neo4j への永続化と再読み込み
+- [ ] Intel 由来の Node / Edge を Graph に統合（詳細は「8. Intel」）：Company / Product / Customer / Event と develops / provides / uses / adopts / announces
 
 ## 6. Hypothesis — 仮説を研究オブジェクト化
 
@@ -80,6 +82,7 @@
 - [ ] Hypothesis 生成（検証可能な形式、指標を含む）
 - [ ] 仮説の「研究オブジェクト」永続化（ID・履歴・リンク）
 - [ ] Experiment への引き渡し
+- [ ] Intel の企業間比較・トレンド分析から研究テーマ・事業機会を探索し、Hypothesis の入力にする
 
 ## 7. Run — 実験実行
 
@@ -90,7 +93,80 @@
 - [ ] Metrics 集計（Success Rate / Failure AUC / Slip Rate ...）
 - [ ] 結果を Hypothesis オブジェクトへフィードバック
 
-## 8. 仕上げ
+## 8. Intel — 企業・産業の動向監視
+
+`docs/design.md` の 2.6（画面）と 6（監視パイプライン）に対応。元メモは `docs/memo.md`。
+Technology Intelligence（技術革新）と Business Intelligence（ビジネスイノベーション）を別々に抽出・比較する。
+
+### 8.1 監視対象レジストリ
+
+- [ ] レジストリのデータモデル（name / category（複数可）/ org_type / origin_country / us_presence / parent + 有効期間 / sources / priority）
+- [ ] 5 カテゴリの定義（ロボット基盤モデル・World Model / ヒューマノイド・汎用ロボット / 物流・製造・産業ロボット / 自動運転・自律移動 / AI基盤・シミュレーション）
+- [ ] 企業と研究組織・事業部門の区別、創業国と米国拠点の区別（例：Google DeepMind、Intrinsic、1X Technologies、Waabi）
+- [ ] 監視設定ファイルの読み込み（companies / check_frequency / summary_language / topics / track_article_updates）
+- [ ] 初期監視対象 9 社の登録（Physical Intelligence / Skild AI / Figure AI / World Labs / Generalist AI / Dexterity / Ambi Robotics / NVIDIA / Google DeepMind）と、各社の公式ブログ URL・RSS 有無・記事抽出方法の調査
+- [ ] `docs/memo.md` の全企業カテゴリ（重複を除いて 22 社）を段階的にレジストリへ移行
+
+### 8.2 収集（巡回・新着検知）
+
+- [ ] 本文取得方式の決定と実装（RSS/Atom → HTML 抽出のフォールバック → fetch 系 MCP）
+- [ ] robots.txt・利用規約・レート制限への対応
+- [ ] 新着検知（URL・公開日・本文ハッシュによる既読管理）
+- [ ] 論文の新規確認（arXiv / 記事内リンク）と GitHub リポジトリの更新確認
+- [ ] 巡回失敗のリトライ・エラー記録（Feeds ステータスへ反映）
+
+### 8.3 要約・構造化抽出
+
+- [ ] 記事本文の抽出と日本語要約（新着検知時のみ実行）
+- [ ] Technology Intelligence 抽出スキーマ（技術 / モデル / 学習 / 評価 / 論文 / OSS / 実機）
+- [ ] Business Intelligence 抽出スキーマ（商用化 / 顧客 / 経済性 / 実運用 / 事業戦略 / 事業モデル / 根拠）
+- [ ] 数値の信頼性ラベル（`company_claimed` / `third_party_verified`）と、指標の種類の明示（ARR ≠ 認識済み売上）
+- [ ] 事業化ステージの分類（技術発表 → 実機統合 → 試験導入 → 本番運用 → 継続運用の実績）
+- [ ] 記事内の論文・GitHub リンクを Papers の検索・登録パイプラインへ引き渡し
+
+### 8.4 更新追跡
+
+- [ ] 記事スナップショット（ハッシュ）の保存
+- [ ] 過去記事の変更検知と Diff 生成（更新・撤回・製品終了）
+- [ ] 変更時に `updated_at` / `changes` を記録し、Graph 上の Event も更新
+- [ ] Intel 画面の `⟳ Updated` 表示
+
+### 8.5 Knowledge Graph 拡張・来歴管理
+
+- [ ] Node：Company / Product / Customer / Event（`stage` 属性）を追加（技術は既存の Method で表現）
+- [ ] Edge：develops / provides / uses / adopts / announces（Company・Product・Model・Customer・Event 間）
+- [ ] 時間・根拠・来歴の属性（announced_at / occurred_at / retrieved_at / updated_at / source_url / reliability / changes）
+- [ ] 既存の Paper / Method ノードとの接続（Paper `describes` 技術の紐付け）
+
+### 8.6 分析・出力
+
+- [ ] 企業間比較（商用化段階・事業モデル・技術方針）— 週 1 回
+- [ ] トレンド分析（VLA→World Action Model / 視覚のみ→Vision-Tactile / 模倣学習と強化学習の統合 / Agentic Robotics）— 週 1 回
+- [ ] 週次レポート生成（日本語）
+- [ ] 研究テーマ・事業機会の探索（技術と事業化の接点）と Hypothesis への連携
+- [ ] 問い「フィジカルAIの技術革新は、どのような新しい顧客価値やビジネスモデルを生み出しているのか？」に答えるクエリ
+
+### 8.7 Intel 画面 UI
+
+- [ ] Intel タブ：Tech / Business / Sources の 3 タブ
+- [ ] フィード表示（日付・企業・観点・要約・claim ラベル）とフィルタ（企業 / 期間）
+- [ ] Sources タブ：ソース一覧・巡回状態・追加／削除・優先度
+- [ ] Agent 指示：`Summarize this week's updates from ...` / `Compare Figure and Skild on their commercialization stage` / `Add ... blog to the watch list` / `Send papers cited in these posts to Papers` / `Generate the weekly intelligence report`
+
+### 8.8 定期実行基盤
+
+- [ ] 巡回ジョブの実行基盤を決定し ADR を起票（cron / systemd timer / 常駐ワーカー / TUI 起動時のキャッチアップ）
+- [ ] 毎日（ブログ・論文・GitHub）と週 1 回（比較・トレンド分析）のスケジュール実装
+- [ ] 記事本文・スナップショット・抽出結果の保存先の決定（Neo4j と別ストアの切り分け）
+- [ ] LLM 呼び出しコストの見積もりと上限管理
+
+### 8.9 テスト
+
+- [ ] 抽出スキーマのフィクスチャテスト（実記事サンプル → Tech / Business 抽出）
+- [ ] 新着検知・変更検知（Diff）のテスト
+- [ ] 巡回失敗時のログ保存（`logs/<test-name>/` 規約に従う）
+
+## 9. 仕上げ
 
 - [ ] キーバインド / ヘルプ画面
 - [ ] セッションの保存・復元
