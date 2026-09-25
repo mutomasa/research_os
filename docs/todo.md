@@ -26,6 +26,7 @@
 
 - [x] alphaXiv MCP をプロジェクトに追加（`claude mcp add`）
 - [ ] alphaXiv MCP の OAuth 認証を通す（`/mcp`）
+- [ ] alphaXiv API キーを発行・設定する（関心フィードの定期取得用）
 - [ ] Paperpile 連携（ライブラリ読み取り・重複確認・登録）
 - [ ] arXiv 検索クライアント
 - [ ] GitHub 連携（リポジトリ・コード検索）
@@ -53,6 +54,21 @@
 - [ ] Abstract 評価によるランキング
 - [ ] Agent 指示：`Find papers about ...` / `Show only papers after 2024` / `Add selected papers to Paperpile` / `Discover related papers on alphaXiv`
 - [ ] 選択論文を Paperpile / alphaXiv ライブラリへ登録
+
+### 3.1 alphaXiv 関心フィード（design.md §3.2 / `docs/new_features/alphaXiv.md`）
+
+- [ ] 関心プロファイル `interests.yaml` のスキーマ定義と読み込み（topics / researchers / arxiv_categories / schedule）
+- [ ] トピック検索：タグごとに `discover_papers`（`prioritize=recency`）を呼ぶ。検索は 1 メッセージ 2 回までの制限に合わせてまとめる
+- [ ] 研究者経由の取得：`get_researcher_papers` で登録研究者の新着を取る
+- [ ] （任意）arXiv API でカテゴリ新着を取り、網羅性を補う
+- [ ] arXiv ID で重複を除き、複数タグにヒットした論文はタグを統合する
+- [ ] 既読キャッシュ（arXiv ID → status: new / seen / saved / dismissed、日本語訳）と新着の抽出
+- [ ] 一覧の日本語化：タイトル＋Abstract 冒頭を全件訳す（原タイトル・arXiv ID を併記し、専門用語は原語のまま）
+- [ ] 詳細の日本語化：選択した論文だけ `get_paper_content` → 日本語要約（キャッシュして再生成しない）
+- [ ] フィード一覧 UI（タグ表示、公開日順／votes 順／タグ別の並べ替え、詳しく・保存・不要の操作）
+- [ ] Agent 指示：`今日の新着論文` で手動取得
+- [ ] 定期取得を巡回ジョブ基盤に載せる（8.8 と共通）。API キー認証で動かす
+- [ ] テスト：重複除去・既読フィルタ・日本語化のキャッシュ（失敗ログは `logs/` に残す）
 
 ## 4. Review — 論文を深く読む
 
@@ -157,6 +173,7 @@ Technology Intelligence（技術革新）と Business Intelligence（ビジネ�
 
 - [ ] 巡回ジョブの実行基盤を決定し ADR を起票（cron / systemd timer / 常駐ワーカー / TUI 起動時のキャッチアップ）
 - [ ] 毎日（ブログ・論文・GitHub）と週 1 回（比較・トレンド分析）のスケジュール実装
+- [ ] alphaXiv 関心フィード（3.1）の定期取得ジョブを同じ基盤に登録
 - [ ] 記事本文・スナップショット・抽出結果の保存先の決定（Neo4j と別ストアの切り分け）
 - [ ] LLM 呼び出しコストの見積もりと上限管理
 
