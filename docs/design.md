@@ -22,6 +22,7 @@
   - [2.6 Intel — 企業・産業の動向を監視する](#26-intel--企業産業の動向を監視する)
 - [3. ステータスバー（外部接続）](#3-ステータスバー外部接続)
   - [3.1 alphaXiv MCP](#31-alphaxiv-mcp)
+  - [3.2 alphaXiv 関心フィード](#32-alphaxiv-関心フィード)
 - [4. Agent 欄がこのUIの中心](#4-agent-欄がこのuiの中心)
 - [5. 裏側のアーキテクチャ](#5-裏側のアーキテクチャ)
 - [6. Intel 監視パイプライン（フィジカルAI企業の動向監視）](#6-intel-監視パイプラインフィジカルai企業の動向監視)
@@ -110,6 +111,12 @@
 - `> Show only papers after 2024`
 - `> Add selected papers to Paperpile`
 - `> Discover related papers on alphaXiv and pull their AI summaries`
+- `> 今日の新着論文`（関心フィードを取得。[3.2](#32-alphaxiv-関心フィード)）
+
+**関心フィード**
+
+クエリを毎回入力しなくても、関心プロファイル（タグ＋キーワード＋研究者）に基づく新着論文を
+**日本語化した一覧** として Papers 画面に表示します。詳細は [3.2](#32-alphaxiv-関心フィード) を参照。
 
 ---
 
@@ -366,6 +373,43 @@ claude mcp add --transport http alphaxiv https://api.alphaxiv.org/mcp/v1 \
 | Researcher | `find_researchers` / `get_researcher` / `get_researcher_papers` | 研究者・著者から論文をたどる |
 | Library | `list_library` / `save_papers_to_folder` / `create_folder` ほか | alphaXiv ライブラリの整理 |
 
+**利用上の制約**（2026-09-25 に実際に呼び出して確認）
+
+- フィード・トレンド・カテゴリ閲覧のツールは無く、ユーザーの関心・タグを検索に使う仕組みも無い。
+- `discover_papers` は関連度で並べた上位候補を返す検索で、網羅的ではない（1回あたり 10 件前後）。検索は 1 メッセージあたり 2 回まで。
+- 結果に同じ論文が重複して出ることがある（arXiv ID で重複を除く）。
+- キーワードはユーザーが書いた語をそのまま使う。略語を展開すると精度が落ちる。
+
+### 3.2 alphaXiv 関心フィード
+
+専門分野・関心タグから新着論文を定期取得し、日本語の一覧にする機能です。
+alphaXiv にはタグ単位で新着を取る手段が無いため、**関心プロファイルは Research OS 側で持ち**、
+トピック検索と研究者経由の 2 経路で取得します。
+仕様の詳細は [`docs/new_features/alphaXiv.md`](new_features/alphaXiv.md) を参照。
+
+```
+interests.yaml（タグ＋キーワード／研究者／任意で arXiv カテゴリ）
+   ├─ ① トピック検索：tag ごとに discover_papers（prioritize=recency）
+   ├─ ② 研究者経由  ：get_researcher_papers
+   └─ ③ 補完（任意）：arXiv API のカテゴリ新着
+        ▼
+   arXiv ID で重複除去 → 既読キャッシュと突き合わせて新着のみ
+        ▼
+   一覧の日本語化（タイトル＋Abstract 冒頭）……全件
+        ▼  ユーザーが選択
+   詳細の日本語化（get_paper_content → 日本語要約）……選択分のみ
+        ▼
+   save_papers_to_folder / Paperpile 登録 / Knowledge Graph 更新
+```
+
+| 項目 | 方針 |
+|------|------|
+| 関心プロファイル | `interests.yaml` にタグごとの検索キーワード、フォローする研究者、補完用の arXiv カテゴリ、取得頻度を書く |
+| 日本語化 | 2 段階。一覧は全件を軽く訳し、約2,000語の AI レポートは選択した論文だけ取得して要約する。原タイトルと arXiv ID は併記し、専門用語は原語のまま |
+| 既読管理 | arXiv ID をキーに `status`（new / seen / saved / dismissed）と日本語訳をキャッシュし、次回は新着だけ出す |
+| 実行方式 | 手動（Agent 欄から）と定期（Intel と共通のバックグラウンド巡回ジョブ。[6.8](#68-未決事項)） |
+| 認証 | 対話利用は OAuth、定期実行は API キー |
+
 ---
 
 ## 4. Agent 欄がこのUIの中心
@@ -440,6 +484,7 @@ Human → Goal → Agent → Plan → Tool / MCP / Skill → Result
 
 Intel は定期実行（毎日・週次）を伴うため、対話中の Agent ループとは別に **バックグラウンドの巡回ジョブ** を持ちます
 （実行基盤は未決。ADR で決定する。[6.8](#68-未決事項)）。
+alphaXiv 関心フィード（[3.2](#32-alphaxiv-関心フィード)）の定期取得も同じ巡回ジョブ基盤に載せます。
 
 ユーザーは Skill そのものをほぼ意識しません。裏側で自動選択されます。
 
@@ -665,7 +710,7 @@ Company ──announces──▶ Event
 
 ### 6.8 未決事項
 
-- **巡回の実行基盤**：TUI プロセス外のスケジューラ／常駐ワーカーが必要。方式（cron・systemd timer・常駐デーモン・TUI 起動時のキャッチアップなど）は ADR で決定する。
+- **巡回の実行基盤**：TUI プロセス外のスケジューラ／常駐ワーカーが必要。方式（cron・systemd timer・常駐デーモン・TUI 起動時のキャッチアップなど）は ADR で決定する。alphaXiv 関心フィード（[3.2](#32-alphaxiv-関心フィード)）の定期取得も同じ基盤を使う。
 - **本文取得の方法**：RSS/Atom、HTML 抽出、MCP（fetch 系）のどれを既定にするか。robots.txt・利用規約・レート制限の扱い。
 - **要約・抽出のコスト**：毎日の LLM 呼び出し量と、新着のみ要約する運用の徹底。
 - **Feeds の保存先**：記事本文・スナップショット・抽出結果を Neo4j と別ストアのどちらに持つか。
