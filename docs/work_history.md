@@ -43,3 +43,18 @@
 
 - 何を: `docs/todo.md` に「8. Intel」セクション（レジストリ・収集・抽出・更新追跡・Graph 拡張・分析出力・UI・定期実行基盤・テスト）を追加し、既存セクションに連動項目を追記した。
 - なぜ: design.md の Intel 設計を実装可能なチェックリストに落とし込むため。巡回の実行基盤は未決のため、決定時に ADR を起票する項目として残した。
+
+### 2026-09-25 `25be63b` docs: add alphaXiv interest-feed spec based on MCP verification
+
+- 何を: `docs/new_features/alphaXiv.md` に、関心タグから新着論文を取得して日本語化する「alphaXiv 関心フィード」の仕様を記述した（interests.yaml、取得パイプライン、2段階の日本語化、既読管理、UI、実行方式）。
+- なぜ: alphaXiv MCP を実際に呼んで検証した結果、タグ単位のフィードツールが無く `discover_papers` も網羅的でないと分かったため、関心プロファイルを Research OS 側で持つ前提で仕様を固めた。
+
+### 2026-09-25 `01788a6` docs: add alphaXiv interest feed (§3.2) to design.md
+
+- 何を: `docs/design.md` の §3.1 に MCP の利用上の制約を追記し、§3.2 関心フィードを新設した。§2.1・§5・§6.8 から参照を張った。
+- なぜ: 新機能の仕様を設計の正である design.md に反映するため。
+
+### 2026-09-25 `fb51c7d` docs: add alphaXiv interest feed tasks to todo.md
+
+- 何を: `docs/todo.md` に §3.1 関心フィードの実装タスク、API キー設定、定期実行基盤へのジョブ登録を追加した。
+- なぜ: design.md §3.2 を実装チェックリストに落とし込むため。
