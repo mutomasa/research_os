@@ -78,3 +78,13 @@
 
 - 何を: `docs/architecture.drawio` を追加し、`docs/design.md` §5 の構成（TUI → Research Agent → Skills / Subagents / MCP → Claude Code、バックグラウンド巡回ジョブ）を draw.io 形式で図示した。
 - なぜ: ASCII 図よりシステム構成を一目で把握しやすくし、GUI で編集できる形で残すため。
+
+### 2026-10-02 `674554c` docs: remove duplicate docs/new_feature.md
+
+- 何を: 旧パスの `docs/new_feature.md` を削除した。
+- なぜ: 同じ提案書が `docs/new_features/new_feature_20260917.md` として既に管理されており（`138afa4`）、重複していたため。新機能の提案書は `docs/new_features/` に集約する。
+
+### 2026-10-02 `6343b89` docs: add C4 model diagram (Level 1-4) of Research OS
+
+- 何を: `docs/c4_model.d2`（d2 ソース）と `docs/c4_model.png`（生成画像）を追加し、Research OS の構成を C4 モデルの Level 1〜4 で図示した。
+- なぜ: `docs/design.md` の構成を、システム全体から Research Agent・Hypothesis Skill まで段階的に拡大して把握できるようにするため。
