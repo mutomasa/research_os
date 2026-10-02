@@ -1,0 +1,244 @@
+# Research OS — C4 モデル（Level 1〜4）
+# 出典: docs/design.md
+# 生成: cd docs && d2 c4_model.d2 c4_model.png
+#
+# 各レベルは 1 つ上のレベルの「★ 印の要素」を拡大したもの。
+#   L1 Research OS ★ → L2 / L2 Research Agent ★ → L3 / L3 Hypothesis Skill ★ → L4
+
+vars: {
+  d2-config: {
+    layout-engine: dagre
+    theme-id: 303
+  }
+}
+
+title: |md
+  # Research OS — C4 Model
+
+  Level 1 → 4 の順に、★ の要素を 1 段ずつ拡大する（出典: docs/design.md）
+| {
+  near: top-center
+  style.font-color: "#222222"
+}
+
+grid-rows: 2
+grid-columns: 2
+grid-gap: 80
+
+classes: {
+  level: {
+    style: {
+      fill: "#fafafa"
+      stroke: "#333333"
+      stroke-width: 2
+      stroke-dash: 0
+      font-size: 22
+      font-color: "#222222"
+      bold: true
+    }
+  }
+  audience: {
+    shape: text
+    style: {
+      font-size: 16
+      font-color: "#555555"
+      italic: true
+    }
+  }
+  person: {
+    shape: c4-person
+  }
+  system: {
+    style: {
+      fill: "#1168bd"
+      stroke: "#0b4884"
+      font-color: "#ffffff"
+    }
+  }
+  external: {
+    style: {
+      fill: "#8a8a8a"
+      stroke: "#6b6b6b"
+      font-color: "#ffffff"
+    }
+  }
+  container: {
+    style: {
+      fill: "#438dd5"
+      stroke: "#3c7fc0"
+      font-color: "#ffffff"
+    }
+  }
+  store: {
+    shape: cylinder
+    style: {
+      fill: "#438dd5"
+      stroke: "#3c7fc0"
+      font-color: "#ffffff"
+    }
+  }
+  component: {
+    style: {
+      fill: "#85bbf0"
+      stroke: "#78a8d8"
+      font-color: "#000000"
+    }
+  }
+  boundary: {
+    style: {
+      fill: transparent
+      stroke: "#666666"
+      stroke-dash: 4
+      font-color: "#444444"
+    }
+  }
+  code: {
+    style: {
+      fill: "#ffffff"
+      stroke: "#78a8d8"
+      font-color: "#000000"
+    }
+  }
+  focus: {
+    style: {
+      stroke: "#e8590c"
+      stroke-width: 4
+    }
+  }
+}
+
+# ═════════════════════ Level 1: System Context ═════════════════════
+l1: "Level 1｜システムコンテキスト図（System Context）\n対象読者: ビジネススポンサー / PM / 非エンジニア" {
+  class: level
+
+  researcher: "研究者\n[Person]" {class: person}
+
+  research_os: "★ Research OS\n[Software System]\n\n検索 → 読解 → 比較 → 仮説化 → 実験\nを 1 つの TUI で回す研究開発 IDE" {
+    class: [system; focus]
+  }
+
+  literature: "文献サービス\n[External System]\n\nPaperpile / arXiv /\nalphaXiv / Semantic Scholar" {class: external}
+  github: "GitHub\n[External System]\n\nコード・OSS" {class: external}
+  web: "企業ブログ・ニュース\n[External System]\n\nフィジカル AI 企業の発信" {class: external}
+  llm: "Claude\n[External System]\n\nLLM 推論" {class: external}
+
+  researcher -> research_os: 研究テーマ・指示
+  research_os -> literature: 論文の検索・登録
+  research_os -> github: 実装の検索
+  research_os -> web: 動向の巡回
+  research_os -> llm: 推論・要約
+}
+
+# ═════════════════════ Level 2: Container ═════════════════════
+l2: "Level 2｜コンテナ図（Container）— Research OS の内部\n対象読者: アーキテクト / 開発者 / SRE / インフラ" {
+  class: level
+
+  researcher: "研究者\n[Person]" {class: person}
+
+  sys: "Research OS" {
+    class: boundary
+
+    tui: "TUI（Cockpit）\n[Container: TUI]\n\n6 タブ + Agent 欄" {class: container}
+    agent: "★ Research Agent\n[Container: Claude Code]\n\n意図を計画・実行" {class: [container; focus]}
+    crawler: "巡回ジョブ\n[Container: Worker]\n\n日次・週次の定期実行" {class: container}
+    workspace: "Experiment Workspace\n[Container: Python / PyTorch]" {class: container}
+    kg: "Knowledge Graph\n[Container: Neo4j]" {class: store}
+    store: "Research Store\n[Container: Local Store]\n\n仮説・関心・Intel 記事" {class: store}
+
+    tui -> agent: 指示 / 結果
+    crawler -> agent: 定期実行
+    agent -> kg: 読み書き
+    agent -> store: 読み書き
+    agent -> workspace: コード生成・実行
+  }
+
+  ext: "外部システム\n（Level 1 参照）" {class: external}
+
+  researcher -> sys.tui: 操作
+  sys.agent -> ext: MCP
+}
+
+# ═════════════════════ Level 3: Component ═════════════════════
+l3: "Level 3｜コンポーネント図（Component）— Research Agent の内部\n対象読者: 開発チーム / テックリード" {
+  class: level
+
+  tui: "TUI\n[Container]" {class: container}
+
+  agent: "Research Agent" {
+    class: boundary
+
+    router: "Router\n[Component]\n\nSkill を自動選択" {class: component}
+
+    lit: "Literature Skill\n[Component]\n\nPapers / Review" {class: component}
+    graph: "Graph Skill\n[Component]\n\nGraph" {class: component}
+    hyp: "★ Hypothesis Skill\n[Component]\n\nHypothesis" {class: [component; focus]}
+    exp: "Experiment Skill\n[Component]\n\nRun" {class: component}
+    intel: "Intel Watch Skill\n[Component]\n\nIntel" {class: component}
+
+    mcp: "MCP Client\n[Component]\n\n外部 I/O" {class: component}
+
+    router -> lit
+    router -> graph
+    router -> hyp
+    router -> exp
+    router -> intel
+    lit -> mcp
+    intel -> mcp
+  }
+
+  ext: "外部システム" {class: external}
+  stores: "Knowledge Graph /\nResearch Store" {class: store}
+
+  tui -> agent.router: 指示
+  agent.mcp -> ext: MCP
+  agent.graph -> stores
+  agent.hyp -> stores
+}
+
+# ═════════════════════ Level 4: Code ═════════════════════
+l4: "Level 4｜コード図（Code）— Hypothesis Skill が扱う研究オブジェクト\n対象読者: 開発者　※ 設計段階の想定モデル。実装後は IDE 等の自動生成に置き換える" {
+  class: level
+
+  Problem: {
+    shape: class
+    class: code
+    id: str
+    statement: str
+  }
+  ResearchGap: {
+    shape: class
+    class: code
+    id: str
+    description: str
+    problem_id: str
+  }
+  ResearchQuestion: {
+    shape: class
+    class: code
+    id: str
+    question: str
+    gap_id: str
+  }
+  Hypothesis: {
+    shape: class
+    class: code
+    id: str
+    statement: str
+    question_id: str
+  }
+  Experiment: {
+    shape: class
+    class: code
+    id: str
+    dataset: str
+    models: "list[str]"
+    metrics: "list[str]"
+    hypothesis_id: str
+    "+run()": Result
+  }
+
+  Problem -> ResearchGap: 1..*
+  ResearchGap -> ResearchQuestion: 1..*
+  ResearchQuestion -> Hypothesis: 1..*
+  Hypothesis -> Experiment: 1..*
+}
