@@ -73,3 +73,8 @@
 
 - 何を: `CLAUDE.md` のドキュメント表に `DESIGN.md` を追加し、`docs/todo.md` §0 にテーマ実装・表示幅ユーティリティ・キーバインド定義のタスクを追加した。
 - なぜ: デザインシステムを参照先として明示し、実装タスクに落とし込むため。
+
+### 2026-10-02 `2164916` docs: add simple system architecture diagram (draw.io)
+
+- 何を: `docs/architecture.drawio` を追加し、`docs/design.md` §5 の構成（TUI → Research Agent → Skills / Subagents / MCP → Claude Code、バックグラウンド巡回ジョブ）を draw.io 形式で図示した。
+- なぜ: ASCII 図よりシステム構成を一目で把握しやすくし、GUI で編集できる形で残すため。
