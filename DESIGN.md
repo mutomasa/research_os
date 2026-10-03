@@ -27,6 +27,7 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 10. [Animation & Motion](#10-animation--motion)
 11. [Agent Prompt Guide](#11-agent-prompt-guide)
 12. [Do's and Don'ts](#12-dos-and-donts)
+13. [Alternate Theme: Signal Night](#13-alternate-theme-signal-night)
 
 ---
 
@@ -38,6 +39,7 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 - **Target**: 研究開発 IDE、文献探索、Agent 主導のワークフロー、監視ダッシュボード（Intel）
 - **Terminal**: TrueColor 推奨、256 色で完全動作、16 色で機能劣化なし（色は常にアイコン・文字と併用）
 - **言語**: UI ラベルは英語（タブ名・ボタン・ステータス）、本文・要約・Agent 応答は日本語
+- **Alternate theme**: `Signal Night`（漆黒ネイビー + Agent 役割色。§13）を `:theme signal-night` で切替可能
 
 **デザインの 3 原則**
 
@@ -682,3 +684,249 @@ Text:     UI labels English, content Japanese; CJK width = 2
 - Agent の出力で画面全体を書き換えない（ユーザーが見ていたパネルとカーソルを保持する）
 - 装飾目的のアニメーション・スプラッシュの待ち時間を入れない
 - 日本語を文字数で切り詰めない（全角で列がずれる）
+
+---
+
+## 13. Alternate Theme: Signal Night
+
+> 参考: [`docs/UI/IMG_8806.jpg`](docs/UI/IMG_8806.jpg)（Agent Tree 型の TUI）。
+> 漆黒に近いネイビーの上に、**Agent の役割ごとの 4 色**（Main = 青 / Subagent = 空色 / Routing = 緑 / Advisor = ラベンダー）を
+> 細い破線枠で浮かべる、管制室的なテーマ。`:theme signal-night` で Lab Ink（§1〜§12）と切り替える。
+
+レイアウト・コンポーネント・キーバインドは Lab Ink と共通で、**色トークンと枠線スタイルだけ** を差し替える。
+加えて、Agent の内部構造（Main / Subagent / Routing / Advisor）を見せる **Agent Tree ビュー**（§13.6）を持つ。
+
+### 13.1 Theme Overview
+
+- **Name**: Signal Night
+- **Mood**: 静か・精密・管制室的（黒地に発光する細線と、役割色のラベル）
+- **Density**: Dense。枠は破線で軽く、面（背景塗り）はほぼ使わない
+- **使いどころ**: Agent 主導で長いタスクを流すとき（Agent Focus `F`、Run 監視、Intel 巡回）
+- **原則**: 色は「誰が動いているか（役割）」を表す。状態（成功・失敗）は従来どおり状態色 + アイコン
+
+### 13.2 Semantic Roles
+
+| Role | Hex | ANSI 256 | ANSI 16 | Usage | Lab Ink 対応 |
+|------|-----|----------|---------|-------|--------------|
+| Background | `#0a0e16` | `233` | `black` | 画面背景（ほぼ黒の紺） | Background |
+| Surface | `#0f1522` | `234` | `black` | カード内背景（必要時のみ） | Surface |
+| Raised | `#1b2236` | `236` | `bright black`（背景） | 選択行・ハイライト行の背景 | Selection |
+| Foreground | `#e6e9f2` | `254` | `bright white` | 本文・カード見出し | Foreground |
+| Text 2 | `#aab3c5` | `249` | `white` | 二次本文（値・説明） | Neutral 500 |
+| Muted | `#6b7486` | `243` | `bright black` | ラベル（`role:` `state:`）、時刻、ヒント | Muted |
+| Border dim | `#263042` | `237` | `bright black` | 非フォーカス枠、区切り `─ ─ ─` | Neutral 200 |
+| Primary | `#3d7cf5` | `69` | `blue` | フォーカス枠、Main Agent | Primary |
+| Accent | `#6cb6ff` | `75` | `bright blue` | キー表示、リンク、Subagent | Accent |
+| Success | `#8ee58c` | `114` | `bright green` | 完了 `[ok returned]`、Routing | Success |
+| Warning | `#f2c46d` | `221` | `yellow` | 部分失敗、`company_claimed` | Warning |
+| Error | `#ff6b7f` | `204` | `red` | 失敗、接続断 | Error |
+| Agent | `#b4a7f5` | `147` | `bright magenta` | Agent 欄の `❯`、Advisor | Agent |
+| Marked | `#ff9e64` | `215` | `bright yellow` | `★` 選択 | Marked |
+
+### 13.3 Agent Role Colors（このテーマの主役）
+
+画像の 4 色凡例（`■ argon 4 · high` `■ flash 3.8 · swarm` `■ routing · forks` `■ advisor · on call`）を
+Research OS の Agent 構成に対応させる。ヘッダ直下の **凡例行** に常に表示する。
+
+| Role | Hex | ANSI 256 | ANSI 16 | Research OS での対象 | 凡例表記 |
+|------|-----|----------|---------|----------------------|----------|
+| Main | `#3d7cf5` | `69` | `blue` | Research Agent 本体（計画・統合・ユーザー応答） | `■ main · high` |
+| Subagent | `#6cb6ff` | `75` | `bright blue` | 並列ワーカー（paper_searcher / pdf_reader / graph_builder / intel_crawler） | `■ sub · swarm` |
+| Routing | `#8ee58c` | `114` | `bright green` | 決定的な分岐（どのソース・どのツール・再試行するか） | `■ routing · forks` |
+| Advisor | `#b4a7f5` | `147` | `bright magenta` | 独立コンテキストのレビュアー（計画前・失敗反復時・完了前のチェック） | `■ advisor · on call` |
+
+- 役割色は **枠線・カードタイトル・ログのタグ `[routing]` `[sub:reader]`** にだけ使う。本文は Foreground / Text 2
+- Lab Ink では 4 役割とも Agent 色 `#bb9af7` で描き、タグ文字列で区別する（色に頼らない設計を維持）
+
+**Phase Colors（Signal Night 版）**
+
+| Phase | Hex | ANSI 256 |
+|-------|-----|----------|
+| Papers | `#6cb6ff` | `75` |
+| Review | `#3d7cf5` | `69` |
+| Graph | `#5fd7c4` | `80` |
+| Hypothesis | `#f2c46d` | `221` |
+| Run | `#8ee58c` | `114` |
+| Intel | `#ff9e64` | `215` |
+
+### 13.4 Borders
+
+角丸ではなく **直角 + 破線** を基本にし、線の細さで「計器盤」感を出す。
+
+```
+┌╌ Main Agent · high ╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ████ high ╌┐
+╎ role:  plans & applies results               ╎
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+                     ▼
+```
+
+| Part | Character | ASCII fallback | 用途 |
+|------|-----------|----------------|------|
+| corner | `┌ ┐ └ ┘` | `+` | カード・パネル |
+| dashed horizontal | `╌` | `-` | 既定の枠（役割色） |
+| dashed vertical | `╎` | `:` | 既定の枠（役割色） |
+| solid horizontal / vertical | `─ │` | `- \|` | フォーカス中のパネル（役割色 + bold） |
+| junction | `┬ ┴ ├ ┤` + `·` | `+` | 枠同士の接続点。接続点に `·` を置いて「ノード」に見せる |
+| flow arrow | `▼ ◂ ▸` | `v < >` | Agent 間の制御の流れ（Main → Routing → Subagent → Main） |
+| inner divider | `- - - - -` | 同左 | カード内の区切り（Border dim） |
+
+- 確認ダイアログは Lab Ink と同じ二重線 `╔═╗`（色は Warning）。破線にしない
+- 端末フォントで `╌ ╎` が欠ける場合は `ascii_borders: true` で fallback
+
+### 13.5 Components
+
+**(a) Legend Header**
+
+```
+ RESEARCH OS AGENT TREE  ·  MAIN high  ·  SUB ×3 swarm  ·  ADVISOR on call
+ ■ main · high      ■ sub · swarm      ■ routing · forks      ■ advisor · on call
+```
+
+1 行目はタイトル（大文字・bold、役割名だけ役割色）。2 行目は凡例（`■` を役割色、文字は Muted）。
+
+**(b) Agent Card**（Main / Advisor）
+
+```
+┌╌ Research Agent · high / main ╌╌╌╌╌ ████ high ╌┐ ╌ advice ◂ ┌╌ Advisor · on call ╌╌╌╌╌ agent: advisor ╌┐
+╎ role:      plans & applies results               ╎            ╎ independent context · reads full session   ╎
+╎ state:     Plan: decomposing subtasks…           ╎            ╎▌◆ [1] before a plan: is this right?        ╎
+╎ subagents: 3× spawned via /agents                ╎            ╎  · [2] error repeats: am I digging wrong?  ╎
+╎ ┌──────────────────────────────────────────┐     ╎            ╎  · [3] before "done": what did I miss?     ╎
+╎ │ main: Plan ready · 3 worker tasks        │     ╎            ╎                                            ╎
+╎ │ ↳ dispatching forks to routing           │     ╎            ╎ calls: 3   tokens: 368k         [ADVISING] ╎
+╎ └──────────────────────────────────────────┘     ╎            └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+```
+
+- ラベル（`role:` など）は Muted、値は Foreground、強度メーター `████` は役割色
+- 内側の小さな実線ボックスは「直近の思考 / 出力」。文字は Text 2
+- Advisor のチェック項目は `·` 箇条、現在評価中の項目は `▌◆` + Raised 背景
+- 状態バッジは角括弧で右下：`[ADVISING]` `[IDLE]` `[APPLIED]`（役割色）
+
+**(c) Routing Bars**（確信度バー）
+
+```
+┌╌ ROUTING · FAST FORK LAYER ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ forks saved  1,687 ╌┐
+╎ which source    ██████████████████████▒▒▒▒▒  0.88 sharp  → runs in code (<16ms)    ╎
+╎ which tool      ███████████▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  0.46 split  → escalates to Main        ╎
+╎ retry or stop   █████████████████████▒▒▒▒▒▒  0.85 sharp  → runs in code (<16ms)    ╎
+╎ Deterministic forks resolved in <16ms · LLM only sees forks that split              ╎
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+```
+
+- 塗り `█` は判定先の役割色（`sharp` = Routing 緑、`split` = Main 青）。残りは **ディザ** `▒`（同色の暗色 `#2c4a33` / `#1d3366`）
+- `sharp` / `split` の文字は塗りと同色、`→` 以降は Muted
+- ASCII fallback: `#` と `.`
+
+**(d) Swarm Cards**（Subagent 並列表示）
+
+```
+┌╌ SUBAGENT DISPATCHER (SWARM) ╌╌╌╌╌╌╌ effort: med · 3× swarm · 235 t/s  [ ▁▃▅▇▆▅▃ ] ╌┐
+└╌╌╌╌╌·╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌·╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌·╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐ ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐ ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+╎      paper_searcher      ╎ ╎        pdf_reader         ╎ ╎       graph_builder        ╎
+╎       sub · med          ╎ ╎        sub · med          ╎ ╎        sub · med           ╎
+╎  - - - - - - - - - - -   ╎ ╎  - - - - - - - - - - -    ╎ ╎  - - - - - - - - - - -     ╎
+╎   alphaXiv + arXiv 検索   ╎ ╎  本文取得 & PDF 質問     ╎ ╎  ノード / エッジ抽出       ╎
+╎      [ ⠹ running ]       ╎ ╎      [ ✓ returned ]       ╎ ╎      [ ◯ queued ]          ╎
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+```
+
+- カード名は bold + Foreground、サブタイトル（`sub · med`）は Subagent 色、本文は中央寄せ
+- 状態は `[ アイコン 状態 ]` を中央に。running は Subagent 色スピナー、returned は Success、failed は Error
+- スループットのスパークライン `▁▃▅▇` は Routing 緑
+- 幅 < 100 列では縦積み、< 80 列ではカードを 1 行サマリ（`⠹ paper_searcher · running`）に畳む
+
+**(e) Return Card + Tagline**
+
+```
+              ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+              ╎      back to Main session · high               ╎
+              ╎  review + verify · Advisor pre-flight stamped   ╎
+              └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+       Plan on Main. Delegate to Subagents. Keep Advisor on call.
+```
+
+タグラインは bold + Foreground、役割名だけ役割色。1 画面に 1 つまで。
+
+**(f) Session Log**
+
+```
+┌╌ session log ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+╎ 16:04:12  [routing]       which tool    → get_paper_content     split → main     ╎
+╎ 16:04:13  [sub:search]    alphaXiv 10 · arXiv 27 件を取得             [ok returned] ╎
+╎ 16:04:14  [sub:reader]    VLA-JEPA の本文を取得中                       [/ running] ╎
+╎ 16:04:15  [advisor]       同じ検索の反復 → クエリ過剰制約を指摘             applied ╎
+╎ 16:04:16  [sub:graph]     Method 12 · Dataset 4 ノードを追加          [ok returned] ╎
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+```
+
+| 列 | 色 |
+|----|----|
+| 時刻 | Muted |
+| タグ `[routing]` `[sub:*]` `[advisor]` `[main]` | 各役割色 |
+| 内容 | Foreground（日本語可） |
+| 結果（右寄せ） | `[ok returned]` = Success、`[/ running]` = Subagent、`applied` = Advisor、`split → main` = Main、失敗 = Error + `✗` |
+
+**(g) Prompt + Effort Footer**（Agent 欄・ステータスバーの Signal Night 版）
+
+```
+ research ❯ @advisor verify hypothesis before run_
+
+ effort: [main:high/sub:med]   subagents: [3/3 swarm]   advisor: [advising]   routing: [1,687 forks]
+```
+
+- `research` は Main 色、`❯` は Agent 色、`@advisor` は Advisor 色 + bold
+- フッタはキーを Muted、`[ ]` 内の値を対応する役割色
+
+### 13.6 Screen: Agent Tree（`F` / Focus mode）
+
+Signal Night で Agent Focus（§7.2）を開いたときの全体像。上から **Main ↔ Advisor → Routing → Swarm → Main に戻る** の流れを縦に描く。
+
+```
+ RESEARCH OS AGENT TREE  ·  MAIN high  ·  SUB ×3 swarm  ·  ADVISOR on call
+ ■ main · high      ■ sub · swarm      ■ routing · forks      ■ advisor · on call
+
+ ┌╌ Main Agent ╌╌╌╌╌╌╌╌╌╌╌ ████ high ╌┐ ╌ advice ◂ ┌╌ Advisor · on call ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+ ╎ … (13.5 b)                         ╎            ╎ … (13.5 b)                         ╎
+ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘            └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+                  ▼
+ ┌╌ ROUTING · FAST FORK LAYER ╌╌╌╌ (13.5 c) ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+                                          ▼
+ ┌╌ SUBAGENT DISPATCHER (SWARM) ╌╌ (13.5 d) ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+ │ [ paper_searcher ]          [ pdf_reader ]          [ graph_builder ]               │
+ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+                         ┌╌ back to Main · review + verify ╌┐   (13.5 e)
+                         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+ ┌╌ session log ╌╌ (13.5 f) ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+ └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+ research ❯ _                                                         (13.5 g)
+ effort: [main:high/sub:med]   subagents: [3/3 swarm]   advisor: [idle]   routing: [1,687 forks]
+```
+
+- 現在動いている段の枠だけ **実線 + bold**、それ以外は破線（どこで処理が止まっているかが一目で分かる）
+- 80 × 24 では Advisor カードを Main カード下の 1 行（`advisor: [advising] · [1] before a plan`）に畳み、Swarm は 1 行サマリ化
+
+### 13.7 Quick Reference（Agent Prompt 用）
+
+```
+Theme:    Signal Night (near-black navy, role-colored dashed lines)
+Bg/Fg:    #0a0e16 / #e6e9f2     Surface: #0f1522   Raised: #1b2236
+Text2:    #aab3c5               Muted:   #6b7486   Border dim: #263042
+Roles:    main #3d7cf5 · sub #6cb6ff · routing #8ee58c · advisor #b4a7f5
+Status:   ok #8ee58c / warn #f2c46d / err #ff6b7f
+Border:   square + dashed ┌╌┐╎└┘ (default), solid │─ for the active stage,
+          double ╔═╗ for confirm dialogs; junction dots ·, flow ▼ ◂
+Bars:     fill █ in role color + dither ▒ in dark role color
+Log tags: [routing] [sub:*] [advisor] [main] in role colors
+```
+
+### 13.8 Do's and Don'ts（Signal Night 固有）
+
+- **Do**: 役割色は枠・タイトル・タグに限定し、本文は Foreground / Text 2 で読みやすく保つ
+- **Do**: 「いま動いている段」だけを実線にし、静止中の段は破線のまま
+- **Do**: 背景の黒は塗りつぶさず端末背景に任せられる（`transparent_bg: true`）。その場合も Raised 行だけは塗る
+- **Don't**: Main（青）と Subagent（空色）を隣接する同じ太さの枠で並べない（色差が小さいため、Subagent は必ず破線 + サブタイトル表記で区別）
+- **Don't**: 役割色を状態の意味で使わない（Routing の緑 ≠ 成功。成功は必ず `✓` / `[ok …]` と併用）
+- **Don't**: ディザ `▒` を装飾目的で使わない。確信度・進捗の「残り」を表すときだけ
