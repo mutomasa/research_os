@@ -88,3 +88,8 @@
 
 - 何を: `docs/c4_model.d2`（d2 ソース）と `docs/c4_model.png`（生成画像）を追加し、Research OS の構成を C4 モデルの Level 1〜4 で図示した。
 - なぜ: `docs/design.md` の構成を、システム全体から Research Agent・Hypothesis Skill まで段階的に拡大して把握できるようにするため。
+
+### 2026-10-03 `4351b7c` docs: add Signal Night alternate TUI theme to DESIGN.md
+
+- 何を: `DESIGN.md` に §13「Alternate Theme: Signal Night」を追加。配色トークン（Hex / ANSI 256 / ANSI 16）、Agent 役割色 4 色、破線ボーダー、Routing バー・Swarm カード・Session Log・Agent Tree 画面を定義し、参考画像 `docs/UI/IMG_8806.jpg` を同梱した。
+- なぜ: Agent の内部構造（Main / Subagent / Routing / Advisor）が一目で分かる、黒地に役割色を灯す管制室的な見た目を Lab Ink の代替テーマとして選べるようにするため。
