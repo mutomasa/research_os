@@ -27,7 +27,7 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 10. [Animation & Motion](#10-animation--motion)
 11. [Agent Prompt Guide](#11-agent-prompt-guide)
 12. [Do's and Don'ts](#12-dos-and-donts)
-13. [Alternate Theme: Signal Night](#13-alternate-theme-signal-night)
+13. [Alternate Theme: Mission Control](#13-alternate-theme-mission-control)
 
 ---
 
@@ -39,7 +39,7 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 - **Target**: 研究開発 IDE、文献探索、Agent 主導のワークフロー、監視ダッシュボード（Intel）
 - **Terminal**: TrueColor 推奨、256 色で完全動作、16 色で機能劣化なし（色は常にアイコン・文字と併用）
 - **言語**: UI ラベルは英語（タブ名・ボタン・ステータス）、本文・要約・Agent 応答は日本語
-- **Alternate theme**: `Signal Night`（漆黒ネイビー + Agent 役割色。§13）を `:theme signal-night` で切替可能
+- **Alternate theme**: `Mission Control`（漆黒ネイビー + Agent 役割色。§13）を `:theme mission-control` で切替可能
 
 **デザインの 3 原則**
 
@@ -687,18 +687,18 @@ Text:     UI labels English, content Japanese; CJK width = 2
 
 ---
 
-## 13. Alternate Theme: Signal Night
+## 13. Alternate Theme: Mission Control
 
 > 参考: [`docs/UI/IMG_8806.jpg`](docs/UI/IMG_8806.jpg)（Agent Tree 型の TUI）。
 > 漆黒に近いネイビーの上に、**Agent の役割ごとの 4 色**（Main = 青 / Subagent = 空色 / Routing = 緑 / Advisor = ラベンダー）を
-> 細い破線枠で浮かべる、管制室的なテーマ。`:theme signal-night` で Lab Ink（§1〜§12）と切り替える。
+> 細い破線枠で浮かべる、管制室的なテーマ。`:theme mission-control` で Lab Ink（§1〜§12）と切り替える。
 
 レイアウト・コンポーネント・キーバインドは Lab Ink と共通で、**色トークンと枠線スタイルだけ** を差し替える。
 加えて、Agent の内部構造（Main / Subagent / Routing / Advisor）を見せる **Agent Tree ビュー**（§13.6）を持つ。
 
 ### 13.1 Theme Overview
 
-- **Name**: Signal Night
+- **Name**: Mission Control
 - **Mood**: 静か・精密・管制室的（黒地に発光する細線と、役割色のラベル）
 - **Density**: Dense。枠は破線で軽く、面（背景塗り）はほぼ使わない
 - **使いどころ**: Agent 主導で長いタスクを流すとき（Agent Focus `F`、Run 監視、Intel 巡回）
@@ -738,7 +738,7 @@ Research OS の Agent 構成に対応させる。ヘッダ直下の **凡例行*
 - 役割色は **枠線・カードタイトル・ログのタグ `[routing]` `[sub:reader]`** にだけ使う。本文は Foreground / Text 2
 - Lab Ink では 4 役割とも Agent 色 `#bb9af7` で描き、タグ文字列で区別する（色に頼らない設計を維持）
 
-**Phase Colors（Signal Night 版）**
+**Phase Colors（Mission Control 版）**
 
 | Phase | Hex | ANSI 256 |
 |-------|-----|----------|
@@ -868,7 +868,7 @@ Research OS の Agent 構成に対応させる。ヘッダ直下の **凡例行*
 | 内容 | Foreground（日本語可） |
 | 結果（右寄せ） | `[ok returned]` = Success、`[/ running]` = Subagent、`applied` = Advisor、`split → main` = Main、失敗 = Error + `✗` |
 
-**(g) Prompt + Effort Footer**（Agent 欄・ステータスバーの Signal Night 版）
+**(g) Prompt + Effort Footer**（Agent 欄・ステータスバーの Mission Control 版）
 
 ```
  research ❯ @advisor verify hypothesis before run_
@@ -881,7 +881,7 @@ Research OS の Agent 構成に対応させる。ヘッダ直下の **凡例行*
 
 ### 13.6 Screen: Agent Tree（`F` / Focus mode）
 
-Signal Night で Agent Focus（§7.2）を開いたときの全体像。上から **Main ↔ Advisor → Routing → Swarm → Main に戻る** の流れを縦に描く。
+Mission Control で Agent Focus（§7.2）を開いたときの全体像。上から **Main ↔ Advisor → Routing → Swarm → Main に戻る** の流れを縦に描く。
 
 ```
  RESEARCH OS AGENT TREE  ·  MAIN high  ·  SUB ×3 swarm  ·  ADVISOR on call
@@ -911,7 +911,7 @@ Signal Night で Agent Focus（§7.2）を開いたときの全体像。上か�
 ### 13.7 Quick Reference（Agent Prompt 用）
 
 ```
-Theme:    Signal Night (near-black navy, role-colored dashed lines)
+Theme:    Mission Control (near-black navy, role-colored dashed lines)
 Bg/Fg:    #0a0e16 / #e6e9f2     Surface: #0f1522   Raised: #1b2236
 Text2:    #aab3c5               Muted:   #6b7486   Border dim: #263042
 Roles:    main #3d7cf5 · sub #6cb6ff · routing #8ee58c · advisor #b4a7f5
@@ -922,7 +922,7 @@ Bars:     fill █ in role color + dither ▒ in dark role color
 Log tags: [routing] [sub:*] [advisor] [main] in role colors
 ```
 
-### 13.8 Do's and Don'ts（Signal Night 固有）
+### 13.8 Do's and Don'ts（Mission Control 固有）
 
 - **Do**: 役割色は枠・タイトル・タグに限定し、本文は Foreground / Text 2 で読みやすく保つ
 - **Do**: 「いま動いている段」だけを実線にし、静止中の段は破線のまま
