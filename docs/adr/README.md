@@ -11,3 +11,4 @@
 |---|---|---|
 | [0001](0001-paper-tab-and-venue-registry.md) | Paper タブの追加と Venue レジストリの共有データ化 | Accepted |
 | [0002](0002-python-and-textual.md) | 実装言語と TUI フレームワーク — Python + Textual | Accepted |
+| [0003](0003-paper-metadata-sources-and-sqlite.md) | 論文メタデータの取得元（OpenAlex を主）と保存先（SQLite） | Accepted |
