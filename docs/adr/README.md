@@ -9,4 +9,4 @@
 
 | No. | タイトル | Status |
 |---|---|---|
-| - | (まだ ADR はありません) | - |
+| [0001](0001-paper-tab-and-venue-registry.md) | Paper タブの追加と Venue レジストリの共有データ化 | Accepted |
