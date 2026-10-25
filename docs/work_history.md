@@ -243,3 +243,13 @@
 
 - 何を: `research-os intake explore` / `intake suggest` を追加し、実 API で core 1 本から 67 件の候補追加を確認した。
 - なぜ: 引用探索と提案を CLI から回せるようにするため。
+
+### 2026-10-25 `cf15c87` docs: align paper intake spec with PR 3 and record commits
+
+- 何を: paper_intake.md §6・§7 を実装（citation_limit 50、参考文献は並べ替えない、link の式、ありふれた語の除外、3 本で提案）に合わせ、todo.md を更新した。
+- なぜ: 仕様と実装の食い違いをなくすため。
+
+### 2026-10-25 `1011bad` test: keep second failure log of generic-word filter
+
+- 何を: ありふれた語の判定の初版で、直後の再実行でも 2 件失敗したログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため（未追跡のまま残っていた）。
