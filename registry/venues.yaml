@@ -1,0 +1,371 @@
+# Venue レジストリ（学術誌・国際会議）
+#
+# 仕様: docs/new_features/venue_strategy.md §3 / docs/design.md §2.7 / ADR-0001
+# 出典: docs/reference/paper_strategy.md §2（学術誌 10）・§3（国際会議 5）・§6（優先順位）
+#
+# スキーマ
+#   venue_id      一意な ID（小文字・英数字・アンダースコア）
+#   name          正式名称
+#   abbrev        略称（なければ null）
+#   type          journal | conference | magazine
+#   publisher     出版元・主催
+#   ieee_related  IEEE 関連か
+#   scope         主な研究領域（タグ）
+#   fit           研究テーマとの相性の既定値（◎ | ○ | △）。research/profile.yaml の venue_overrides で上書きする
+#   priority      投稿優先度の既定値（1 が最優先。未設定は null）
+#   tier          投稿戦略上の位置付け（first_result | foundational | mature_journal | null）
+#   links         公式サイト・CFP・投稿規定の URL（未確認は null）
+#   policies      投稿規定の要点（年度で変わるため verified で確認状態を持つ）
+#   deadlines     年度ごとの締切（Phase C の巡回で更新する。手で推測値を入れない）
+#   source_url / retrieved_at / updated_at  来歴
+#
+# 注意: policies・deadlines は公式ページで確認するまで verified: false のままにする。
+
+schema_version: 1
+
+venues:
+  # ── 学術誌（paper_strategy.md §2）────────────────────────────
+
+  - venue_id: tro
+    name: IEEE Transactions on Robotics
+    abbrev: T-RO
+    type: journal
+    publisher: IEEE
+    ieee_related: true
+    scope: [Robot Theory, Manipulation, Perception, Control, Robot Learning]
+    fit: "◎"
+    priority: 5
+    tier: mature_journal
+    links:
+      official: https://www.ieee-ras.org/publications/t-ro
+      cfp: null
+      author_guide: null
+    policies:
+      notes:
+        - 会議論文の単なる延長ではなく、新しい技術的貢献と十分な追加検証が必要（paper_strategy.md §5 Step 3）
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: ral
+    name: IEEE Robotics and Automation Letters
+    abbrev: RA-L
+    type: journal
+    publisher: IEEE
+    ieee_related: true
+    scope: [Robot Learning, Manipulation, Perception, Real-Robot Experiments]
+    fit: "◎"
+    priority: 1
+    tier: first_result
+    links:
+      official: https://www.ieee-ras.org/publications/ra-l
+      cfp: null
+      author_guide: null
+    policies:
+      co_presents_with: [icra, iros]
+      notes:
+        - RA-L 採択論文を条件付きで ICRA・IROS で発表できる制度がある
+        - 既発表内容の扱いと各年度の規定は要確認（paper_strategy.md §5 Step 2）
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: ram
+    name: IEEE Robotics & Automation Magazine
+    abbrev: RAM
+    type: magazine
+    publisher: IEEE
+    ieee_related: true
+    scope: [Tutorial, Real Systems, Applications]
+    fit: "○"
+    priority: null
+    tier: null
+    links:
+      official: https://www.ieee-ras.org/publications/ram
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: scirobotics
+    name: Science Robotics
+    abbrev: null
+    type: journal
+    publisher: AAAS
+    ieee_related: false
+    scope: [Innovative Robot Science, Robot Technology]
+    fit: "◎"
+    priority: null
+    tier: null
+    links:
+      official: https://www.science.org/journal/scirobotics
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: ijrr
+    name: International Journal of Robotics Research
+    abbrev: IJRR
+    type: journal
+    publisher: SAGE
+    ieee_related: false
+    scope: [Robot Learning, Perception, Manipulation, World Models, Vision-Tactile Representation, Failure Prediction, Failure Recovery]
+    fit: "◎"
+    priority: 5
+    tier: mature_journal
+    links:
+      official: https://journals.sagepub.com/home/ijr
+      cfp: null
+      author_guide: null
+    policies:
+      notes:
+        - 会議論文の単なる延長ではなく、新しい技術的貢献と十分な追加検証が必要（paper_strategy.md §5 Step 3）
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: ijsr
+    name: International Journal of Social Robotics
+    abbrev: IJSR
+    type: journal
+    publisher: Springer
+    ieee_related: false
+    scope: [Human-Robot Interaction, Care Robotics, Social Deployment]
+    fit: "○"
+    priority: null
+    tier: null
+    links:
+      official: null
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: rcim
+    name: Robotics and Computer-Integrated Manufacturing
+    abbrev: RCIM
+    type: journal
+    publisher: Elsevier
+    ieee_related: false
+    scope: [Industrial Robotics, Manufacturing, Collaborative Automation]
+    fit: "△"
+    priority: null
+    tier: null
+    links:
+      official: null
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: jfr
+    name: Journal of Field Robotics
+    abbrev: JFR
+    type: journal
+    publisher: Wiley
+    ieee_related: false
+    scope: [SLAM, Field Perception, Mobile Robots]
+    fit: "○"
+    priority: null
+    tier: null
+    links:
+      official: null
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: ras
+    name: Robotics and Autonomous Systems
+    abbrev: RAS
+    type: journal
+    publisher: Elsevier
+    ieee_related: false
+    scope: [Autonomous Behavior, Perception, Learning, Control, State Prediction, Failure Detection, Replanning]
+    fit: "◎"
+    priority: null
+    tier: null
+    links:
+      official: null
+      cfp: null
+      author_guide: null
+    policies:
+      notes:
+        - 略称 RAS は学会 IEEE Robotics and Automation Society（IEEE RAS）と紛らわしいため、表示時は正式名称を併記する
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: auro
+    name: Autonomous Robots
+    abbrev: AURO
+    type: journal
+    publisher: Springer
+    ieee_related: false
+    scope: [Autonomous Robots, Robot Intelligence, Planning, Manipulation]
+    fit: "◎"
+    priority: null
+    tier: null
+    links:
+      official: null
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  # ── 国際会議（paper_strategy.md §3）──────────────────────────
+
+  - venue_id: icra
+    name: IEEE International Conference on Robotics and Automation
+    abbrev: ICRA
+    type: conference
+    publisher: IEEE RAS
+    ieee_related: true
+    scope: [Robot Manipulation, Robot Learning, Vision-Language-Action, Reinforcement Learning, Robot Perception, World Models, Sim-to-Real]
+    fit: "◎"
+    priority: 2
+    tier: first_result
+    links:
+      official: null   # 開催年ごとにサイトが変わるため、Phase C の巡回で年度別に登録する
+      cfp: null
+      author_guide: null
+    policies:
+      co_presents_with: [ral]
+      notes:
+        - RA-L 採択論文の発表を受け付ける制度がある（年度ごとに要確認）
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: iros
+    name: IEEE/RSJ International Conference on Intelligent Robots and Systems
+    abbrev: IROS
+    type: conference
+    publisher: IEEE / RSJ
+    ieee_related: true
+    scope: [Intelligent Robotics, Autonomous Navigation, SLAM, Semantic Mapping, Robot Learning, Robot Manipulation, Multi-Robot Systems]
+    fit: "◎"
+    priority: 3
+    tier: first_result
+    links:
+      official: null   # 開催年ごとにサイトが変わるため、Phase C の巡回で年度別に登録する
+      cfp: null
+      author_guide: null
+    policies:
+      co_presents_with: [ral]
+      notes:
+        - RA-L 採択論文の発表を受け付ける制度がある（年度ごとに要確認）
+        - SO-101 の操作研究に加え、TurtleBot3・Livox MID-360 の空間AI／Scene Graph 研究にも適する
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: case
+    name: IEEE International Conference on Automation Science and Engineering
+    abbrev: CASE
+    type: conference
+    publisher: IEEE
+    ieee_related: true
+    scope: [Industrial Robotics, Automation, Scheduling, Optimization, Manufacturing Systems, Multi-Robot Coordination]
+    fit: "○"
+    priority: null
+    tier: null
+    links:
+      official: null
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: rss
+    name: "Robotics: Science and Systems"
+    abbrev: RSS
+    type: conference
+    publisher: RSS Foundation
+    ieee_related: false
+    scope: [Robot Learning, World Models, Reinforcement Learning, Robot Manipulation, Planning, Perception, Embodied AI]
+    fit: "◎"
+    priority: 4
+    tier: foundational
+    links:
+      official: https://roboticsconference.org/
+      cfp: null
+      author_guide: null
+    policies:
+      notes:
+        - 新しい潜在状態表現や失敗予測・復帰アルゴリズムを提案する場合に有力（paper_strategy.md §3）
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
+
+  - venue_id: roman
+    name: IEEE International Symposium on Robot and Human Interactive Communication
+    abbrev: RO-MAN
+    type: conference
+    publisher: IEEE
+    ieee_related: true
+    scope: [Human-Robot Interaction, Social Robotics, Assistive Robotics, Human-Robot Collaboration, Trust and Explainability]
+    fit: "○"
+    priority: null
+    tier: null
+    links:
+      official: null
+      cfp: null
+      author_guide: null
+    policies:
+      notes: []
+      verified: false
+    deadlines: []
+    source_url: docs/reference/paper_strategy.md
+    retrieved_at: 2026-10-25
+    updated_at: 2026-10-25
