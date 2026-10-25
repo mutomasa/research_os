@@ -11,6 +11,7 @@
 #   venue_overrides       registry/venues.yaml の fit / priority / tier をこの研究テーマ向けに上書きする
 #   survey_venues         サーベイの網羅度を集計する Venue（registry/venues.yaml の venue_id）
 #   submission_plan       投稿戦略の段階（paper_strategy.md §5 Step 1〜3）
+#   intake                論文取り込みと Inbox の上限（docs/new_features/paper_intake.md §5）
 
 schema_version: 1
 
@@ -81,3 +82,14 @@ submission_plan:
       - Failure Recovery Policy の学習
       - 異なる環境・物体での頑健性評価
     note: 単なる延長ではなく、新しい技術的貢献と十分な追加検証が必要
+
+# 論文取り込みと Inbox の上限（docs/new_features/paper_intake.md §5）。すべて仮の値
+intake:
+  inbox_weekly_total: 10   # 週あたり Inbox に出す総数（alphaXiv 関心フィードと共有）
+  inbox_per_rq: 4          # 主 RQ ごとの週あたりの上限
+  inbox_backlog_max: 10    # 未処理の Inbox がこの数以上なら新しく出さない
+  to_read_max: 5           # 「読む」の上限
+  core_target: 15          # RQ ごとの中核論文の目標数（達したら週 1 本に絞る）
+  min_score: 0.30          # これ未満は出さない
+  year_from: null          # null なら直近 4 年
+  weights: { relevance: 0.50, venue: 0.20, gap: 0.15, velocity: 0.15 }

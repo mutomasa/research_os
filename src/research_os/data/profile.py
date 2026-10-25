@@ -39,6 +39,28 @@ class SubmissionStep(StrictModel):
     note: str | None = None
 
 
+class IntakeWeights(StrictModel):
+    relevance: float = 0.50
+    venue: float = 0.20
+    gap: float = 0.15
+    velocity: float = 0.15
+
+
+class IntakeConfig(StrictModel):
+    """論文取り込みと Inbox の上限（docs/new_features/paper_intake.md §5）。"""
+
+    inbox_weekly_total: int = 10
+    inbox_per_rq: int = 4
+    inbox_backlog_max: int = 10
+    to_read_max: int = 5
+    core_target: int = 15
+    min_score: float = 0.30
+    year_from: int | None = None  # None なら直近 4 年
+    per_query: int = 50
+    refetch_days: int = 6
+    weights: IntakeWeights = IntakeWeights()
+
+
 class ResearchProfile(StrictModel):
     schema_version: Literal[1]
     theme: str
@@ -48,6 +70,7 @@ class ResearchProfile(StrictModel):
     venue_overrides: dict[str, VenueOverride] = {}
     survey_venues: list[str] = []
     submission_plan: list[SubmissionStep] = []
+    intake: IntakeConfig = IntakeConfig()
 
     @model_validator(mode="after")
     def _check_rq_refs(self) -> "ResearchProfile":
