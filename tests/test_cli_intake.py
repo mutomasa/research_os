@@ -29,3 +29,23 @@ def test_inbox_and_triage(root, tmp_path, capsys):
     assert "理由" in capsys.readouterr().err
     assert main(_args(root, db, "triage", pid, "to_read")) == 0
     assert main(_args(root, db, "triage", "doi:nope", "to_read")) == 1
+
+
+def test_suggest_and_explore_without_core(root, tmp_path, capsys):
+    db = tmp_path / "papers.db"
+    assert main(_args(root, db, "intake", "suggest")) == 0
+    assert "提案はありません" in capsys.readouterr().out
+
+
+def test_explore_without_core_makes_no_requests(root, tmp_path, capsys, monkeypatch):
+    import research_os.cli as cli
+
+    class NoNetwork:
+        def references(self, *a):
+            raise AssertionError("network")
+
+        citing = references
+
+    monkeypatch.setattr(cli, "OpenAlexClient", NoNetwork)
+    assert main(_args(root, tmp_path / "papers.db", "intake", "explore")) == 0
+    assert "中核論文（core）がまだありません" in capsys.readouterr().out
