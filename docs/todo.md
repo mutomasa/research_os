@@ -9,19 +9,20 @@
 
 - [ ] TUI フレームワーク選定（Textual / Bubble Tea など）
 - [ ] アプリ骨格：① ヘッダ ② フェーズタブ ③ 研究対象 ④ Agent 欄 ⑤ ステータスバー の4層レイアウト
-- [ ] フェーズタブの切り替え（Papers / Review / Graph / Hypothesis / Run ＋ 並走トラックの Intel）
+- [ ] フェーズタブの切り替え（Papers / Review / Graph / Hypothesis / Run / Paper ＋ 並走トラックの Intel。Paper は ADR-0001）
 - [ ] グローバル状態管理（現在のテーマ・選択論文・接続状態）
 - [ ] 設定ファイル読み込み（API キー、MCP エンドポイント、保存先）
 - [ ] ロギング / エラーハンドリング基盤
 - [ ] テーマ実装：`DESIGN.md` の配色トークン（Hex / 256 / 16 色フォールバック）・枠線・アイコンの ASCII フォールバック
 - [ ] 表示幅ユーティリティ：East Asian Width（全角 = 2、Ambiguous 幅の設定）に基づく切り詰め・パディング
 - [ ] キーバインド定義（`DESIGN.md` §9）とヘルプ画面
+- [ ] `DESIGN.md` に Paper タブを追加：フェーズ色・タブバー（`1`–`7`、Intel は `7`）・画面レイアウト（ADR-0001 のフォローアップ）
 
 ## 1. Research Agent コア
 
 - [ ] `Human → Goal → Agent → Plan → Tool/MCP/Skill → Result` のループ実装
 - [ ] Router：ユーザー発話 → Skill 自動選択
-- [ ] Skill レジストリ（literature-review / graph / hypothesis / experiment / intel-watch）
+- [ ] Skill レジストリ（literature-review / graph / hypothesis / experiment / paper-venue / intel-watch）
 - [ ] Subagent 起動・結果集約
 - [ ] Agent 欄 UI（自然言語入力、実行ログ、ステップ表示）
 
@@ -33,7 +34,7 @@
 - [ ] Paperpile 連携（ライブラリ読み取り・重複確認・登録）
 - [ ] arXiv 検索クライアント
 - [ ] GitHub 連携（リポジトリ・コード検索）
-- [ ] Semantic Scholar / OpenAlex（将来）
+- [ ] Semantic Scholar / OpenAlex：掲載先（venue）メタデータの取得に使う（Venue フィルタに必要なため優先度を上げる。design.md §2.7）
 - [ ] Neo4j 接続（Knowledge Graph 永続化）
 - [ ] ステータスバー：各接続のヘルスチェックと表示（`Paperpile ✓ arXiv ✓ alphaXiv ✓ GitHub ✓ Feeds ✓`）
 - [ ] Feeds 接続：Intel 監視対象ソースの巡回状態を集計して表示（`Feeds ✓ 8/9`、失敗ソースがあれば警告）
@@ -57,6 +58,8 @@
 - [ ] Abstract 評価によるランキング
 - [ ] Agent 指示：`Find papers about ...` / `Show only papers after 2024` / `Add selected papers to Paperpile` / `Discover related papers on alphaXiv`
 - [ ] 選択論文を Paperpile / alphaXiv ライブラリへ登録
+- [ ] Venue フィルタ（掲載先で絞り込み）と、優先 Venue によるランキング重み付け（既定オフ）
+- [ ] 優先 Venue ごとのサーベイ網羅度（読了・レビュー済み論文数）の表示
 
 ### 3.1 alphaXiv 関心フィード（design.md §3.2 / `docs/new_features/alphaXiv.md`）
 
@@ -92,6 +95,7 @@
 - [ ] Agent 問い合わせ：`Show papers connecting JEPA and tactile sensing` / `What research areas are disconnected?`
 - [ ] Neo4j への永続化と再読み込み
 - [ ] Intel 由来の Node / Edge を Graph に統合（詳細は「8. Intel」）：Company / Product / Customer / Event と develops / provides / uses / adopts / announces
+- [ ] Paper 由来の Node / Edge を Graph に統合（詳細は「9. Paper」）：Venue / Paper Draft と published_in / targets / co_presents_with
 
 ## 6. Hypothesis — 仮説を研究オブジェクト化
 
@@ -111,6 +115,7 @@
 - [ ] 実行ログ・進捗のストリーム表示
 - [ ] Metrics 集計（Success Rate / Failure AUC / Slip Rate ...）
 - [ ] 結果を Hypothesis オブジェクトへフィードバック
+- [ ] 実験環境アセットの登録（SO-101 / RealSense D435i / XELA uSPa11（`status: planned`）/ LeRobot / SmolVLA）と、実験定義・Review 比較表の Robot・Sensor 軸での利用
 
 ## 8. Intel — 企業・産業の動向監視
 
@@ -186,7 +191,43 @@ Technology Intelligence（技術革新）と Business Intelligence（ビジネ�
 - [ ] 新着検知・変更検知（Diff）のテスト
 - [ ] 巡回失敗時のログ保存（`logs/<test-name>/` 規約に従う）
 
-## 9. 仕上げ
+## 9. Paper — 論文化と投稿戦略（design.md §2.7 / `docs/new_features/venue_strategy.md` / ADR-0001）
+
+### 9.1 Phase A：Venue レジストリと研究プロファイル
+
+- [ ] Venue レジストリのスキーマ定義（name / abbrev / type / publisher / ieee_related / scope / fit / priority / tier / policies / deadlines / 来歴）
+- [ ] `registry/venues.yaml` の読み込み（Intel の `registry/companies.yaml` と同じ共有データ層）
+- [ ] 初期登録：学術誌 10・国際会議 5（`docs/reference/paper_strategy.md` §2・§3）
+- [ ] 研究プロファイル `research/profile.yaml` のスキーマ（theme / research_questions / venue_overrides / survey_venues）
+- [ ] 研究プロファイルから関心プロファイル `interests.yaml` のトピックを初期生成
+- [ ] RQ カバレッジ集計（RQ ごとの関連論文・仮説・実験・Evidence 数）と `> Show RQ coverage`
+
+### 9.2 Phase B：Paper 画面と投稿パイプライン
+
+- [ ] Paper タブ：Draft / Submission の 2 サブタブ
+- [ ] Draft：Paper Section ごとの Claim 登録、Claim → Evidence → Experiment → Hypothesis の追跡、未検証 Claim の警告
+- [ ] `paper/submission.yaml`（Paper Draft：target_venue / candidate_venues / stage / requirements / decided_by）
+- [ ] 投稿ステージ遷移（planning → drafting → ready → submitted → under_review → accepted / rejected、revision）
+- [ ] `tier` ごとの要件テンプレートと投稿準備チェック。判定を Research Gate R6（Paper Gate）に統合（pass / conditional / fail ＋未充足項目）
+- [ ] 投稿先比較（成熟度・新規性・要件充足・締切）。締切が未取得なら「未確認」と表示し推測で埋めない
+- [ ] 投稿先の確定は人間の承認を必須にし、`decided_by` に記録
+- [ ] ジャーナル版の差分チェック（会議版との Claim / Evidence の差分、追加検証観点のテンプレート）
+- [ ] Agent 指示：`Which venue fits PD-001 best right now?` / `List missing requirements for RA-L` / `What is new in the journal version?`
+
+### 9.3 Phase C：締切・投稿規定の監視
+
+- [ ] Venue の CFP・投稿規定ページを巡回ジョブ（8.8）に登録（週 1 回、締切 30 日前から毎日）
+- [ ] 締切抽出と `deadlines` 更新（`source_url` / `retrieved_at` を保持、公式確認まで「未確認」）
+- [ ] 投稿規定の変更検知（Intel の Diff 機能を再利用）
+- [ ] ステータスバーに投稿候補 Venue の締切カウントダウン（例：`ICRA ⏳ 21d`）
+
+### 9.4 未決・テスト
+
+- [ ] 掲載先メタデータの取得元を決定（Semantic Scholar / OpenAlex / DBLP）
+- [ ] 締切抽出方式を決定（HTML 抽出か手動登録を既定にするか）
+- [ ] テスト：Venue レジストリ読み込み、R6 判定（要件充足・未充足）、Claim 差分（失敗ログは `logs/` に残す）
+
+## 10. 仕上げ
 
 - [ ] キーバインド / ヘルプ画面
 - [ ] セッションの保存・復元
