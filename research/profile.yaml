@@ -92,4 +92,5 @@ intake:
   core_target: 15          # RQ ごとの中核論文の目標数（達したら週 1 本に絞る）
   min_score: 0.30          # これ未満は出さない
   year_from: null          # null なら直近 4 年
-  weights: { relevance: 0.50, venue: 0.20, gap: 0.15, velocity: 0.15 }
+  citation_limit: 50       # 中核論文 1 本あたり、参考文献・被引用それぞれの取得上限
+  weights: { relevance: 0.50, venue: 0.20, gap: 0.15, velocity: 0.15, link: 0.10 }

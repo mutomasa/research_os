@@ -21,6 +21,7 @@ class ResearchQuestion(StrictModel):
     question: str
     verification: list[str] = []
     survey_topics: list[str] = []
+    exclude_topics: list[str] = []  # 含む論文はこの RQ との関連度を 0 にする（捨てた理由からの提案を人が承認して追加）
 
 
 class VenueOverride(StrictModel):
@@ -44,6 +45,7 @@ class IntakeWeights(StrictModel):
     venue: float = 0.20
     gap: float = 0.15
     velocity: float = 0.15
+    link: float = 0.10  # 中核論文との引用のつながり（合計が 1 を超えた分は切り捨てる）
 
 
 class IntakeConfig(StrictModel):
@@ -58,6 +60,7 @@ class IntakeConfig(StrictModel):
     year_from: int | None = None  # None なら直近 4 年
     per_query: int = 50
     refetch_days: int = 6
+    citation_limit: int = 50  # 中核論文 1 本あたり、参考文献・被引用それぞれの取得上限
     weights: IntakeWeights = IntakeWeights()
 
 

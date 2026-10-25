@@ -37,11 +37,7 @@ def build_url(keywords: list[str], source_ids: list[str], year_from: int, per_pa
         "select": SELECT,
         "per-page": str(per_page),
     }
-    if key := os.environ.get("OPENALEX_API_KEY"):
-        params["api_key"] = key
-    if mailto := os.environ.get("OPENALEX_MAILTO"):
-        params["mailto"] = mailto
-    return f"{BASE_URL}?{urllib.parse.urlencode(params)}"
+    return _url(BASE_URL, params)
 
 
 def abstract_from_index(index: dict[str, list[int]] | None) -> str | None:
@@ -78,9 +74,38 @@ def parse_work(work: dict, venue_by_source: dict[str, str]) -> PaperRecord:
     )
 
 
+def _auth_params() -> dict[str, str]:
+    params = {}
+    if key := os.environ.get("OPENALEX_API_KEY"):
+        params["api_key"] = key
+    if mailto := os.environ.get("OPENALEX_MAILTO"):
+        params["mailto"] = mailto
+    return params
+
+
+def _url(path: str, params: dict[str, str]) -> str:
+    return f"{path}?{urllib.parse.urlencode({**params, **_auth_params()})}"
+
+
 class OpenAlexClient:
     def __init__(self, get: HttpGet = _urllib_get):
         self.get = get
+
+    def references(self, openalex_id: str, limit: int, venue_by_source: dict[str, str]) -> list[PaperRecord]:
+        """参考文献。被引用数で並べると分野をまたぐ古典ばかりになるため、並べ替えずに上限まで取る。"""
+        work = self.get(_url(f"{BASE_URL}/{openalex_id}", {"select": "id,referenced_works"}))
+        ids = [_short_id(u) for u in work.get("referenced_works") or []][:limit]
+        if not ids:
+            return []
+        data = self.get(_url(BASE_URL, {"filter": f"openalex:{'|'.join(ids)}", "select": SELECT,
+                                        "per-page": str(len(ids))}))
+        return [parse_work(w, venue_by_source) for w in data.get("results", []) if w.get("title")]
+
+    def citing(self, openalex_id: str, limit: int, venue_by_source: dict[str, str]) -> list[PaperRecord]:
+        """被引用（この論文を引用している論文）。被引用数の多い順に上限まで取る。"""
+        data = self.get(_url(BASE_URL, {"filter": f"cites:{openalex_id}", "sort": "cited_by_count:desc",
+                                        "select": SELECT, "per-page": str(limit)}))
+        return [parse_work(w, venue_by_source) for w in data.get("results", []) if w.get("title")]
 
     def search(self, keywords: list[str], source_ids: list[str], year_from: int,
                per_page: int, venue_by_source: dict[str, str]) -> list[PaperRecord]:

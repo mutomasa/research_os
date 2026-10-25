@@ -21,6 +21,13 @@ class FetchReport:
 
 
 @dataclass
+class ExploreReport:
+    explored: dict[str, int] = field(default_factory=dict)  # 中核論文の paper_id → 取得件数
+    skipped_recent: list[str] = field(default_factory=list)
+    without_openalex_id: list[str] = field(default_factory=list)
+
+
+@dataclass
 class SurfaceReport:
     surfaced: list[str] = field(default_factory=list)
     blocked_by_backlog: bool = False
@@ -67,6 +74,34 @@ def fetch(store: PaperStore, client: OpenAlexClient, registry: VenueRegistry,
     return report
 
 
+def explore(store: PaperStore, client: OpenAlexClient, registry: VenueRegistry,
+            profile: ResearchProfile, now: datetime, force: bool = False) -> ExploreReport:
+    """中核論文の参考文献と被引用を候補プールに入れる（paper_intake.md §6）。"""
+    report = ExploreReport()
+    venue_by_source = registry.by_openalex_id()
+    limit = profile.intake.citation_limit
+    for row in store.papers("core"):
+        pid, oa = row["paper_id"], row["openalex_id"]
+        if not oa:
+            report.without_openalex_id.append(pid)
+            continue
+        key = f"citation|{pid}"
+        last = store.last_fetched(key)
+        if not force and last and now - last < timedelta(days=profile.intake.refetch_days):
+            report.skipped_recent.append(pid)
+            continue
+        records = client.references(oa, limit, venue_by_source) + client.citing(oa, limit, venue_by_source)
+        added = 0
+        for rec in records:
+            if store.find(rec) == pid:
+                continue
+            store.upsert(rec, "citation", pid, key, now)
+            added += 1
+        store.log_fetch(key, added, now)
+        report.explored[pid] = added
+    return report
+
+
 def rescore(store: PaperStore, registry: VenueRegistry, profile: ResearchProfile, now: datetime) -> int:
     """candidate と inbox の論文のスコアを付け直す（RQ の手薄さは毎回変わるため）。"""
     venues = {v.venue_id: v for v in effective_venues(registry, profile)}
@@ -77,7 +112,8 @@ def rescore(store: PaperStore, registry: VenueRegistry, profile: ResearchProfile
         primary = max(relevance, key=relevance.get) if relevance else None
         cpy = scoring.citations_per_year(row["cited_by_count"], row["year"], now.year)
         total, parts = scoring.score(
-            relevance.get(primary, 0.0), venues.get(row["venue_id"]), core.get(primary, 0), cpy, profile.intake
+            relevance.get(primary, 0.0), venues.get(row["venue_id"]), core.get(primary, 0), cpy, profile.intake,
+            core_links=store.core_links(row["paper_id"]),
         )
         parts["primary_rq"] = primary
         store.set_relevance(row["paper_id"], relevance)
