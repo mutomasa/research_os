@@ -59,3 +59,13 @@ def test_venue_priority_from_low_quality(ctx):
         _dismiss(store, f"Weak result {k}", "low_quality", venue_id="ral")
     [s] = feedback.suggest(store, registry, profile)
     assert s.kind == "venue_priority" and s.target == "ral" and "現在 1" in s.message
+
+
+def test_generic_words_are_not_suggested(ctx):
+    store, registry, profile = ctx
+    for k in range(20):
+        store.upsert(PaperRecord(title=f"Learning manipulation {k}", doi=f"10.2/{k}"), "openalex", None, None, NOW)
+    for t in ["Surgical learning A", "Surgical learning B", "Surgical learning C"]:
+        _dismiss(store, t, "irrelevant")
+    [s] = feedback.suggest(store, registry, profile)
+    assert "surgical" in s.message and "learning" not in s.message

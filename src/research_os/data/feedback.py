@@ -13,6 +13,7 @@ from research_os.data.scoring import tokens
 from research_os.data.venues import VenueRegistry
 
 MIN_EVIDENCE = 3  # 同じ理由がこの本数以上たまったら提案する
+GENERIC_RATIO = 0.10  # 捨てた論文以外の題名のこの割合を超えて出る語（learning など）は除外語にしない
 
 
 @dataclass
@@ -41,11 +42,16 @@ def _exclude_terms(by_reason, store: PaperStore, profile: ResearchProfile) -> li
         rows = by_reason.get(("irrelevant", rq.id), [])
         if len(rows) < MIN_EVIDENCE:
             continue
+        dismissed_ids = {r["paper_id"] for r in rows}
+        others = [tokens(r["title"]) for r in store.papers() if r["paper_id"] not in dismissed_ids]
+        df = Counter(w for t in others for w in t)
+        generic = {w for w, n in df.items() if n > GENERIC_RATIO * len(others)}
         own = set().union(*(tokens(t) for t in rq.survey_topics)) if rq.survey_topics else set()
         counts = Counter(w for r in rows for w in tokens(r["title"]))
         terms = [
             w for w, n in counts.most_common()
-            if n >= max(2, len(rows) // 2) and w not in own and sum(w in t for t in library) == 0
+            if n >= max(2, len(rows) // 2) and w not in own and w not in generic
+            and sum(w in t for t in library) == 0
         ][:5]
         if terms:
             out.append(Suggestion(
