@@ -345,7 +345,7 @@ Paper — PD-001  Vision-Tactile JEPA for Failure Prediction on SO-101
     ✓ 視覚のみ vs 視覚・触覚統合の比較          EVD-002
     ✗ SO-101 による実機評価                     Evidence なし
 
-  Candidates   RA-L ◎   ICRA ◎ ⏳ 21d   IROS ◎
+  Candidates   RA-L ◎   ICRA ◎ ◔ 21d   IROS ◎
 ```
 
 **主な機能**
@@ -402,7 +402,7 @@ Hypothesis チェーンの上位オブジェクトとして持ち（`research/pr
 | GitHub ✓ | コード・OSS・実装の検索が可能 |
 | Feeds ✓ | Intel の監視対象ソース（企業ブログ・ニュース等）を巡回できている。`Feeds ✓ 8/9` のように取得成功数を併記し、失敗ソースがあれば警告表示にする |
 | MCP ✓ | MCP Server 群が正常 |
-| ICRA ⏳ 21d | 投稿候補 Venue の直近締切までの日数（[2.7](#27-paper--論文化と投稿戦略)）。巡回で取得した締切のみ表示し、未確認の締切は出さない |
+| ICRA ◔ 21d | 投稿候補 Venue の直近締切までの日数（[2.7](#27-paper--論文化と投稿戦略)）。巡回で取得した締切のみ表示し、未確認の締切は出さない |
 
 **将来の拡張イメージ**
 

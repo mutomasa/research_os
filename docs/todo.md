@@ -219,7 +219,7 @@ Technology Intelligence（技術革新）と Business Intelligence（ビジネ�
 - [ ] Venue の CFP・投稿規定ページを巡回ジョブ（8.8）に登録（週 1 回、締切 30 日前から毎日）
 - [ ] 締切抽出と `deadlines` 更新（`source_url` / `retrieved_at` を保持、公式確認まで「未確認」）
 - [ ] 投稿規定の変更検知（Intel の Diff 機能を再利用）
-- [ ] ステータスバーに投稿候補 Venue の締切カウントダウン（例：`ICRA ⏳ 21d`）
+- [ ] ステータスバーに投稿候補 Venue の締切カウントダウン（例：`ICRA ◔ 21d`）
 
 ### 9.4 未決・テスト
 
