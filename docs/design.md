@@ -20,6 +20,7 @@
   - [2.4 Hypothesis — 仮説を研究オブジェクト化](#24-hypothesis--仮説を研究オブジェクト化)
   - [2.5 Run — 実験実行](#25-run--実験実行)
   - [2.6 Intel — 企業・産業の動向を監視する](#26-intel--企業産業の動向を監視する)
+  - [2.7 Paper — 論文化と投稿戦略](#27-paper--論文化と投稿戦略)
 - [3. ステータスバー（外部接続）](#3-ステータスバー外部接続)
   - [3.1 alphaXiv MCP](#31-alphaxiv-mcp)
   - [3.2 alphaXiv 関心フィード](#32-alphaxiv-関心フィード)
@@ -34,36 +35,36 @@
 画面は上から **① ナビゲーション → ② 研究対象 → ③ Agent操作 → ④ 接続状態** の4層です。
 
 ```
-┌────────────────────────────────────────────────────┐
-│ Research OS                                        │  ① アプリ名
-├────────────────────────────────────────────────────┤
-│ Papers │ Review │ Graph │ Hypothesis │ Run │ Intel │  ② 研究フェーズ
-├────────────────────────────────────────────────────┤
-│                                                    │
-│  vision tactile world model                        │  ③ 現在の研究テーマ
-│                                                    │
-│  Found: 37 papers                                  │
-│                                                    │
-│  ★ VLA-JEPA                                        │
-│  ★ Tactile World Model                             │  ④ 文献・成果物
-│  ★ Vision-Tactile Policy                           │
-│                                                    │
-├────────────────────────────────────────────────────┤
-│ Agent                                              │
-│                                                    │
-│ > Compare these papers                             │
-│ > Find research gaps                               │  ⑤ AI Agent操作
-│ > Design experiment                                │
-│                                                    │
-├────────────────────────────────────────────────────┤
-│ Paperpile ✓ arXiv ✓ alphaXiv ✓ GitHub ✓ Feeds ✓    │  ⑥ 外部接続
-└────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│ Research OS                                                │  ① アプリ名
+├────────────────────────────────────────────────────────────┤
+│ Papers │ Review │ Graph │ Hypothesis │ Run │ Paper │ Intel │  ② 研究フェーズ
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  vision tactile world model                                │  ③ 現在の研究テーマ
+│                                                            │
+│  Found: 37 papers                                          │
+│                                                            │
+│  ★ VLA-JEPA                                                │
+│  ★ Tactile World Model                                     │  ④ 文献・成果物
+│  ★ Vision-Tactile Policy                                   │
+│                                                            │
+├────────────────────────────────────────────────────────────┤
+│ Agent                                                      │
+│                                                            │
+│ > Compare these papers                                     │
+│ > Find research gaps                                       │  ⑤ AI Agent操作
+│ > Design experiment                                        │
+│                                                            │
+├────────────────────────────────────────────────────────────┤
+│ Paperpile ✓ arXiv ✓ alphaXiv ✓ GitHub ✓ Feeds ✓            │  ⑥ 外部接続
+└────────────────────────────────────────────────────────────┘
 ```
 
 | # | 要素 | 役割 |
 |---|------|------|
 | ① | アプリ名 | Research OS のヘッダ |
-| ② | 研究フェーズ | Papers / Review / Graph / Hypothesis / Run のタブ切り替え。加えて、フェーズ横断で企業・産業動向を監視する **Intel** タブ（[2.6](#26-intel--企業産業の動向を監視する)） |
+| ② | 研究フェーズ | Papers / Review / Graph / Hypothesis / Run / Paper のタブ切り替え（Paper は [2.7](#27-paper--論文化と投稿戦略)、[ADR-0001](adr/0001-paper-tab-and-venue-registry.md)）。加えて、フェーズ横断で企業・産業動向を監視する **Intel** タブ（[2.6](#26-intel--企業産業の動向を監視する)） |
 | ③ | 現在の研究テーマ | いま扱っているクエリ／テーマ |
 | ④ | 文献・成果物 | ヒットした論文やアウトプット一覧 |
 | ⑤ | Agent 操作 | 自然言語で Agent に指示する欄（**最重要**） |
@@ -181,6 +182,9 @@ Selected Papers: 3
 Intel（[2.6](#26-intel--企業産業の動向を監視する)）が追加する Node：
 `Company`（企業・研究組織）／ `Product` ／ `Customer` ／ `Event`（事業イベント）
 
+Paper（[2.7](#27-paper--論文化と投稿戦略)）が追加する Node：
+`Venue`（学術誌・国際会議）／ `Paper Draft`（自分の論文）
+
 **Edge の種類**
 
 | From | 関係 | To |
@@ -195,6 +199,9 @@ Intel（[2.6](#26-intel--企業産業の動向を監視する)）が追加する
 | Product | `uses` | Model |
 | Customer | `adopts` | Product |
 | Company | `announces` | Event |
+| Paper | `published_in` | Venue |
+| Paper Draft | `targets` | Venue |
+| Venue | `co_presents_with` | Venue |
 
 Intel 由来の Edge / Node の詳細（時間・根拠・来歴の管理を含む）は [6.6](#66-ナレッジグラフ拡張と来歴管理) を参照。
 
@@ -319,6 +326,70 @@ Intel — updated 2026-09-21 06:00          Feeds ✓ 9/9
 
 ---
 
+### 2.7 Paper — 論文化と投稿戦略
+
+Evidence に裏付けられた Claim から論文を更新し、**どの投稿先に、いつ、何を揃えて投稿するか** を管理する画面です。
+closed-loop 構想（`docs/new_features/new_feature_20260917.md` §5.4）の Paper 画面を基礎に、
+投稿戦略（`docs/new_features/venue_strategy.md`、元資料: `docs/reference/paper_strategy.md`）を含めます。
+画面構成の決定は [ADR-0001](adr/0001-paper-tab-and-venue-registry.md)。
+
+**画面イメージ**
+
+```
+Paper — PD-001  Vision-Tactile JEPA for Failure Prediction on SO-101
+[ Draft ] [ Submission ]                       target: RA-L   stage: drafting
+
+  R6 Paper Gate: conditional (3/4)
+    ✓ Vision-Tactile JEPA アーキテクチャ        CLM-001
+    ✓ 失敗予測の定量評価                        EVD-001
+    ✓ 視覚のみ vs 視覚・触覚統合の比較          EVD-002
+    ✗ SO-101 による実機評価                     Evidence なし
+
+  Candidates   RA-L ◎   ICRA ◎ ⏳ 21d   IROS ◎
+```
+
+**主な機能**
+
+| 機能 | 内容 |
+|------|------|
+| Draft | Paper Section ごとの Claim 登録、Claim → Evidence → Experiment → Hypothesis の追跡、未検証 Claim の警告 |
+| 投稿ステージ | `planning → drafting → ready → submitted → under_review → accepted / rejected`（revision を含む） |
+| 投稿準備チェック | Venue の `tier` ごとの要件テンプレート（例：アーキテクチャ・比較実験・失敗予測の定量評価・実機評価）を必須 Evidence / Claim として判定。Research Gate R6（Paper Gate）に統合する |
+| 投稿先の比較 | 成熟度・新規性・要件充足・締切から候補 Venue を Agent が比較する。確定は人間が行う |
+| ジャーナル版の差分 | 会議版とジャーナル版の Claim / Evidence を比べ、新規の貢献と追加検証を一覧化する |
+
+**Venue レジストリ**
+
+学術誌・国際会議を **画面に属さない共有データ**（`registry/venues.yaml`）として管理し、
+Papers の掲載先フィルタ、Graph の `published_in`、Intel 巡回による締切監視からも参照します。
+
+| 属性 | 内容 |
+|------|------|
+| `name` / `abbrev` / `type` | 正式名称・略称・種別（`journal` ／ `conference` ／ `magazine`） |
+| `publisher` / `ieee_related` | 出版元・主催、IEEE 関連か |
+| `scope` / `fit` / `priority` / `tier` | 研究領域、研究テーマとの相性（◎○△）、投稿優先度、投稿戦略上の位置付け（研究プロファイルで上書き可） |
+| `policies` / `deadlines` | 投稿規定の要点（二重投稿・既発表の扱い・RA-L と会議の連携制度など）、年度ごとの締切 |
+| `source_url` / `retrieved_at` / `updated_at` | 来歴 |
+
+初期登録は学術誌 10・国際会議 5（優先：RA-L → ICRA → IROS → RSS → T-RO / IJRR）。
+
+**研究プロファイル**
+
+研究テーマと RQ（例：RQ1 Vision-Tactile Representation / RQ2 Predictive World Model / RQ3 Failure-Aware Manipulation）を
+Hypothesis チェーンの上位オブジェクトとして持ち（`research/profile.yaml`）、RQ ごとの文献・仮説・実験・Evidence の **カバレッジ** を表示します。
+
+**Agent への指示例**
+
+- `> Which venue fits PD-001 best right now?`
+- `> List missing requirements for RA-L`
+- `> Show RQ coverage`
+- `> What is new in the journal version?`
+- `> RA-L・T-RO・IJRR に載った tactile 論文だけ`（Papers 画面）
+
+> Paper は研究の「終わり」ではなく、研究中に更新し続けるオブジェクトです。投稿先は、その論文がどこまで成熟したかを測る基準になります。
+
+---
+
 ## 3. ステータスバー（外部接続）
 
 画面下部 `Paperpile ✓  arXiv ✓  alphaXiv ✓  GitHub ✓  MCP ✓` はステータスバーです。
@@ -331,6 +402,7 @@ Intel — updated 2026-09-21 06:00          Feeds ✓ 9/9
 | GitHub ✓ | コード・OSS・実装の検索が可能 |
 | Feeds ✓ | Intel の監視対象ソース（企業ブログ・ニュース等）を巡回できている。`Feeds ✓ 8/9` のように取得成功数を併記し、失敗ソースがあれば警告表示にする |
 | MCP ✓ | MCP Server 群が正常 |
+| ICRA ⏳ 21d | 投稿候補 Venue の直近締切までの日数（[2.7](#27-paper--論文化と投稿戦略)）。巡回で取得した締切のみ表示し、未確認の締切は出さない |
 
 **将来の拡張イメージ**
 
@@ -480,11 +552,12 @@ Human → Goal → Agent → Plan → Tool / MCP / Skill → Result
 | Graph | Graph 用 Skill |
 | Hypothesis | Research Gap / Hypothesis Skill |
 | Run | Experiment / Coding Skill |
+| Paper | Paper / Venue Skill（Claim 追跡・投稿準備チェック・投稿先比較。`docs/new_features/venue_strategy.md`） |
 | Intel | Intel Watch Skill（巡回・要約・抽出・比較・週次レポート。[6](#6-intel-監視パイプラインフィジカルai企業の動向監視)） |
 
 Intel は定期実行（毎日・週次）を伴うため、対話中の Agent ループとは別に **バックグラウンドの巡回ジョブ** を持ちます
 （実行基盤は未決。ADR で決定する。[6.8](#68-未決事項)）。
-alphaXiv 関心フィード（[3.2](#32-alphaxiv-関心フィード)）の定期取得も同じ巡回ジョブ基盤に載せます。
+alphaXiv 関心フィード（[3.2](#32-alphaxiv-関心フィード)）の定期取得と、Venue の CFP・投稿規定の巡回（[2.7](#27-paper--論文化と投稿戦略)）も同じ巡回ジョブ基盤に載せます。
 
 ユーザーは Skill そのものをほぼ意識しません。裏側で自動選択されます。
 
