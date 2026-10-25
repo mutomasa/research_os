@@ -1,0 +1,22 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_profile.py::test_override_changes_only_given_fields (call) ===
+root = PosixPath('/home/mutomasa/research/research_os')
+registry = VenueRegistry(schema_version=1, venues=[Venue(venue_id='tro', name='IEEE Transactions on Robotics', abbrev='T-RO', typ...'docs/reference/paper_strategy.md', retrieved_at=datetime.date(2026, 10, 25), updated_at=datetime.date(2026, 10, 25))])
+
+    def test_override_changes_only_given_fields(root, registry):
+        raw = _raw(root)
+        raw["venue_overrides"] = {"case": {"priority": 1}}
+        venues = effective_venues(registry, ResearchProfile.model_validate(raw))
+        case = venues[0]
+>       assert case.venue_id == "case"
+E       AssertionError: assert 'ral' == 'case'
+E         
+E         - case
+E         + ral
+
+tests/test_profile.py:36: AssertionError
