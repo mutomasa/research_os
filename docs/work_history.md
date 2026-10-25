@@ -98,3 +98,23 @@
 
 - 何を: `DESIGN.md` §13 の代替テーマ名を Signal Night → Mission Control に、`:theme` 引数を `mission-control` に変更した。
 - なぜ: 管制室的に Agent を監視するテーマの性格が名前から直接伝わるようにするため。
+
+### 2026-10-25 `b1ec255` docs: propose venue strategy feature based on paper_strategy reference
+
+- 何を: 参照資料 `docs/reference/paper_strategy.md` を追加し、それを基に `docs/new_features/venue_strategy.md`（Status: Proposed）を作成。Venue レジストリ、研究プロファイル（テーマ・RQ カバレッジ）、Paper 画面での投稿パイプライン（R6 統合の投稿準備チェック・投稿先比較・ジャーナル版差分）、締切・投稿規定の巡回監視を定義した。
+- なぜ: 現行設計は実験・論文化までで止まっており、どの投稿先にいつ何を揃えて出すかを追跡する仕組みがなかったため。
+
+### 2026-10-25 `235e721` docs: add ADR-0001 for Paper tab and shared Venue registry
+
+- 何を: ADR-0001 を追加。Publish タブを新設せず closed-loop の Paper 画面に投稿戦略を含めること、Venue レジストリを共有データとし Graph に Venue ノードを追加することを決定。
+- なぜ: 論文化と投稿先決定の画面・判定（R6 Paper Gate）の二重化を避け、Venue を Papers / Graph / Intel 巡回で共有するため。
+
+### 2026-10-25 `4f3fd27` docs: add Paper tab and Venue registry to design.md
+
+- 何を: `docs/design.md` に 2.7 Paper を追加し、全体レイアウトのタブ・Graph の Node / Edge・ステータスバー（締切表示）・Skill 対応表・巡回基盤を更新した。
+- なぜ: ADR-0001 の決定を仕様の正である design.md に反映するため。
+
+### 2026-10-25 `b6c9865` docs: reflect Paper tab and venue strategy in todo.md
+
+- 何を: `docs/todo.md` に 9. Paper（Phase A〜C）を追加し、Papers / Graph / Run / 外部接続 / 基盤の関連タスクを追記。仕上げを 10 に繰り下げた。
+- なぜ: design.md §2.7 と venue_strategy.md の仕様を実装タスクに落とし込むため。
