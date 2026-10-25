@@ -196,10 +196,10 @@ Technology Intelligence（技術革新）と Business Intelligence（ビジネ�
 ### 9.1 Phase A：Venue レジストリと研究プロファイル
 
 - [x] Venue レジストリのスキーマ定義（name / abbrev / type / publisher / ieee_related / scope / fit / priority / tier / policies / deadlines / 来歴）
-- [ ] `registry/venues.yaml` の読み込み（Intel の `registry/companies.yaml` と同じ共有データ層）
+- [x] `registry/venues.yaml` の読み込み（Intel の `registry/companies.yaml` と同じ共有データ層）
 - [x] 初期登録：学術誌 10・国際会議 5（`docs/reference/paper_strategy.md` §2・§3）
 - [x] 研究プロファイル `research/profile.yaml` のスキーマ（theme / research_questions / venue_overrides / survey_venues）
-- [ ] 研究プロファイルから関心プロファイル `interests.yaml` のトピックを初期生成
+- [x] 研究プロファイルから関心プロファイル `interests.yaml` のトピックを初期生成（`research-os interests init`）
 - [ ] RQ カバレッジ集計（RQ ごとの関連論文・仮説・実験・Evidence 数）と `> Show RQ coverage`
 
 ### 9.2 Phase B：Paper 画面と投稿パイプライン
