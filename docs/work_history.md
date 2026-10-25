@@ -133,3 +133,8 @@
 
 - 何を: `registry/venues.yaml` を作成し、学術誌 10・国際会議 5 を venue_strategy.md §3.1 のスキーマで登録した（priority：RA-L 1 / ICRA 2 / IROS 3 / RSS 4 / T-RO・IJRR 5）。
 - なぜ: Phase A の起点として、Papers の Venue フィルタ・Graph の Venue ノード・Paper 画面が参照する共有データを用意するため。投稿規定・締切は未確認のため verified: false / 空のままにした。
+
+### 2026-10-25 `b2f6fd1` feat: add research profile (research/profile.yaml)
+
+- 何を: `research/profile.yaml` を作成し、研究テーマ、RQ1〜RQ3（検証内容・サーベイキーワード）、venue_overrides、survey_venues、submission_plan（Step 1〜3）を定義した。venue_strategy.md §4 に追加項目を追記した。
+- なぜ: 研究テーマと RQ を Hypothesis チェーンの上位に置き、RQ カバレッジ集計・関心フィードの初期生成・投稿先の優先度判断の基準にするため（Phase A）。
