@@ -138,3 +138,33 @@
 
 - 何を: `research/profile.yaml` を作成し、研究テーマ、RQ1〜RQ3（検証内容・サーベイキーワード）、venue_overrides、survey_venues、submission_plan（Step 1〜3）を定義した。venue_strategy.md §4 に追加項目を追記した。
 - なぜ: 研究テーマと RQ を Hypothesis チェーンの上位に置き、RQ カバレッジ集計・関心フィードの初期生成・投稿先の優先度判断の基準にするため（Phase A）。
+
+### 2026-10-25 `96e90f8` docs: add ADR-0002 choosing Python + Textual
+
+- 何を: ADR-0002 を追加し、実装言語を Python 3.12+、TUI を Textual、パッケージ管理を uv、検証を pydantic v2、テストを pytest に決定した。DESIGN.md の「未選定」注記と todo.md §0 を更新した。
+- なぜ: 実験資産・Paper2Agent・Agent SDK と同じ言語で連携でき、DESIGN.md の描画規約も満たせるため（Go + Bubble Tea / Rust + Ratatui と比較）。
+
+### 2026-10-25 `c4dbeb8` chore: scaffold Python package with uv (src layout, pytest)
+
+- 何を: `pyproject.toml`・`uv.lock`・`src/research_os/`（data パッケージ、最小 CLI）・`tests/`（スモークテスト）・`.gitignore` を追加した。
+- なぜ: Phase A のデータ層を実装する土台を用意するため。
+
+### 2026-10-25 `57830e7` feat: load and validate Venue registry
+
+- 何を: `registry/venues.yaml` の読み込み・検証（未知キー・ID 重複・参照切れ）と、テスト失敗時に `logs/pytest/` へ生ログを残す conftest フックを追加した。
+- なぜ: Phase A のデータ層の土台として、共有データの書き間違いを読み込み時に検出するため。
+
+### 2026-10-25 `454e03f` feat: load research profile and apply venue overrides
+
+- 何を: `research/profile.yaml` の読み込み・検証と、venue_overrides を適用した優先度順の Venue 一覧（`effective_venues`）を追加した。
+- なぜ: 研究テーマ固有の優先度をレジストリを変えずに反映するため。
+
+### 2026-10-25 `72b41ed` feat: generate interests.yaml from research profile and add CLI
+
+- 何を: 研究プロファイルから `interests.yaml` を初期生成する機能と CLI（`research-os venues` / `research-os interests init`）を追加した。
+- なぜ: 関心フィードの設定を RQ と対応づけて作り、RQ カバレッジ集計の土台にするため。置き場所は暫定（#5）。
+
+### 2026-10-25 `bd9fe14` test: keep failure log of venue override test
+
+- 何を: override テストの失敗ログを `logs/pytest/` に残した（テスト側の誤りを修正済み）。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。同順位の並び順の問題は #3、ログ管理方針は #6。
