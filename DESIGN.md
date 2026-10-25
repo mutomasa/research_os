@@ -44,7 +44,7 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 **デザインの 3 原則**
 
 1. **Agent が主役** — 画面下部の Agent 欄は常に見えていて、`>` 1 キーで入力できる。Agent の実行状態（計画・ツール呼び出し・結果）は隠さず表示する。
-2. **フェーズが色で分かる** — Papers / Review / Graph / Hypothesis / Run / Intel はそれぞれ固有色を持ち、タブ・パネルタイトル・Agent の文脈表示に使う。
+2. **フェーズが色で分かる** — Papers / Review / Graph / Hypothesis / Run / Paper / Intel はそれぞれ固有色を持ち、タブ・パネルタイトル・Agent の文脈表示に使う。
 3. **根拠が見える** — 数値・主張・要約には必ず出典（arXiv ID / URL / `company_claimed` など）を併記する。出典のない情報を強調表示しない。
 
 ---
@@ -81,8 +81,11 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 | Graph | `#73daca` | `79` | `bright cyan` | つなぐ |
 | Hypothesis | `#e0af68` | `179` | `yellow` | 閃く |
 | Run | `#9ece6a` | `149` | `green` | 試す |
+| Paper | `#f4b8e4` | `218` | `bright magenta` | 書く・出す（論文化と投稿） |
 | Intel | `#ff9e64` | `215` | `bright red` | 外を見る（並走トラック） |
 
+> Paper は 16 色環境で Agent（`magenta`）と近い色になるため `bright magenta` を割り当てる。Agent 欄は枠と `❯`、Paper はタブとパネルタイトルにしか使わないので、位置で区別できる。
+>
 > Hypothesis と Warning、Run と Success は同色です。フェーズ色は「タブ／タイトル」、状態色は「アイコン付きの値」に
 > 用途を分けているため衝突しません。状態は必ずアイコン（§8）と併用すること。
 
@@ -116,6 +119,8 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 | Product | `#e0af68` | `179` | `▣` |
 | Customer | `#9ece6a` | `149` | `◎` |
 | Event | `#7dcfff` | `117` | `◷` |
+| Venue | `#f4b8e4` | `218` | `▲` |
+| Paper Draft | `#c0caf5` | `189` | `¶` |
 
 **情報の信頼性**（Intel・数値の併記）
 
@@ -133,6 +138,29 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 | `seen` | （バッジなし） | 本文を Neutral 500 |
 | `saved` | `✓ saved` | Success |
 | `dismissed` | 行ごと非表示（`d` で表示切替時は dim + 取消線） | Neutral 300 |
+
+**Research Gate の判定**（Paper の R6 投稿準備チェック、design.md §2.7）
+
+| 判定 | 表示 | 色 |
+|------|------|----|
+| `pass` | `✓ pass` | Success |
+| `conditional` | `⚠ conditional 3/4` | Warning |
+| `fail` | `✗ fail` | Error |
+| 要件の充足 / 未充足 | 行頭 `✓` / `✗`、右に根拠 ID（`CLM-001` `EVD-001`）を Accent | Success / Error |
+
+**投稿ステージ**（Paper）
+
+`planning → drafting → ready → submitted → under_review → accepted / rejected` を 6 段の Stage meter `▰▰▱▱▱▱ drafting` で表示する。
+`accepted` は Success、`rejected` は Error、`revision` は Warning のラベルを meter の右に付ける。
+
+**締切**（Paper・ステータスバー）
+
+| 状態 | 表示 | 色 |
+|------|------|----|
+| 31 日以上 | `◔ 45d` | Muted |
+| 8〜30 日 | `◔ 21d` | Warning |
+| 7 日以内 | `◔ 5d` | Error + bold |
+| 未確認（公式ページで未確認） | `◔ ?` | Neutral 300 |
 
 ---
 
@@ -229,7 +257,7 @@ Intel は並走トラックなので `│` で区切って右側に置く。
 
 ```
  Research OS  ·  vision tactile world model                        2026-10-01 09:12
- 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   │   6 Intel ●3
+ 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   6 Paper   │   7 Intel ●3
  ▔▔▔▔▔▔▔▔
 ```
 
@@ -294,6 +322,7 @@ Intel は並走トラックなので `│` で区切って右側に置く。
 |------|------|
 | Paperpile 登録 / alphaXiv フォルダ保存 | 必須（二重線ダイアログ、§4.3） |
 | 実験の実行（Run） | 必須。GPU・推定時間を表示 |
+| 投稿先の確定・投稿ステージの変更（Paper） | 必須。`a`（常に許可）は使えず毎回確認する。確定者を `decided_by` に記録 |
 | 大量の LLM 呼び出し（詳細の日本語化 10 件以上など） | 必須。件数を表示 |
 | 読み取りのみの検索・取得 | 不要 |
 
@@ -335,7 +364,7 @@ Review の比較表、Run の結果表で共通。ヘッダは bold + 下線、�
 最下行。外部接続を左、フォーカス中のキーヒントを右に置く。背景は Neutral 50。
 
 ```
- Paperpile ✓  arXiv ✓  alphaXiv ✓  GitHub ✓  Feeds ⚠ 8/9  MCP ✓       ? help  q quit
+ Paperpile ✓  arXiv ✓  alphaXiv ✓  GitHub ✓  Feeds ⚠ 8/9  MCP ✓  ICRA ◔ 21d   ? help  q quit
 ```
 
 | 状態 | 表示 |
@@ -348,6 +377,7 @@ Review の比較表、Run の結果表で共通。ヘッダは bold + 下線、�
 
 - 幅が足りないときは右から省略し、`+3` のように残数を表示。異常のある接続は省略しない
 - 定期巡回ジョブが動いているときは左端に `⟳`（design.md §6.8）
+- 投稿候補 Venue の直近締切を接続一覧の右に 1 つだけ出す（`ICRA ◔ 21d`、色は §2.4「締切」）。未確認の締切は出さない。幅が足りないときは接続より先に省略する
 
 ### 5.8 Toast / Notification
 
@@ -369,7 +399,7 @@ Review の比較表、Run の結果表で共通。ヘッダは bold + 下線、�
 
 ```
  Research OS  ·  vision tactile world model                                                          2026-10-01 09:12
- 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   │   6 Intel ●3
+ 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   6 Paper   │   7 Intel ●3
  ▔▔▔▔▔▔▔▔
 ╭─ <メイン領域: フェーズごとの画面> ─────────────────────────────────────────────────────────────────────────────────╮
 │                                                                                                                    │
@@ -498,6 +528,28 @@ Tech / Business / Sources のサブタブ。各行に日付・企業・種別・
 - 事業化ステージ（design.md §6.5）は 5 段メーター `▰▰▰▱▱ 試験導入` で表示
 - `⟳ Updated` の Diff は `+` 行を Success、`-` 行を Error で表示
 
+### 6.8 Paper
+
+Draft / Submission のサブタブ。Submission では R6 の判定、要件の充足、投稿候補 Venue を 1 画面に並べる（design.md §2.7）。
+
+```
+╭─ Paper ─ Draft [Submission] ────────────────── ¶ PD-001 · target ▲ RA-L · ▰▰▱▱▱▱ drafting ─╮
+│ R6 Paper Gate   ⚠ conditional 3/4                                                          │
+│                                                                                            │
+│ ✓ Vision-Tactile JEPA アーキテクチャ                                   CLM-001             │
+│ ✓ 失敗予測の定量評価                                                   EVD-001             │
+│ ✓ 視覚のみ vs 視覚・触覚統合の比較                                     EVD-002             │
+│ ✗ SO-101 による実機評価                                                Evidence なし       │
+│                                                                                            │
+│ Candidates   ▲ RA-L  ◎  通年        ▲ ICRA  ◎  ◔ 21d        ▲ IROS  ◎  ◔ ?                 │
+╰────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+- タイトル右に Paper Draft ID・投稿先・投稿ステージを出す。投稿先未確定のときは `target –`（Neutral 300）
+- 要件行で `enter` を押すと根拠の Claim / Evidence（未充足なら関連する Experiment）へジャンプ
+- Candidates の `◎ ○ △` は研究テーマとの相性（研究プロファイルの値）。締切は §2.4「締切」の色
+- Draft サブタブは Paper Section ごとに Claim を並べ、Evidence のない Claim を `✗` + Error で示す
+
 ---
 
 ## 7. Layout & Spacing
@@ -563,6 +615,9 @@ Tech / Business / Sources のサブタブ。各行に日付・企業・種別・
 | Claim | `◐` | `(c)` |
 | Verified | `●` | `(v)` |
 | Stage meter | `▰ ▱` | `# .` |
+| Deadline | `◔` | `@` |
+| Venue | `▲` | `^` |
+| Paper Draft | `¶` | `P` |
 | Progress | `█ ░` | `# .` |
 | Sparkline | `▁▂▃▄▅▆▇█` | `_.-=^` |
 
@@ -576,7 +631,7 @@ vim 系を基本に、Agent 欄へのアクセスを最短にする。
 
 | Key | Action |
 |-----|--------|
-| `1`–`6` | フェーズタブ切替（Papers … Intel） |
+| `1`–`7` | フェーズタブ切替（`1` Papers … `6` Paper、`7` Intel） |
 | `>` / `i` | Agent 欄にフォーカス（入力開始） |
 | `Esc` | Agent 欄 → Main に戻る / ダイアログを閉じる |
 | `Tab` / `Shift+Tab` | パネル間フォーカス移動 |
@@ -593,7 +648,7 @@ vim 系を基本に、Agent 欄へのアクセスを最短にする。
 |-----|--------|
 | `j` / `k`, `↓` / `↑` | 上下移動 |
 | `g` / `G` | 先頭 / 末尾 |
-| `enter` | 開く（Papers → Review、ノード → 詳細） |
+| `enter` | 開く（Papers → Review、ノード → 詳細、Paper の要件 → 根拠の Claim / Evidence） |
 | `space` | `★` 選択トグル |
 | `/` | インクリメンタル絞り込み |
 | `s` | ソート切替 |
@@ -647,7 +702,7 @@ Primary:  #7aa2f7 (focus)        Accent:  #7dcfff (links, keys)
 Agent:    #bb9af7 (agent pane, ❯, spinner)
 Status:   ok #9ece6a / warn #e0af68 / err #f7768e / muted #737aa2
 Phases:   Papers #7aa2f7 · Review #7dcfff · Graph #73daca ·
-          Hypothesis #e0af68 · Run #9ece6a · Intel #ff9e64
+          Hypothesis #e0af68 · Run #9ece6a · Paper #f4b8e4 · Intel #ff9e64
 Border:   rounded ╭╮╰╯─│ (panels), double ╔╗╚╝═║ (confirm dialogs)
 Glyphs:   ✓ ✗ ⚠ ◯ ⠋ ★ ▌ ❯ ⟳ ◐ ●   (ASCII fallback required)
 Layout:   Header / Tabs / Main / Agent(7 rows) / Status bar, min 80x24
@@ -747,6 +802,7 @@ Research OS の Agent 構成に対応させる。ヘッダ直下の **凡例行*
 | Graph | `#5fd7c4` | `80` |
 | Hypothesis | `#f2c46d` | `221` |
 | Run | `#8ee58c` | `114` |
+| Paper | `#f5a3d1` | `218` |
 | Intel | `#ff9e64` | `215` |
 
 ### 13.4 Borders
