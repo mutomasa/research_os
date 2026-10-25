@@ -118,3 +118,13 @@
 
 - 何を: `docs/todo.md` に 9. Paper（Phase A〜C）を追加し、Papers / Graph / Run / 外部接続 / 基盤の関連タスクを追記。仕上げを 10 に繰り下げた。
 - なぜ: design.md §2.7 と venue_strategy.md の仕様を実装タスクに落とし込むため。
+
+### 2026-10-25 `fc46138` docs: add Paper tab to DESIGN.md
+
+- 何を: `DESIGN.md` に Paper のフェーズ色（`#f4b8e4`）、タブバー（`6 Paper │ 7 Intel`）、キーバインド `1`–`7`、Venue / Paper Draft ノード、R6 判定・投稿ステージ・締切の表示規約、6.8 Paper 画面を追加した。
+- なぜ: ADR-0001 のフォローアップとして、design.md §2.7 の Paper 画面を描くための規約を揃えるため。
+
+### 2026-10-25 `ce2a318` docs: replace hourglass emoji with ◔ in deadline display
+
+- 何を: design.md・todo.md・venue_strategy.md の締切表示 `⏳` を `◔` に置き換えた。
+- なぜ: DESIGN.md の「絵文字をアイコンに使わない」規約に合わせるため。
