@@ -127,6 +127,15 @@ venue_overrides:
 survey_venues: [ral, tro, ijrr, icra, iros, rss]
 ```
 
+実ファイル（`research/profile.yaml`）では、上記に加えて次を持つ。
+
+| 項目 | 内容 |
+|---|---|
+| `research_questions[].verification` | RQ ごとの検証内容（`paper_strategy.md` §5 Step 1 の評価項目を割り当てる） |
+| `research_questions[].survey_topics` | RQ ごとの先行研究キーワード（RQ カバレッジ集計の論文ひも付けに使う） |
+| `survey_topics` | テーマ全体の先行研究キーワード（`interests.yaml` の topics の初期生成元） |
+| `submission_plan` | 投稿戦略の段階（Step 1〜3）。各段の候補 Venue と主要な貢献 |
+
 - closed-loop の成果物ディレクトリ（`research/questions.yaml`）とは、`research_questions` の ID で対応づける。
 - 関心プロファイル `interests.yaml`（design.md §3.2）のトピックは、ここから初期生成できる。
 

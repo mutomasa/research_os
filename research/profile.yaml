@@ -1,0 +1,83 @@
+# 研究プロファイル（研究テーマと RQ）
+#
+# 仕様: docs/new_features/venue_strategy.md §4 / docs/design.md §2.7
+# 出典: docs/reference/paper_strategy.md §2（優先学術誌）・§5（研究テーマ・RQ・実験環境・投稿戦略）・§6（優先順位）・§7（先行研究調査）
+#
+# スキーマ
+#   theme / theme_ja      研究テーマ（英語・日本語）
+#   research_questions    RQ の一覧。id は closed-loop の research/questions.yaml・Hypothesis と対応づけるキー
+#     id / title / question / verification（検証内容）/ survey_topics（RQ ごとの先行研究キーワード）
+#   survey_topics         テーマ全体の先行研究キーワード。interests.yaml（design.md §3.2）の topics を初期生成する元
+#   venue_overrides       registry/venues.yaml の fit / priority / tier をこの研究テーマ向けに上書きする
+#   survey_venues         サーベイの網羅度を集計する Venue（registry/venues.yaml の venue_id）
+#   submission_plan       投稿戦略の段階（paper_strategy.md §5 Step 1〜3）
+
+schema_version: 1
+
+theme: Vision-Tactile JEPA World Models for Failure-Aware Long-Horizon Robotic Manipulation
+theme_ja: 失敗認識型の長期ロボットマニピュレーションに向けた視覚・触覚統合JEPA世界モデル
+
+research_questions:
+  - id: RQ1
+    title: Vision-Tactile Representation
+    question: 視覚・触覚情報によって接触・滑り・把持状態を正確に表現できるか
+    verification:
+      - 接触状態の推定精度
+      - 視覚のみと視覚・触覚統合モデルの比較
+    survey_topics: [Vision-Tactile Learning, Tactile Sensing, Multimodal Representation, Slip Detection]
+
+  - id: RQ2
+    title: Predictive World Model
+    question: JEPA型世界モデルによって将来の状態や操作失敗を予測できるか
+    verification:
+      - 世界モデルの予測性能
+      - 滑り・把持失敗の予測精度
+    survey_topics: [JEPA, World Models, Latent Dynamics, Failure Prediction]
+
+  - id: RQ3
+    title: Failure-Aware Manipulation
+    question: 失敗予測を再計画・回復に利用することで長期タスクの成功率を向上できるか
+    verification:
+      - 長期操作の成功率
+      - 失敗からの回復性能
+    survey_topics: [Failure-Aware Manipulation, Failure Recovery, Replanning, Long-Horizon Manipulation, VLA]
+
+survey_topics: [Vision-Tactile Learning, JEPA, World Models, Failure-Aware Manipulation]
+
+# 現在の値は registry/venues.yaml の既定値と同じ。テーマ固有の判断としてここに明示し、
+# テーマを変えたときはこちらだけを書き換える。
+venue_overrides:
+  ral:  { fit: "◎", priority: 1, tier: first_result }
+  icra: { fit: "◎", priority: 2, tier: first_result }
+  iros: { fit: "◎", priority: 3, tier: first_result }
+  rss:  { fit: "◎", priority: 4, tier: foundational }
+  tro:  { fit: "◎", priority: 5, tier: mature_journal }
+  ijrr: { fit: "◎", priority: 5, tier: mature_journal }
+
+# paper_strategy.md §6「研究活動の推奨フロー」でサーベイ対象に挙がっている 6 件
+survey_venues: [ral, tro, ijrr, icra, iros, rss]
+
+submission_plan:
+  - step: 1
+    title: SO-101 実機実験
+    goal: 視覚・触覚・関節状態のデータを収集し、RQ1〜RQ3 の検証項目を評価する
+    research_questions: [RQ1, RQ2, RQ3]
+  - step: 2
+    title: 最初の研究成果の投稿
+    candidate_venues: [ral, icra, iros]
+    contributions:
+      - Vision-Tactile JEPA アーキテクチャ
+      - 視覚のみと視覚・触覚統合モデルの比較
+      - 失敗予測の定量評価
+      - SO-101 による実機評価
+    note: 投稿先は完成度・新規性・実験結果・投稿時期で選ぶ（確定は人間が行う）
+  - step: 3
+    title: ジャーナル版への発展
+    candidate_venues: [tro, ijrr]
+    contributions:
+      - 異なる操作タスクへの汎化
+      - 長期タスクへの適用
+      - World Model を使用した再計画
+      - Failure Recovery Policy の学習
+      - 異なる環境・物体での頑健性評価
+    note: 単なる延長ではなく、新しい技術的貢献と十分な追加検証が必要
