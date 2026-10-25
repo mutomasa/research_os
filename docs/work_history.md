@@ -128,3 +128,8 @@
 
 - 何を: design.md・todo.md・venue_strategy.md の締切表示 `⏳` を `◔` に置き換えた。
 - なぜ: DESIGN.md の「絵文字をアイコンに使わない」規約に合わせるため。
+
+### 2026-10-25 `bf70cf0` feat: add initial Venue registry (registry/venues.yaml)
+
+- 何を: `registry/venues.yaml` を作成し、学術誌 10・国際会議 5 を venue_strategy.md §3.1 のスキーマで登録した（priority：RA-L 1 / ICRA 2 / IROS 3 / RSS 4 / T-RO・IJRR 5）。
+- なぜ: Phase A の起点として、Papers の Venue フィルタ・Graph の Venue ノード・Paper 画面が参照する共有データを用意するため。投稿規定・締切は未確認のため verified: false / 空のままにした。
