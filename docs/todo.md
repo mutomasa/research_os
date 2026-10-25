@@ -7,7 +7,7 @@
 
 ## 0. 基盤 / プロジェクト骨格
 
-- [ ] TUI フレームワーク選定（Textual / Bubble Tea など）
+- [x] TUI フレームワーク選定：Python + Textual（ADR-0002）
 - [ ] アプリ骨格：① ヘッダ ② フェーズタブ ③ 研究対象 ④ Agent 欄 ⑤ ステータスバー の4層レイアウト
 - [ ] フェーズタブの切り替え（Papers / Review / Graph / Hypothesis / Run / Paper ＋ 並走トラックの Intel。Paper は ADR-0001）
 - [ ] グローバル状態管理（現在のテーマ・選択論文・接続状態）

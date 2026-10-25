@@ -8,8 +8,8 @@
 形式は [awesome-tui-design](https://github.com/cola-runner/awesome-tui-design) の `TEMPLATE.md` に準拠し、
 AI エージェント（Claude Code など）がそのまま読んで TUI 実装に使えることを目的にしています。
 
-> TUI フレームワークは未選定（Textual / Bubble Tea など。`docs/todo.md` §0）。
-> 本書はフレームワーク非依存で、色は Hex / ANSI 256 / ANSI 16 の 3 段で定義します。
+> 実装は Python + Textual（[ADR-0002](docs/adr/0002-python-and-textual.md)）。
+> ただし本書はフレームワーク非依存で、色は Hex / ANSI 256 / ANSI 16 の 3 段で定義します。
 
 ---
 
