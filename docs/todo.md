@@ -97,7 +97,8 @@
 
 - [x] core 論文の参照文献・被引用から候補を取得（core 1 本あたり各 `citation_limit` 件まで）とスコアの `link` 要素
 - [x] 捨てた理由の集計と提案（除外語・year_from・Venue 重み。適用は人が承認）
-- [ ] スコア段階 2：上位 `llm_top_k` 件だけ LLM（`claude -p`）で関連度を判定（paper_intake.md §4.1、#9）
+- [x] スコア段階 2：上位 `llm_top_k` 件だけ LLM（`claude -p`）で関連度を判定（paper_intake.md §4.1、#9）
+- [x] 関連度の下限 `min_relevance`（#15）と、判定済みの候補だけを出す制御（#16）
 
 **UI（Papers 画面）**
 
