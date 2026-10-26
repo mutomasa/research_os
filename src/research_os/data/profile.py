@@ -57,10 +57,14 @@ class IntakeConfig(StrictModel):
     to_read_max: int = 5
     core_target: int = 15
     min_score: float = 0.30
+    min_relevance: float = 0.30  # 主 RQ の関連度がこれ未満なら、他の加点があっても出さない
     year_from: int | None = None  # None なら直近 4 年
     per_query: int = 50
     refetch_days: int = 6
     citation_limit: int = 50  # 中核論文 1 本あたり、参考文献・被引用それぞれの取得上限
+    llm_top_k: int = 30  # 1 回の取り込みで LLM に判定させる候補の上限（§4.1）
+    llm_batch: int = 10  # 1 回の claude -p 呼び出しにまとめる論文数
+    llm_model: str = "sonnet"
     weights: IntakeWeights = IntakeWeights()
 
 

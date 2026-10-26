@@ -258,3 +258,28 @@
 
 - 何を: OpenAlex の HTTP 429・接続エラーを OpenAlexError にし、CLI で「error: ...」として終了コード 1 を返すようにした。
 - なぜ: キーなしで運用すると決めた（#11）ため、無料枠を使い切ってもスタックトレースで落ちないようにする。
+
+### 2026-10-27 `2b27092` docs: specify LLM relevance judge via claude -p
+
+- 何を: paper_intake.md §4.1 に段階 2（claude -p による関連度判定）の仕様を書いた。
+- なぜ: 段階 1 の関連度が 1.00 に張り付く（#9）。呼び出し方は利用者が claude -p を選んだ。
+
+### 2026-10-27 `d5a1172` feat: judge relevance of top candidates with claude -p
+
+- 何を: 上位 llm_top_k 件を claude -p で判定し、RQ 定義のハッシュつきで保存して rescore で使うようにした。min_relevance（#15）と判定済みのみを出す制御（#16）を加えた。
+- なぜ: 別分野の論文が語の一致だけで上位に来るのを防ぐため。実データで LidarDM 類が 0.1〜0.4 に下がることを確認した。
+
+### 2026-10-27 `8bf0456` feat: run LLM judge in intake run / explore with --no-llm
+
+- 何を: intake run / explore に判定を組み込み、--no-llm と、claude が無いときの段階 1 への切り替えを加えた。Inbox に判定理由を表示する。
+- なぜ: CLI から段階 2 を回せるようにするため。
+
+### 2026-10-27 `02ff16e` test: keep failure log of LLM judge test
+
+- 何を: 段階 2 のテストの初版で失敗した 3 件のログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-27 `0afa403` docs: align paper intake spec with LLM judge
+
+- 何を: §4.1・§5 に #15・#16 の対応と所要時間を追記し、todo.md を更新した。
+- なぜ: 仕様と実装を合わせるため。

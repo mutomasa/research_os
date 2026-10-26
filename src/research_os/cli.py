@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from research_os import __version__
 from research_os.data import feedback, intake, interests, papers, profile, venues
+from research_os.llm import relevance as llm_relevance
 from research_os.sources.openalex import OpenAlexClient, OpenAlexError
 
 
@@ -36,6 +37,22 @@ def _load(args: argparse.Namespace):
     return registry, prof, papers.PaperStore(args.db)
 
 
+def _score_and_surface(args: argparse.Namespace, registry, prof, store, now: datetime) -> intake.SurfaceReport:
+    """段階 1 でスコアを付け、上位を LLM で判定し直してから Inbox に出す（paper_intake.md §4.1）。"""
+    intake.rescore(store, registry, prof, now)
+    if args.no_llm:
+        return intake.surface(store, prof, now)
+    report = llm_relevance.judge(store, prof, now)
+    if report.calls:
+        print(f"llm judged: {report.judged} ({report.calls} calls)")
+    if report.judged:
+        intake.rescore(store, registry, prof, now)
+    if report.error:
+        print(f"warning: LLM 判定を中断しました。段階 1 の関連度で続けます: {report.error}", file=sys.stderr)
+        return intake.surface(store, prof, now)
+    return intake.surface(store, prof, now, judged_only=True)
+
+
 def _cmd_intake_run(args: argparse.Namespace) -> int:
     registry, prof, store = _load(args)
     now = datetime.now()
@@ -46,8 +63,7 @@ def _cmd_intake_run(args: argparse.Namespace) -> int:
         print(f"skipped (fetched within {prof.intake.refetch_days} days): {', '.join(report.skipped_recent)}")
     if report.venues_without_source:
         print(f"no OpenAlex source: {', '.join(report.venues_without_source)}")
-    intake.rescore(store, registry, prof, now)
-    result = intake.surface(store, prof, now)
+    result = _score_and_surface(args, registry, prof, store, now)
     if result.blocked_by_backlog:
         print(f"Inbox に未処理が {prof.intake.inbox_backlog_max} 本以上あるため、新しい論文は出しません")
     print(f"surfaced: {len(result.surfaced)} (今週の残り {result.weekly_remaining})")
@@ -66,8 +82,7 @@ def _cmd_intake_explore(args: argparse.Namespace) -> int:
         print(f"no OpenAlex ID: {', '.join(report.without_openalex_id)}")
     if not (report.explored or report.skipped_recent or report.without_openalex_id):
         print("中核論文（core）がまだありません。research-os triage <paper_id> core で指定してください")
-    intake.rescore(store, registry, prof, now)
-    result = intake.surface(store, prof, now)
+    result = _score_and_surface(args, registry, prof, store, now)
     print(f"surfaced: {len(result.surfaced)} (今週の残り {result.weekly_remaining})")
     return 0
 
@@ -83,7 +98,8 @@ def _cmd_intake_suggest(args: argparse.Namespace) -> int:
 
 
 def _format_reason(parts: dict) -> str:
-    items = [f"{parts.get('primary_rq')} 関連 {parts['relevance']:.2f}"]
+    source = "（LLM）" if parts.get("relevance_source") == "llm" else ""
+    items = [f"{parts.get('primary_rq')} 関連 {parts['relevance']:.2f}{source}"]
     if parts.get("venue_priority"):
         items.append(f"投稿先({parts['venue_priority']})")
     if parts["gap"] > 0:
@@ -108,7 +124,10 @@ def _cmd_inbox(args: argparse.Namespace) -> int:
         print(f"\n{row['score'] or 0:.2f}  {row['title']}  [{venue} {row['year'] or ''}]")
         print(f"      {row['paper_id']}")
         if row["breakdown"]:
-            print(f"      {_format_reason(json.loads(row['breakdown']))}")
+            parts = json.loads(row["breakdown"])
+            print(f"      {_format_reason(parts)}")
+            if parts.get("llm_reason"):
+                print(f"      {parts['llm_reason']}")
     return 0
 
 
@@ -141,9 +160,11 @@ def build_parser() -> argparse.ArgumentParser:
     isub = p.add_subparsers(dest="intake_command", required=True)
     p = isub.add_parser("run", help="OpenAlex から取得し、スコアを付けて上限の範囲で Inbox に出す")
     p.add_argument("--force", action="store_true", help="refetch_days 以内でも再取得する")
+    p.add_argument("--no-llm", action="store_true", help="LLM（claude -p）による関連度の判定を飛ばす")
     p.set_defaults(func=_cmd_intake_run)
     p = isub.add_parser("explore", help="中核論文の参考文献・被引用を候補に入れ、上限の範囲で Inbox に出す")
     p.add_argument("--force", action="store_true", help="refetch_days 以内でも再取得する")
+    p.add_argument("--no-llm", action="store_true", help="LLM（claude -p）による関連度の判定を飛ばす")
     p.set_defaults(func=_cmd_intake_explore)
     p = isub.add_parser("suggest", help="捨てた理由から設定変更を提案する（適用は手で行う）")
     p.set_defaults(func=_cmd_intake_suggest)

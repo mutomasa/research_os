@@ -3,6 +3,7 @@
 仕様: docs/new_features/paper_intake.md §2・§4・§5
 """
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -10,6 +11,7 @@ from research_os.data import scoring
 from research_os.data.papers import PaperStore
 from research_os.data.profile import ResearchProfile, effective_venues
 from research_os.data.venues import VenueRegistry
+from research_os.llm.relevance import profile_hash
 from research_os.sources.openalex import OpenAlexClient
 
 
@@ -103,12 +105,23 @@ def explore(store: PaperStore, client: OpenAlexClient, registry: VenueRegistry,
 
 
 def rescore(store: PaperStore, registry: VenueRegistry, profile: ResearchProfile, now: datetime) -> int:
-    """candidate と inbox の論文のスコアを付け直す（RQ の手薄さは毎回変わるため）。"""
+    """candidate と inbox の論文のスコアを付け直す（RQ の手薄さは毎回変わるため）。
+
+    LLM 判定（段階 2）があればその関連度を使い、無ければ段階 1（語の一致）を使う。除外語は両方に効かせる。
+    """
     venues = {v.venue_id: v for v in effective_venues(registry, profile)}
     core = {rq.id: store.count("core", rq.id) for rq in profile.research_questions}
+    h = profile_hash(profile)
     rows = store.papers("candidate") + store.papers("inbox")
     for row in rows:
-        relevance = scoring.relevance_by_rq(row["title"], row["abstract"], profile)
+        judged = store.llm_relevance(row["paper_id"], h)
+        if judged:
+            text = f"{row['title']} {row['abstract'] or ''}"
+            llm, reason = judged
+            relevance = {rq.id: 0.0 if scoring.excluded(text, rq.exclude_topics) else llm.get(rq.id, 0.0)
+                         for rq in profile.research_questions}
+        else:
+            relevance = scoring.relevance_by_rq(row["title"], row["abstract"], profile)
         primary = max(relevance, key=relevance.get) if relevance else None
         cpy = scoring.citations_per_year(row["cited_by_count"], row["year"], now.year)
         total, parts = scoring.score(
@@ -116,14 +129,20 @@ def rescore(store: PaperStore, registry: VenueRegistry, profile: ResearchProfile
             core_links=store.core_links(row["paper_id"]),
         )
         parts["primary_rq"] = primary
+        parts["relevance_source"] = "llm" if judged else "keyword"
+        if judged:
+            parts["llm_reason"] = reason
         store.set_relevance(row["paper_id"], relevance)
         store.set_score(row["paper_id"], total, parts, primary)
     store.commit()
     return len(rows)
 
 
-def surface(store: PaperStore, profile: ResearchProfile, now: datetime) -> SurfaceReport:
-    """上限（paper_intake.md §5）の範囲で、スコアの高い candidate を inbox に出す。"""
+def surface(store: PaperStore, profile: ResearchProfile, now: datetime, judged_only: bool = False) -> SurfaceReport:
+    """上限（paper_intake.md §5）の範囲で、スコアの高い candidate を inbox に出す。
+
+    judged_only なら LLM 判定済みの候補だけを出す（未判定の段階 1 の 1.00 が判定済みを追い越さないように）。
+    """
     cfg = profile.intake
     report = SurfaceReport()
     if store.count("inbox") >= cfg.inbox_backlog_max:
@@ -141,6 +160,11 @@ def surface(store: PaperStore, profile: ResearchProfile, now: datetime) -> Surfa
             break
         if row["score"] is None or row["score"] < cfg.min_score:
             break  # スコア順なので以降も下回る
+        parts = json.loads(row["breakdown"])
+        if parts["relevance"] < cfg.min_relevance:
+            continue  # 関連の薄い論文が投稿先・手薄さの加点だけで空き枠を埋めないようにする
+        if judged_only and parts.get("relevance_source") != "llm":
+            continue
         rq = row["primary_rq"]
         if per_rq.get(rq, 0) <= 0:
             continue

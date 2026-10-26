@@ -67,6 +67,15 @@ CREATE TABLE IF NOT EXISTS paper_rq (
     relevance REAL NOT NULL,
     PRIMARY KEY (paper_id, rq_id)
 );
+CREATE TABLE IF NOT EXISTS llm_relevance (
+    paper_id TEXT NOT NULL REFERENCES papers (paper_id),
+    rq_id TEXT NOT NULL,
+    relevance REAL NOT NULL,
+    reason TEXT,
+    profile_hash TEXT NOT NULL,
+    judged_at TEXT NOT NULL,
+    PRIMARY KEY (paper_id, rq_id)
+);
 CREATE TABLE IF NOT EXISTS fetch_log (
     query_key TEXT PRIMARY KEY,
     fetched_at TEXT NOT NULL,
@@ -220,6 +229,25 @@ class PaperStore:
         self.db.execute(
             "UPDATE triage SET score = ?, breakdown = ?, primary_rq = ? WHERE paper_id = ?",
             (score, json.dumps(breakdown, ensure_ascii=False), primary_rq, paper_id),
+        )
+
+    def llm_relevance(self, paper_id: str, profile_hash: str) -> tuple[dict[str, float], str] | None:
+        """現在の RQ 定義（profile_hash）での LLM 判定。無ければ None。"""
+        rows = self.db.execute(
+            "SELECT rq_id, relevance, reason FROM llm_relevance WHERE paper_id = ? AND profile_hash = ?",
+            (paper_id, profile_hash),
+        ).fetchall()
+        if not rows:
+            return None
+        return {r["rq_id"]: r["relevance"] for r in rows}, rows[0]["reason"] or ""
+
+    def set_llm_relevance(self, paper_id: str, relevance: dict[str, float], reason: str,
+                          profile_hash: str, now: datetime) -> None:
+        self.db.execute("DELETE FROM llm_relevance WHERE paper_id = ?", (paper_id,))
+        self.db.executemany(
+            "INSERT INTO llm_relevance (paper_id, rq_id, relevance, reason, profile_hash, judged_at)"
+            " VALUES (?, ?, ?, ?, ?, ?)",
+            [(paper_id, rq, r, reason, profile_hash, now.isoformat()) for rq, r in relevance.items()],
         )
 
     def commit(self) -> None:

@@ -1,0 +1,31 @@
+command: /home/mutomasa/research/research_os/.venv/lib/python3.13/site-packages/pytest/__main__.py -q
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_llm_relevance.py::test_llm_relevance_replaces_keyword_relevance (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x73ab73de7fb0>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...llm_batch=10, llm_model='sonnet', weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15, link=0.1))))
+
+    def test_llm_relevance_replaces_keyword_relevance(ctx):
+        store, registry, profile = ctx
+        _, before = _score(store, TITLES[1])
+        assert before["relevance"] == 1.0 and before["relevance_source"] == "keyword"
+    
+        runner = FakeRunner({TITLES[0]: 0.95, TITLES[1]: 0.05, TITLES[2]: 0.05})
+        report = rel.judge(store, profile, NOW, runner)
+        assert (report.judged, report.calls, report.error) == (3, 1, None)
+        assert runner.calls[0][2] == "sonnet"
+    
+        intake.rescore(store, registry, profile, NOW)
+        good, good_parts = _score(store, TITLES[0])
+        bad, bad_parts = _score(store, TITLES[1])
+        assert bad_parts["relevance"] == 0.05 and bad_parts["relevance_source"] == "llm"
+        assert bad_parts["llm_reason"].startswith("理由 LidarDM")
+>       assert good > bad and bad < profile.intake.min_score  # 別分野の論文は Inbox に出なくなる
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert (0.893 > 0.443 and 0.443 < 0.3)
+E        +  where 0.3 = IntakeConfig(inbox_weekly_total=10, inbox_per_rq=4, inbox_backlog_max=10, to_read_max=5, core_target=15, min_score=0.3..., llm_batch=10, llm_model='sonnet', weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15, link=0.1)).min_score
+E        +    where IntakeConfig(inbox_weekly_total=10, inbox_per_rq=4, inbox_backlog_max=10, to_read_max=5, core_target=15, min_score=0.3..., llm_batch=10, llm_model='sonnet', weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15, link=0.1)) = ResearchProfile(schema_version=1, theme='Vision-Tactile JEPA World Models for Failure-Aware Long-Horizon Robotic Manip... llm_batch=10, llm_model='sonnet', weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15, link=0.1))).intake
+
+tests/test_llm_relevance.py:76: AssertionError
