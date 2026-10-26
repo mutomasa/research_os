@@ -168,3 +168,18 @@
 
 - 何を: override テストの失敗ログを `logs/pytest/` に残した（テスト側の誤りを修正済み）。
 - なぜ: CLAUDE.md の失敗ログ保存規約に従うため。同順位の並び順の問題は #3、ログ管理方針は #6。
+
+### 2026-10-25 `ab9cc57` docs: propose paper intake from venues with capped Inbox
+
+- 何を: `docs/new_features/paper_intake.md` を追加。投稿先 × RQ キーワード × 年での取り込み、内訳つきスコア、上限つき Inbox、引用探索と捨てた理由の反映を定義した。
+- なぜ: alphaXiv 以外に投稿先からも論文を取り込みつつ、表示量を制御して情報の海に埋もれないようにするため。
+
+### 2026-10-25 `f56ee70` docs: add ADR-0003 for OpenAlex metadata source and SQLite store
+
+- 何を: ADR-0003 を追加。取得元は OpenAlex を主、保存先は SQLite（`research/papers.db`）とした。
+- なぜ: 掲載先で絞り込める取得元と、上限の集計に向いた保存先が必要だったため。関心フィードの既読キャッシュの保存先もあわせて決めた。
+
+### 2026-10-25 `90fb64a` docs: add Inbox to design.md §2.1 and paper intake tasks to todo.md
+
+- 何を: `docs/design.md` §2.1 に Inbox を追記し、`docs/todo.md` に §3.2 Paper Intake（PR 2 / PR 3 / UI）を追加した。
+- なぜ: 仕様を設計書の正と実装タスクに反映するため。

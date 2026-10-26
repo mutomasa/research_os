@@ -119,6 +119,33 @@
 クエリを毎回入力しなくても、関心プロファイル（タグ＋キーワード＋研究者）に基づく新着論文を
 **日本語化した一覧** として Papers 画面に表示します。詳細は [3.2](#32-alphaxiv-関心フィード) を参照。
 
+**Inbox — 投稿先からの取り込み**
+
+`registry/venues.yaml` の投稿先（RA-L / ICRA / IROS / RSS / T-RO / IJRR など）に掲載された論文を、
+研究プロファイルの RQ キーワード × 掲載先 × 年で OpenAlex から拾い、スコアを付けて **上限つきの Inbox** に出します。
+関心フィードの新着も同じ Inbox に入り、同じ上限を共有します。
+仕様は `docs/new_features/paper_intake.md`、取得元と保存先は [ADR-0003](adr/0003-paper-metadata-sources-and-sqlite.md)。
+
+```
+Inbox  今週 7/10 · 未処理 4 · 読む 3/5                       RQ1 ▰▰▰▱ RQ2 ▰▱▱▱ RQ3 ▱▱▱▱
+
+  0.82  Tactile World Models for Slip Prediction        RA-L 2025
+        RQ2 関連 0.91 · RA-L(1) · RQ2 手薄 +0.10 · 被引用 18/年
+  0.74  Contact-Rich Manipulation with Visuo-Tactile …  ICRA 2024
+        RQ1 関連 0.80 · ICRA(2) · 被引用 9/年
+```
+
+- 取得した論文はまず非表示の **候補プール** に入り、Inbox に出るのはスコア上位だけ
+- 上限：週 10 本（関心フィードと共有）・主 RQ ごと週 4 本・未処理が 10 本以上なら追加しない・「読む」は 5 本まで・中核 15 本に達した RQ は週 1 本に絞る（すべて仮の値。`research/profile.yaml` の `intake` で変更）
+- 各論文には **スコアの内訳**（RQ との関連度・投稿先の優先度・RQ の手薄さ・年あたりの被引用数）を表示する
+- 捨てるときは理由（関係ない / 既知 / 古い / 質が低い）を選び、次回の取り込みの提案に使う
+
+**Agent への指示例（Inbox）**
+
+- `> 今週の Inbox`
+- `> RQ3 の論文が足りない。RA-L と RSS から探して`
+- `> この論文の参考文献から候補を出して`
+
 ---
 
 ### 2.2 Review — 論文を深く読む
