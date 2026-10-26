@@ -1,0 +1,218 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_intake.py::test_fetch_one_request_per_rq_and_reports_missing_sources (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x75c9147bfa10>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...ar_from=None, per_query=50, refetch_days=6, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15))))
+
+    def test_fetch_one_request_per_rq_and_reports_missing_sources(ctx):
+        store, registry, profile = ctx
+        client = FakeClient()
+>       report = intake.fetch(store, client, registry, profile, NOW)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/research_os/data/intake.py:62: in fetch
+    records = client.search(rq.survey_topics, sources, since, profile.intake.per_query, venue_by_source)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_intake.FakeClient object at 0x75c913c5eba0>
+keywords = ['Vision-Tactile Learning', 'Tactile Sensing', 'Multimodal Representation', 'Slip Detection']
+source_ids = ['S4210169774', 'S144620930', 'S73484101', 'S4210217939', 'S4363608614']
+year_from = 2023, per_page = 50
+venue_by_source = {'S144620930': 'tro', 'S4210169774': 'ral', 'S132261465': 'ram', 'S4210213233': 'scirobotics', ...}
+
+    def search(self, keywords, source_ids, year_from, per_page, venue_by_source):
+        self.calls.append((tuple(keywords), tuple(source_ids), year_from))
+>       rq = next(rq for rq, t in TITLES.items() if keywords[0].split()[0].lower() in t.lower())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/test_intake.py:26: StopIteration
+
+=== tests/test_intake.py::test_refetch_is_skipped_within_refetch_days (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x75c913a10410>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...ar_from=None, per_query=50, refetch_days=6, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15))))
+
+    def test_refetch_is_skipped_within_refetch_days(ctx):
+        store, registry, profile = ctx
+>       intake.fetch(store, FakeClient(), registry, profile, NOW)
+
+tests/test_intake.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/research_os/data/intake.py:62: in fetch
+    records = client.search(rq.survey_topics, sources, since, profile.intake.per_query, venue_by_source)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_intake.FakeClient object at 0x75c914626350>
+keywords = ['Vision-Tactile Learning', 'Tactile Sensing', 'Multimodal Representation', 'Slip Detection']
+source_ids = ['S4210169774', 'S144620930', 'S73484101', 'S4210217939', 'S4363608614']
+year_from = 2023, per_page = 50
+venue_by_source = {'S144620930': 'tro', 'S4210169774': 'ral', 'S132261465': 'ram', 'S4210213233': 'scirobotics', ...}
+
+    def search(self, keywords, source_ids, year_from, per_page, venue_by_source):
+        self.calls.append((tuple(keywords), tuple(source_ids), year_from))
+>       rq = next(rq for rq, t in TITLES.items() if keywords[0].split()[0].lower() in t.lower())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/test_intake.py:26: StopIteration
+
+=== tests/test_intake.py::test_weekly_total_and_per_rq_caps (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x75c913a107d0>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...ar_from=None, per_query=50, refetch_days=6, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15))))
+
+    def test_weekly_total_and_per_rq_caps(ctx):
+        store, registry, profile = ctx
+>       report = _run(store, registry, profile)  # 3 RQ × 8 本の候補
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:43: in _run
+    intake.fetch(store, client, registry, profile, now)
+src/research_os/data/intake.py:62: in fetch
+    records = client.search(rq.survey_topics, sources, since, profile.intake.per_query, venue_by_source)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_intake.FakeClient object at 0x75c913a102d0>
+keywords = ['Vision-Tactile Learning', 'Tactile Sensing', 'Multimodal Representation', 'Slip Detection']
+source_ids = ['S4210169774', 'S144620930', 'S73484101', 'S4210217939', 'S4363608614']
+year_from = 2023, per_page = 50
+venue_by_source = {'S144620930': 'tro', 'S4210169774': 'ral', 'S132261465': 'ram', 'S4210213233': 'scirobotics', ...}
+
+    def search(self, keywords, source_ids, year_from, per_page, venue_by_source):
+        self.calls.append((tuple(keywords), tuple(source_ids), year_from))
+>       rq = next(rq for rq, t in TITLES.items() if keywords[0].split()[0].lower() in t.lower())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/test_intake.py:26: StopIteration
+
+=== tests/test_intake.py::test_nothing_more_this_week_after_cap (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x75c913d0d0f0>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...ar_from=None, per_query=50, refetch_days=6, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15))))
+
+    def test_nothing_more_this_week_after_cap(ctx):
+        store, registry, profile = ctx
+>       _run(store, registry, profile)
+
+tests/test_intake.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:43: in _run
+    intake.fetch(store, client, registry, profile, now)
+src/research_os/data/intake.py:62: in fetch
+    records = client.search(rq.survey_topics, sources, since, profile.intake.per_query, venue_by_source)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_intake.FakeClient object at 0x75c914777100>
+keywords = ['Vision-Tactile Learning', 'Tactile Sensing', 'Multimodal Representation', 'Slip Detection']
+source_ids = ['S4210169774', 'S144620930', 'S73484101', 'S4210217939', 'S4363608614']
+year_from = 2023, per_page = 50
+venue_by_source = {'S144620930': 'tro', 'S4210169774': 'ral', 'S132261465': 'ram', 'S4210213233': 'scirobotics', ...}
+
+    def search(self, keywords, source_ids, year_from, per_page, venue_by_source):
+        self.calls.append((tuple(keywords), tuple(source_ids), year_from))
+>       rq = next(rq for rq, t in TITLES.items() if keywords[0].split()[0].lower() in t.lower())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/test_intake.py:26: StopIteration
+
+=== tests/test_intake.py::test_backlog_blocks_new_papers (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x75c913dfb230>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...ar_from=None, per_query=50, refetch_days=6, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15))))
+
+    def test_backlog_blocks_new_papers(ctx):
+        store, registry, profile = ctx
+>       _run(store, registry, profile)  # 未処理 10
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:43: in _run
+    intake.fetch(store, client, registry, profile, now)
+src/research_os/data/intake.py:62: in fetch
+    records = client.search(rq.survey_topics, sources, since, profile.intake.per_query, venue_by_source)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_intake.FakeClient object at 0x75c913dfb5c0>
+keywords = ['Vision-Tactile Learning', 'Tactile Sensing', 'Multimodal Representation', 'Slip Detection']
+source_ids = ['S4210169774', 'S144620930', 'S73484101', 'S4210217939', 'S4363608614']
+year_from = 2023, per_page = 50
+venue_by_source = {'S144620930': 'tro', 'S4210169774': 'ral', 'S132261465': 'ram', 'S4210213233': 'scirobotics', ...}
+
+    def search(self, keywords, source_ids, year_from, per_page, venue_by_source):
+        self.calls.append((tuple(keywords), tuple(source_ids), year_from))
+>       rq = next(rq for rq, t in TITLES.items() if keywords[0].split()[0].lower() in t.lower())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/test_intake.py:26: StopIteration
+
+=== tests/test_intake.py::test_saturated_rq_is_throttled (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x75c913ca57b0>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...ar_from=None, per_query=50, refetch_days=6, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15))))
+
+    def test_saturated_rq_is_throttled(ctx):
+        store, registry, profile = ctx
+        profile.intake.core_target = 1
+        pid = store.upsert(PaperRecord(title=TITLES["RQ2"] + " core", doi="10.1/core"), "openalex", None, None, NOW)
+        store.db.execute("UPDATE triage SET status = 'core', primary_rq = 'RQ2' WHERE paper_id = ?", (pid,))
+>       _run(store, registry, profile)
+
+tests/test_intake.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:43: in _run
+    intake.fetch(store, client, registry, profile, now)
+src/research_os/data/intake.py:62: in fetch
+    records = client.search(rq.survey_topics, sources, since, profile.intake.per_query, venue_by_source)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_intake.FakeClient object at 0x75c913b39eb0>
+keywords = ['Vision-Tactile Learning', 'Tactile Sensing', 'Multimodal Representation', 'Slip Detection']
+source_ids = ['S4210169774', 'S144620930', 'S73484101', 'S4210217939', 'S4363608614']
+year_from = 2023, per_page = 50
+venue_by_source = {'S144620930': 'tro', 'S4210169774': 'ral', 'S132261465': 'ram', 'S4210213233': 'scirobotics', ...}
+
+    def search(self, keywords, source_ids, year_from, per_page, venue_by_source):
+        self.calls.append((tuple(keywords), tuple(source_ids), year_from))
+>       rq = next(rq for rq, t in TITLES.items() if keywords[0].split()[0].lower() in t.lower())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/test_intake.py:26: StopIteration
+
+=== tests/test_intake.py::test_breakdown_is_saved (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x75c913ca6140>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...ar_from=None, per_query=50, refetch_days=6, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15))))
+
+    def test_breakdown_is_saved(ctx):
+        store, registry, profile = ctx
+>       _run(store, registry, profile)
+
+tests/test_intake.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:43: in _run
+    intake.fetch(store, client, registry, profile, now)
+src/research_os/data/intake.py:62: in fetch
+    records = client.search(rq.survey_topics, sources, since, profile.intake.per_query, venue_by_source)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <test_intake.FakeClient object at 0x75c913ca6250>
+keywords = ['Vision-Tactile Learning', 'Tactile Sensing', 'Multimodal Representation', 'Slip Detection']
+source_ids = ['S4210169774', 'S144620930', 'S73484101', 'S4210217939', 'S4363608614']
+year_from = 2023, per_page = 50
+venue_by_source = {'S144620930': 'tro', 'S4210169774': 'ral', 'S132261465': 'ram', 'S4210213233': 'scirobotics', ...}
+
+    def search(self, keywords, source_ids, year_from, per_page, venue_by_source):
+        self.calls.append((tuple(keywords), tuple(source_ids), year_from))
+>       rq = next(rq for rq, t in TITLES.items() if keywords[0].split()[0].lower() in t.lower())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       StopIteration
+
+tests/test_intake.py:26: StopIteration

@@ -80,22 +80,24 @@
 
 **PR 2：データ層・OpenAlex・スコア・上限**
 
-- [ ] `registry/venues.yaml` に `identifiers`（issn / openalex / dblp）を追加し、ISSN から OpenAlex source ID を解決する
-- [ ] SQLite スキーマ（papers / paper_sources / triage / paper_rq）と `research/papers.db`（git 管理外）
-- [ ] 重複除去：DOI / arXiv ID / OpenAlex ID / 正規化題名。プレプリントと出版版を 1 本にまとめる
-- [ ] OpenAlex 取得：RQ の survey_topics × survey_venues × 年の範囲（`mailto` 付き、結果をキャッシュ）
-- [ ] スコア段階 1（語の一致による関連度・投稿先・手薄さ・年あたり被引用数）と内訳の保存
-- [ ] 上限の制御（週 10・主 RQ ごと 4・未処理 10 以上で停止・読む 5・中核 15 で飽和・min_score 0.30）
-- [ ] 状態遷移（candidate → inbox → to_read → read → core / dismissed＋理由）
-- [ ] `research/profile.yaml` に `intake` 設定を追加
-- [ ] CLI：取り込み・Inbox 表示・判断の操作
-- [ ] テスト：重複除去・スコア・上限・状態遷移（OpenAlex はモック。失敗ログは `logs/` に残す）
+- [x] `registry/venues.yaml` に `identifiers`（issn / openalex / dblp）を追加し、ISSN から OpenAlex source ID を解決する
+- [x] SQLite スキーマ（papers / paper_sources / triage / paper_rq）と `research/papers.db`（git 管理外）
+- [x] 重複除去：DOI / arXiv ID / OpenAlex ID / 正規化題名。プレプリントと出版版を 1 本にまとめる
+- [x] OpenAlex 取得：RQ の survey_topics × survey_venues × 年の範囲（`mailto` 付き、結果をキャッシュ）
+- [x] スコア段階 1（語の一致による関連度・投稿先・手薄さ・年あたり被引用数）と内訳の保存（関連度が粗い問題は #9）
+- [x] 上限の制御（週 10・主 RQ ごと 4・未処理 10 以上で停止・読む 5・中核 15 で飽和・min_score 0.30）
+- [x] 状態遷移（candidate → inbox → to_read → read → core / dismissed＋理由）
+- [x] `research/profile.yaml` に `intake` 設定を追加
+- [x] CLI：取り込み・Inbox 表示・判断の操作
+- [x] テスト：重複除去・スコア・上限・状態遷移（OpenAlex はモック。失敗ログは `logs/` に残す）
 
 **PR 3：引用探索・フィードバック・LLM 判定**
 
-- [ ] core 論文の参照文献・被引用から候補を取得（core 1 本あたり各 20 件まで）とスコアの `link` 要素
-- [ ] 捨てた理由の集計と提案（除外語・year_from・Venue 重み。適用は人が承認）
-- [ ] スコア段階 2：上位 `llm_top_k` 件だけ LLM で関連度を判定
+- [ ] RSS の取得経路（OpenAlex に収録なし。#10）
+
+- [x] core 論文の参照文献・被引用から候補を取得（core 1 本あたり各 `citation_limit` 件まで）とスコアの `link` 要素
+- [x] 捨てた理由の集計と提案（除外語・year_from・Venue 重み。適用は人が承認）
+- [ ] スコア段階 2：上位 `llm_top_k` 件だけ LLM で関連度を判定（呼び出し方の判断待ち。#9）
 
 **UI（Papers 画面）**
 

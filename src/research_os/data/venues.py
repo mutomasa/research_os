@@ -25,6 +25,12 @@ class Links(StrictModel):
     author_guide: str | None = None
 
 
+class Identifiers(StrictModel):
+    issn: list[str] = []
+    openalex: str | None = None  # OpenAlex source ID（例: S4210169774）
+    dblp: str | None = None
+
+
 class Policies(StrictModel):
     co_presents_with: list[str] = []
     notes: list[str] = []
@@ -52,6 +58,7 @@ class Venue(StrictModel):
     priority: int | None
     tier: Tier | None
     links: Links
+    identifiers: Identifiers = Identifiers()
     policies: Policies
     deadlines: list[Deadline] = []
     source_url: str
@@ -83,6 +90,10 @@ class VenueRegistry(StrictModel):
 
     def ids(self) -> set[str]:
         return {v.venue_id for v in self.venues}
+
+    def by_openalex_id(self) -> dict[str, str]:
+        """OpenAlex source ID → venue_id。"""
+        return {v.identifiers.openalex: v.venue_id for v in self.venues if v.identifiers.openalex}
 
     def get(self, venue_id: str) -> Venue:
         for v in self.venues:
