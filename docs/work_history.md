@@ -218,3 +218,38 @@
 
 - 何を: `research-os intake run` / `inbox` / `triage` を追加し、実 API で 150 件取得 → Inbox 10 件を確認した。
 - なぜ: TUI の前に、取り込みと判断を CLI で回せるようにするため。
+
+### 2026-10-25 `dc83aba` feat: explore references and citations of core papers
+
+- 何を: core 論文の参考文献・被引用を候補に入れる探索、スコアの link 要素、RQ の exclude_topics、捨てる理由 known をライブラリに入れる挙動を追加した。
+- なぜ: 広くキーワード検索するより、採用した中核論文の周辺に集中するため（paper_intake.md §6）。
+
+### 2026-10-25 `d8ca43c` feat: suggest profile changes from dismissal reasons
+
+- 何を: 捨てた理由（irrelevant / outdated / low_quality）が 3 本以上たまったら、除外語・year_from・投稿先の優先度の変更を提案する機能を追加した。
+- なぜ: 判断の結果を次の取り込みに生かしつつ、設定の変更は人が承認するため（§7）。
+
+### 2026-10-25 `ef967b6` fix: do not suggest generic words as exclude topics
+
+- 何を: 捨てた論文以外の題名に多く出るありふれた語を除外語の候補から外した。
+- なぜ: 実データで「learning」が提案されたため。
+
+### 2026-10-25 `ea4fe0f` test: keep failure log of generic-word filter
+
+- 何を: ありふれた語の判定の初版で 2 件失敗したログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-25 `68f5523` feat: add intake explore / suggest CLI
+
+- 何を: `research-os intake explore` / `intake suggest` を追加し、実 API で core 1 本から 67 件の候補追加を確認した。
+- なぜ: 引用探索と提案を CLI から回せるようにするため。
+
+### 2026-10-25 `cf15c87` docs: align paper intake spec with PR 3 and record commits
+
+- 何を: paper_intake.md §6・§7 を実装（citation_limit 50、参考文献は並べ替えない、link の式、ありふれた語の除外、3 本で提案）に合わせ、todo.md を更新した。
+- なぜ: 仕様と実装の食い違いをなくすため。
+
+### 2026-10-25 `1011bad` test: keep second failure log of generic-word filter
+
+- 何を: ありふれた語の判定の初版で、直後の再実行でも 2 件失敗したログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため（未追跡のまま残っていた）。

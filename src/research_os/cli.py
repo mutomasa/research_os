@@ -9,7 +9,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from research_os import __version__
-from research_os.data import intake, interests, papers, profile, venues
+from research_os.data import feedback, intake, interests, papers, profile, venues
 from research_os.sources.openalex import OpenAlexClient
 
 
@@ -54,12 +54,42 @@ def _cmd_intake_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_intake_explore(args: argparse.Namespace) -> int:
+    registry, prof, store = _load(args)
+    now = datetime.now()
+    report = intake.explore(store, OpenAlexClient(), registry, prof, now, force=args.force)
+    for pid, n in report.explored.items():
+        print(f"explored {pid}: {n}")
+    if report.skipped_recent:
+        print(f"skipped (fetched within {prof.intake.refetch_days} days): {len(report.skipped_recent)}")
+    if report.without_openalex_id:
+        print(f"no OpenAlex ID: {', '.join(report.without_openalex_id)}")
+    if not (report.explored or report.skipped_recent or report.without_openalex_id):
+        print("中核論文（core）がまだありません。research-os triage <paper_id> core で指定してください")
+    intake.rescore(store, registry, prof, now)
+    result = intake.surface(store, prof, now)
+    print(f"surfaced: {len(result.surfaced)} (今週の残り {result.weekly_remaining})")
+    return 0
+
+
+def _cmd_intake_suggest(args: argparse.Namespace) -> int:
+    registry, prof, store = _load(args)
+    suggestions = feedback.suggest(store, registry, prof)
+    if not suggestions:
+        print(f"提案はありません（同じ理由が {feedback.MIN_EVIDENCE} 本以上たまると提案します）")
+    for s in suggestions:
+        print(f"[{s.kind}] {s.message}")
+    return 0
+
+
 def _format_reason(parts: dict) -> str:
     items = [f"{parts.get('primary_rq')} 関連 {parts['relevance']:.2f}"]
     if parts.get("venue_priority"):
         items.append(f"投稿先({parts['venue_priority']})")
     if parts["gap"] > 0:
         items.append(f"手薄 {parts['gap']:.2f}")
+    if parts.get("link"):
+        items.append(f"中核とつながり {parts['link']:.2f}")
     items.append(f"被引用 {parts['citations_per_year']:g}/年")
     return " · ".join(items)
 
@@ -112,6 +142,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = isub.add_parser("run", help="OpenAlex から取得し、スコアを付けて上限の範囲で Inbox に出す")
     p.add_argument("--force", action="store_true", help="refetch_days 以内でも再取得する")
     p.set_defaults(func=_cmd_intake_run)
+    p = isub.add_parser("explore", help="中核論文の参考文献・被引用を候補に入れ、上限の範囲で Inbox に出す")
+    p.add_argument("--force", action="store_true", help="refetch_days 以内でも再取得する")
+    p.set_defaults(func=_cmd_intake_explore)
+    p = isub.add_parser("suggest", help="捨てた理由から設定変更を提案する（適用は手で行う）")
+    p.set_defaults(func=_cmd_intake_suggest)
 
     p = sub.add_parser("inbox", help="Inbox（または指定した状態）の論文を表示")
     p.add_argument("--status", default="inbox", choices=papers.STATUSES)

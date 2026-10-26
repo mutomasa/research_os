@@ -1,7 +1,7 @@
 """論文のスコア（段階 1：語の一致）。
 
 仕様: docs/new_features/paper_intake.md §4
-score = w.relevance × relevance + w.venue × venue + w.gap × gap + w.velocity × velocity
+score = min(1, w.relevance × relevance + w.venue × venue + w.gap × gap + w.velocity × velocity + w.link × link)
 """
 
 import math
@@ -12,6 +12,7 @@ from research_os.data.venues import Venue
 
 STOPWORDS = {"a", "an", "and", "for", "in", "of", "on", "the", "to", "with", "via", "using", "based"}
 VELOCITY_CAP = 50  # 年あたり被引用がこの値で velocity = 1
+LINK_CAP = 3  # この本数の中核論文とつながっていれば link = 1
 
 
 def tokens(text: str) -> set[str]:
@@ -33,9 +34,17 @@ def rq_relevance(text: str, survey_topics: list[str]) -> float:
     return sum(top) / len(top) if top else 0.0
 
 
+def excluded(text: str, exclude_topics: list[str]) -> bool:
+    body = tokens(text)
+    return any(t and t <= body for t in (tokens(topic) for topic in exclude_topics))
+
+
 def relevance_by_rq(title: str, abstract: str | None, profile: ResearchProfile) -> dict[str, float]:
     text = f"{title} {abstract or ''}"
-    return {rq.id: round(rq_relevance(text, rq.survey_topics), 3) for rq in profile.research_questions}
+    return {
+        rq.id: 0.0 if excluded(text, rq.exclude_topics) else round(rq_relevance(text, rq.survey_topics), 3)
+        for rq in profile.research_questions
+    }
 
 
 def venue_weight(venue: Venue | None) -> float:
@@ -60,8 +69,12 @@ def gap(core_count: int, config: IntakeConfig) -> float:
     return max(0.0, 1 - core_count / config.core_target)
 
 
+def link(core_links: int) -> float:
+    return min(1.0, core_links / LINK_CAP)
+
+
 def score(relevance: float, venue: Venue | None, core_count: int, cpy: float,
-          config: IntakeConfig) -> tuple[float, dict]:
+          config: IntakeConfig, core_links: int = 0) -> tuple[float, dict]:
     """スコアと内訳を返す。内訳は Inbox で「なぜこの論文か」を示すために保存する。"""
     w = config.weights
     parts = {
@@ -69,9 +82,10 @@ def score(relevance: float, venue: Venue | None, core_count: int, cpy: float,
         "venue": round(venue_weight(venue), 3),
         "gap": round(gap(core_count, config), 3),
         "velocity": round(velocity(cpy), 3),
+        "link": round(link(core_links), 3),
     }
-    total = (w.relevance * parts["relevance"] + w.venue * parts["venue"]
-             + w.gap * parts["gap"] + w.velocity * parts["velocity"])
+    total = min(1.0, w.relevance * parts["relevance"] + w.venue * parts["venue"]
+                + w.gap * parts["gap"] + w.velocity * parts["velocity"] + w.link * parts["link"])
     parts["citations_per_year"] = round(cpy, 1)
     parts["venue_priority"] = venue.priority if venue else None
     return round(total, 3), parts

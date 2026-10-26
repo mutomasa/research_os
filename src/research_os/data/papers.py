@@ -174,6 +174,13 @@ class PaperStore:
         self.db.commit()
         return paper_id
 
+    def core_links(self, paper_id: str) -> int:
+        """この論文と引用でつながっている中核論文の本数（paper_sources の source = citation）。"""
+        return self.db.execute(
+            "SELECT COUNT(DISTINCT source_ref) FROM paper_sources WHERE paper_id = ? AND source = 'citation'",
+            (paper_id,),
+        ).fetchone()[0]
+
     def last_fetched(self, query_key: str) -> datetime | None:
         row = self.db.execute("SELECT fetched_at FROM fetch_log WHERE query_key = ?", (query_key,)).fetchone()
         return datetime.fromisoformat(row["fetched_at"]) if row else None
@@ -188,6 +195,13 @@ class PaperStore:
         self.db.commit()
 
     # ── スコア ────────────────────────────────────────────────
+
+    def dismissed(self) -> list[sqlite3.Row]:
+        """捨てた理由つきの論文（known は read として保存されるがここに含める）。"""
+        return self.db.execute(
+            "SELECT p.*, t.primary_rq, t.dismiss_reason FROM papers p JOIN triage t USING (paper_id)"
+            " WHERE t.dismiss_reason IS NOT NULL"
+        ).fetchall()
 
     def papers(self, status: str | None = None) -> list[sqlite3.Row]:
         sql = "SELECT p.*, t.status, t.score, t.breakdown, t.primary_rq, t.surfaced_at FROM papers p JOIN triage t USING (paper_id)"
@@ -251,10 +265,13 @@ class PaperStore:
             raise InvalidTransition(f"{paper_id}: {current} → {new_status} はできません")
         if new_status == "dismissed" and reason not in DISMISS_REASONS:
             raise ValueError(f"捨てる理由を {DISMISS_REASONS} から選んでください")
+        stored = new_status
+        if new_status == "dismissed" and reason == "known":
+            stored = "read"  # 既知の論文はライブラリに入れ、以後の重複除去と手薄さの計算に使う
         if new_status == "to_read" and self.count("to_read") >= to_read_max:
             raise LimitReached(f"「読む」が上限 {to_read_max} 本に達しています。読み終えるか捨ててから追加してください")
         self.db.execute(
             "UPDATE triage SET status = ?, decided_at = ?, dismiss_reason = ? WHERE paper_id = ?",
-            (new_status, now.isoformat(), reason if new_status == "dismissed" else None, paper_id),
+            (stored, now.isoformat(), reason if new_status == "dismissed" else None, paper_id),
         )
         self.db.commit()
