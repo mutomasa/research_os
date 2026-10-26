@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from research_os import __version__
 from research_os.data import feedback, intake, interests, papers, profile, venues
-from research_os.sources.openalex import OpenAlexClient
+from research_os.sources.openalex import OpenAlexClient, OpenAlexError
 
 
 def _cmd_venues(args: argparse.Namespace) -> int:
@@ -166,6 +166,6 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     try:
         return args.func(args)
-    except (ValidationError, ValueError, KeyError, FileExistsError, FileNotFoundError) as e:
+    except (ValidationError, ValueError, KeyError, FileExistsError, FileNotFoundError, OpenAlexError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1

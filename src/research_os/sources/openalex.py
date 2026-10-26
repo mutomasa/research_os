@@ -7,6 +7,7 @@ OPENALEX_MAILTO は連絡先として付ける（枠は増えない）。
 import json
 import os
 import re
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Callable
@@ -20,10 +21,22 @@ ARXIV_RE = re.compile(r"arxiv\.org/(?:abs|pdf)/(\d{4}\.\d{4,5})")
 HttpGet = Callable[[str], dict]
 
 
+class OpenAlexError(RuntimeError):
+    pass
+
+
 def _urllib_get(url: str) -> dict:
     req = urllib.request.Request(url, headers={"User-Agent": "research-os"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.load(resp)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as e:
+        if e.code == 429:
+            # キーなしの無料枠（IP 全体で 1 日分）を使い切った。取得済みの分は保存されている（#11）
+            raise OpenAlexError("OpenAlex の 1 日の無料枠を使い切りました。翌日に再実行してください") from e
+        raise OpenAlexError(f"OpenAlex が HTTP {e.code} を返しました") from e
+    except urllib.error.URLError as e:
+        raise OpenAlexError(f"OpenAlex に接続できません: {e.reason}") from e
 
 
 def search_query(keywords: list[str]) -> str:

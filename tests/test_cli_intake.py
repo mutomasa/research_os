@@ -49,3 +49,27 @@ def test_explore_without_core_makes_no_requests(root, tmp_path, capsys, monkeypa
     monkeypatch.setattr(cli, "OpenAlexClient", NoNetwork)
     assert main(_args(root, tmp_path / "papers.db", "intake", "explore")) == 0
     assert "中核論文（core）がまだありません" in capsys.readouterr().out
+
+
+def test_rate_limit_is_reported_and_partial_results_kept(root, tmp_path, capsys, monkeypatch):
+    import io
+    import urllib.error
+
+    import research_os.sources.openalex as oa
+
+    calls = []
+
+    def fake_urlopen(req, timeout):
+        calls.append(req.full_url)
+        if len(calls) == 1:
+            body = {"results": [{"id": "https://openalex.org/W1", "title": "Tactile sensing for slip detection",
+                                 "publication_year": 2025, "cited_by_count": 3, "locations": [],
+                                 "primary_location": None, "authorships": []}]}
+            return io.BytesIO(__import__("json").dumps(body).encode())
+        raise urllib.error.HTTPError(req.full_url, 429, "Too Many Requests", {}, None)
+
+    monkeypatch.setattr(oa.urllib.request, "urlopen", fake_urlopen)
+    db = tmp_path / "papers.db"
+    assert main(_args(root, db, "intake", "run")) == 1
+    assert "無料枠を使い切りました" in capsys.readouterr().err
+    assert len(PaperStore(db).papers()) == 1  # 枠を使い切る前に取得した分は残る
