@@ -183,3 +183,73 @@
 
 - 何を: `docs/design.md` §2.1 に Inbox を追記し、`docs/todo.md` に §3.2 Paper Intake（PR 2 / PR 3 / UI）を追加した。
 - なぜ: 仕様を設計書の正と実装タスクに反映するため。
+
+### 2026-10-25 `d4b4654` feat: add venue identifiers and intake limits to profile
+
+- 何を: `registry/venues.yaml` に identifiers を追加（OpenAlex source ID を学術誌 10・ICRA・IROS で確認、DBLP は未確認で null）し、`research/profile.yaml` に intake（上限・重み）を追加した。
+- なぜ: 投稿先から論文を引くための識別子と、表示量の上限を設定として持つため。
+
+### 2026-10-25 `ed017b8` feat: add SQLite paper store with dedupe and triage transitions
+
+- 何を: SQLite の論文ストア（papers / paper_sources / triage / paper_rq / fetch_log）、重複除去、判断の状態遷移を追加した。
+- なぜ: ADR-0003 に従い、候補プールと判断の状態を上限の集計ができる形で保存するため。
+
+### 2026-10-25 `0e415b6` feat: add stage-1 paper scoring with breakdown
+
+- 何を: 語の一致による関連度・投稿先・RQ の手薄さ・年あたり被引用のスコアと内訳を追加した。
+- なぜ: Inbox で「なぜこの論文か」を示しつつ優先度を付けるため。関連度が粗い問題は #9。
+
+### 2026-10-25 `70fd7b2` feat: add OpenAlex works client
+
+- 何を: RQ ごとに投稿先をまとめて 1 リクエストで検索する OpenAlex クライアントを追加した（API キーは任意）。
+- なぜ: 掲載先で絞り込める主な取得元として（ADR-0003）。無料枠の問題は #11。
+
+### 2026-10-25 `8822615` feat: add intake pipeline with weekly and per-RQ caps
+
+- 何を: 取得 → スコアの付け直し → 上限つきで Inbox に出す流れを追加した（週 10・主 RQ ごと 4・未処理 10 で停止・中核で飽和・min_score）。
+- なぜ: 情報の海に埋もれないよう、表示量を上限で制御するため。
+
+### 2026-10-25 `21b8e32` test: keep failure log of intake fake client
+
+- 何を: intake テストの失敗ログ（FakeClient のキーワード対応の誤り）を残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-25 `3f0594f` feat: add intake run / inbox / triage CLI
+
+- 何を: `research-os intake run` / `inbox` / `triage` を追加し、実 API で 150 件取得 → Inbox 10 件を確認した。
+- なぜ: TUI の前に、取り込みと判断を CLI で回せるようにするため。
+
+### 2026-10-25 `dc83aba` feat: explore references and citations of core papers
+
+- 何を: core 論文の参考文献・被引用を候補に入れる探索、スコアの link 要素、RQ の exclude_topics、捨てる理由 known をライブラリに入れる挙動を追加した。
+- なぜ: 広くキーワード検索するより、採用した中核論文の周辺に集中するため（paper_intake.md §6）。
+
+### 2026-10-25 `d8ca43c` feat: suggest profile changes from dismissal reasons
+
+- 何を: 捨てた理由（irrelevant / outdated / low_quality）が 3 本以上たまったら、除外語・year_from・投稿先の優先度の変更を提案する機能を追加した。
+- なぜ: 判断の結果を次の取り込みに生かしつつ、設定の変更は人が承認するため（§7）。
+
+### 2026-10-25 `ef967b6` fix: do not suggest generic words as exclude topics
+
+- 何を: 捨てた論文以外の題名に多く出るありふれた語を除外語の候補から外した。
+- なぜ: 実データで「learning」が提案されたため。
+
+### 2026-10-25 `ea4fe0f` test: keep failure log of generic-word filter
+
+- 何を: ありふれた語の判定の初版で 2 件失敗したログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-25 `68f5523` feat: add intake explore / suggest CLI
+
+- 何を: `research-os intake explore` / `intake suggest` を追加し、実 API で core 1 本から 67 件の候補追加を確認した。
+- なぜ: 引用探索と提案を CLI から回せるようにするため。
+
+### 2026-10-25 `cf15c87` docs: align paper intake spec with PR 3 and record commits
+
+- 何を: paper_intake.md §6・§7 を実装（citation_limit 50、参考文献は並べ替えない、link の式、ありふれた語の除外、3 本で提案）に合わせ、todo.md を更新した。
+- なぜ: 仕様と実装の食い違いをなくすため。
+
+### 2026-10-25 `1011bad` test: keep second failure log of generic-word filter
+
+- 何を: ありふれた語の判定の初版で、直後の再実行でも 2 件失敗したログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため（未追跡のまま残っていた）。

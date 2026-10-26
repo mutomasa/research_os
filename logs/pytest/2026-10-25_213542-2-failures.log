@@ -1,0 +1,33 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q tests/test_feedback.py
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_feedback.py::test_exclude_terms_from_irrelevant (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x796dbc522490>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...efetch_days=6, citation_limit=50, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15, link=0.1))))
+
+    def test_exclude_terms_from_irrelevant(ctx):
+        store, registry, profile = ctx
+        for t in ["Surgical robot world model", "Surgical policy evaluation", "LiDAR surgical simulation"]:
+            _dismiss(store, t, "irrelevant")
+>       [s] = feedback.suggest(store, registry, profile)
+        ^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/test_feedback.py:42: ValueError
+
+=== tests/test_feedback.py::test_generic_words_are_not_suggested (call) ===
+ctx = (<research_os.data.papers.PaperStore object at 0x796dbc673950>, VenueRegistry(schema_version=1, venues=[Venue(venue_id...efetch_days=6, citation_limit=50, weights=IntakeWeights(relevance=0.5, venue=0.2, gap=0.15, velocity=0.15, link=0.1))))
+
+    def test_generic_words_are_not_suggested(ctx):
+        store, registry, profile = ctx
+        for k in range(20):
+            store.upsert(PaperRecord(title=f"Learning manipulation {k}", doi=f"10.2/{k}"), "openalex", None, None, NOW)
+        for t in ["Surgical learning A", "Surgical learning B", "Surgical learning C"]:
+            _dismiss(store, t, "irrelevant")
+>       [s] = feedback.suggest(store, registry, profile)
+        ^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/test_feedback.py:70: ValueError

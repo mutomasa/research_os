@@ -21,6 +21,7 @@ class ResearchQuestion(StrictModel):
     question: str
     verification: list[str] = []
     survey_topics: list[str] = []
+    exclude_topics: list[str] = []  # 含む論文はこの RQ との関連度を 0 にする（捨てた理由からの提案を人が承認して追加）
 
 
 class VenueOverride(StrictModel):
@@ -39,6 +40,30 @@ class SubmissionStep(StrictModel):
     note: str | None = None
 
 
+class IntakeWeights(StrictModel):
+    relevance: float = 0.50
+    venue: float = 0.20
+    gap: float = 0.15
+    velocity: float = 0.15
+    link: float = 0.10  # 中核論文との引用のつながり（合計が 1 を超えた分は切り捨てる）
+
+
+class IntakeConfig(StrictModel):
+    """論文取り込みと Inbox の上限（docs/new_features/paper_intake.md §5）。"""
+
+    inbox_weekly_total: int = 10
+    inbox_per_rq: int = 4
+    inbox_backlog_max: int = 10
+    to_read_max: int = 5
+    core_target: int = 15
+    min_score: float = 0.30
+    year_from: int | None = None  # None なら直近 4 年
+    per_query: int = 50
+    refetch_days: int = 6
+    citation_limit: int = 50  # 中核論文 1 本あたり、参考文献・被引用それぞれの取得上限
+    weights: IntakeWeights = IntakeWeights()
+
+
 class ResearchProfile(StrictModel):
     schema_version: Literal[1]
     theme: str
@@ -48,6 +73,7 @@ class ResearchProfile(StrictModel):
     venue_overrides: dict[str, VenueOverride] = {}
     survey_venues: list[str] = []
     submission_plan: list[SubmissionStep] = []
+    intake: IntakeConfig = IntakeConfig()
 
     @model_validator(mode="after")
     def _check_rq_refs(self) -> "ResearchProfile":

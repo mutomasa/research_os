@@ -15,6 +15,8 @@
 #   priority      投稿優先度の既定値（1 が最優先。未設定は null）
 #   tier          投稿戦略上の位置付け（first_result | foundational | mature_journal | null）
 #   links         公式サイト・CFP・投稿規定の URL（未確認は null）
+#   identifiers   取得元ごとの識別子（issn / openalex: OpenAlex source ID / dblp: DBLP のキー）。ADR-0003
+#                 openalex は 2026-10-25 に ISSN・名称から解決して確認済み。dblp は未確認のため null
 #   policies      投稿規定の要点（年度で変わるため verified で確認状態を持つ）
 #   deadlines     年度ごとの締切（Phase C の巡回で更新する。手で推測値を入れない）
 #   source_url / retrieved_at / updated_at  来歴
@@ -40,6 +42,10 @@ venues:
       official: https://www.ieee-ras.org/publications/t-ro
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [1552-3098]
+      openalex: S144620930
+      dblp: null
     policies:
       notes:
         - 会議論文の単なる延長ではなく、新しい技術的貢献と十分な追加検証が必要（paper_strategy.md §5 Step 3）
@@ -63,6 +69,10 @@ venues:
       official: https://www.ieee-ras.org/publications/ra-l
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [2377-3766]
+      openalex: S4210169774
+      dblp: null
     policies:
       co_presents_with: [icra, iros]
       notes:
@@ -88,6 +98,10 @@ venues:
       official: https://www.ieee-ras.org/publications/ram
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [1070-9932]
+      openalex: S132261465
+      dblp: null
     policies:
       notes: []
       verified: false
@@ -110,6 +124,10 @@ venues:
       official: https://www.science.org/journal/scirobotics
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [2470-9476]
+      openalex: S4210213233
+      dblp: null
     policies:
       notes: []
       verified: false
@@ -132,6 +150,10 @@ venues:
       official: https://journals.sagepub.com/home/ijr
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [0278-3649]
+      openalex: S73484101
+      dblp: null
     policies:
       notes:
         - 会議論文の単なる延長ではなく、新しい技術的貢献と十分な追加検証が必要（paper_strategy.md §5 Step 3）
@@ -155,6 +177,10 @@ venues:
       official: null
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [1875-4791]
+      openalex: S168738021
+      dblp: null
     policies:
       notes: []
       verified: false
@@ -177,6 +203,10 @@ venues:
       official: null
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [0736-5845]
+      openalex: S118216261
+      dblp: null
     policies:
       notes: []
       verified: false
@@ -199,6 +229,10 @@ venues:
       official: null
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [1556-4959]
+      openalex: S151299380
+      dblp: null
     policies:
       notes: []
       verified: false
@@ -221,6 +255,10 @@ venues:
       official: null
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [0921-8890]
+      openalex: S133768115
+      dblp: null
     policies:
       notes:
         - 略称 RAS は学会 IEEE Robotics and Automation Society（IEEE RAS）と紛らわしいため、表示時は正式名称を併記する
@@ -244,6 +282,10 @@ venues:
       official: null
       cfp: null
       author_guide: null
+    identifiers:
+      issn: [0929-5593]
+      openalex: S144091109
+      dblp: null
     policies:
       notes: []
       verified: false
@@ -268,6 +310,10 @@ venues:
       official: null   # 開催年ごとにサイトが変わるため、Phase C の巡回で年度別に登録する
       cfp: null
       author_guide: null
+    identifiers:
+      issn: []
+      openalex: S4210217939
+      dblp: null
     policies:
       co_presents_with: [ral]
       notes:
@@ -292,6 +338,10 @@ venues:
       official: null   # 開催年ごとにサイトが変わるため、Phase C の巡回で年度別に登録する
       cfp: null
       author_guide: null
+    identifiers:
+      issn: []
+      openalex: S4363608614
+      dblp: null
     policies:
       co_presents_with: [ral]
       notes:
@@ -317,6 +367,10 @@ venues:
       official: null
       cfp: null
       author_guide: null
+    identifiers:
+      issn: []
+      openalex: null   # 年度ごとに別 source に分かれていて未確定
+      dblp: null
     policies:
       notes: []
       verified: false
@@ -339,6 +393,10 @@ venues:
       official: https://roboticsconference.org/
       cfp: null
       author_guide: null
+    identifiers:
+      issn: []
+      openalex: null   # OpenAlex は 2022〜2026 年の RSS 論文を収録していない（Issue 参照）
+      dblp: null
     policies:
       notes:
         - 新しい潜在状態表現や失敗予測・復帰アルゴリズムを提案する場合に有力（paper_strategy.md §3）
@@ -362,6 +420,10 @@ venues:
       official: null
       cfp: null
       author_guide: null
+    identifiers:
+      issn: []
+      openalex: null   # 候補が複数あり未確定
+      dblp: null
     policies:
       notes: []
       verified: false
