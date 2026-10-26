@@ -73,3 +73,44 @@ def test_rate_limit_is_reported_and_partial_results_kept(root, tmp_path, capsys,
     assert main(_args(root, db, "intake", "run")) == 1
     assert "無料枠を使い切りました" in capsys.readouterr().err
     assert len(PaperStore(db).papers()) == 1  # 枠を使い切る前に取得した分は残る
+
+
+def _seed_candidates(db):
+    store = PaperStore(db)
+    for i, t in enumerate(["JEPA world models for grasp failure prediction", "LidarDM world models for driving"]):
+        store.upsert(PaperRecord(title=t, doi=f"10.7/{i}", abstract="latent dynamics with world models",
+                                 year=2025, venue_id="ral"), "openalex", None, None, datetime(2026, 10, 25))
+    store.close()
+
+
+def test_explore_judges_with_claude_and_surfaces_judged(root, tmp_path, capsys, monkeypatch):
+    import research_os.cli as cli
+    import research_os.llm.relevance as rel
+
+    def fake_runner(prompt, schema, model):
+        return {"papers": [{"key": "P1", "relevance": {"RQ1": 0, "RQ2": 0.9, "RQ3": 0}, "reason": "直接扱う"},
+                           {"key": "P2", "relevance": {"RQ1": 0, "RQ2": 0.1, "RQ3": 0}, "reason": "別分野"}]}
+
+    monkeypatch.setattr(rel, "claude_cli_run", fake_runner)
+    monkeypatch.setattr(cli, "OpenAlexClient", lambda: None)
+    db = tmp_path / "papers.db"
+    _seed_candidates(db)
+    assert main(_args(root, db, "intake", "explore")) == 0
+    out = capsys.readouterr().out
+    assert "llm judged: 2 (1 calls)" in out and "surfaced: 1" in out
+    assert main(_args(root, db, "inbox")) == 0
+    out = capsys.readouterr().out
+    assert "RQ2 関連 0.90（LLM）" in out and "直接扱う" in out
+
+
+def test_llm_failure_falls_back_to_keyword(root, tmp_path, capsys, monkeypatch):
+    import research_os.cli as cli
+    import research_os.llm.relevance as rel
+
+    monkeypatch.setattr(rel.shutil, "which", lambda name: None)
+    monkeypatch.setattr(cli, "OpenAlexClient", lambda: None)
+    db = tmp_path / "papers.db"
+    _seed_candidates(db)
+    assert main(_args(root, db, "intake", "explore")) == 0
+    captured = capsys.readouterr()
+    assert "claude コマンドが見つかりません" in captured.err and "surfaced: 2" in captured.out
