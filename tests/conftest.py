@@ -17,6 +17,17 @@ def root() -> Path:
     return ROOT
 
 
+@pytest.fixture(autouse=True)
+def no_real_claude(monkeypatch):
+    """テストから本物の claude -p を呼ばない（契約の利用枠を使うため）。必要なテストは上書きする。"""
+    import research_os.llm.relevance as rel
+
+    def refuse(*a, **k):
+        raise AssertionError("test tried to run the real claude -p")
+
+    monkeypatch.setattr(rel.subprocess, "run", refuse)
+
+
 def pytest_runtest_logreport(report: pytest.TestReport) -> None:
     if report.failed:
         _failures.append(report)
