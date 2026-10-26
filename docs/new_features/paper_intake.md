@@ -109,7 +109,22 @@ score = 0.50 × relevance + 0.20 × venue + 0.15 × gap + 0.15 × velocity − p
 | `penalty` | ライブラリ内の論文と題名がほぼ同じ（正規化題名が一致、または類似度 0.9 以上）なら候補から外す | 重複は減点ではなく統合する |
 
 - 重みは `intake.weights` で変更できる。
-- LLM 判定（段階 2）は 1 回の取り込みで上位 `intake.llm_top_k`（既定 30）件までに限る。
+
+### 4.1 関連度の段階 2（LLM 判定）
+
+段階 1 は語の一致なので、`world model` を含むだけの別分野の論文（例：自動運転の LiDAR 生成）も関連度 1.00 になる（#9）。
+そこで段階 1 の上位だけを LLM に判定させ、判定があれば段階 1 の値を置き換える。
+
+- **呼び出し**：Claude Code を `claude -p` で呼ぶ（Claude Code の契約内で動かす。API キーは使わない）。
+  ツールは無効（`--tools ""`）、MCP は読まない、セッションは保存しない、出力は `--json-schema` で構造化する。
+- **対象**：まだ判定のない `candidate` を段階 1 のスコア順に、1 回の取り込みで `intake.llm_top_k`（既定 30）件まで。
+  `intake.llm_batch`（既定 10）件ずつ 1 回の呼び出しにまとめる。モデルは `intake.llm_model`（既定 `sonnet`）。
+- **入力**：RQ の id・題名・問い・survey_topics と、論文の題名・要旨（先頭 1,500 字）。
+- **出力**：論文ごとに RQ ごとの関連度（0〜1）と 1 文の理由。理由は Inbox に表示する。
+- **保存**：`llm_relevance`（`paper_id` / `rq_id` / `relevance` / `reason` / `profile_hash` / `judged_at`）。
+  `profile_hash` は RQ の定義から計算し、RQ を書き換えたら判定し直す。同じ論文を同じ RQ で 2 回判定しない。
+- **失敗時**：`claude` が無い・失敗した場合は警告を出して段階 1 のまま続ける（取り込み自体は止めない）。`--no-llm` で段階 2 を飛ばせる。
+- 内訳に `relevance_source`（`llm` / `keyword`）を残し、どちらの値で順位が付いたか分かるようにする。
 
 **表示イメージ**
 
