@@ -16,6 +16,7 @@
 - [ ] テーマ実装：`DESIGN.md` の配色トークン（Hex / 256 / 16 色フォールバック）・枠線・アイコンの ASCII フォールバック
 - [ ] 表示幅ユーティリティ：East Asian Width（全角 = 2、Ambiguous 幅の設定）に基づく切り詰め・パディング
 - [ ] キーバインド定義（`DESIGN.md` §9）とヘルプ画面
+- [ ] 右上の Neko（`DESIGN.md` §5.9）：Agent 状態に連動して顔を差し替える。狭い端末では 1 行化、`mascot: full | compact | off` 設定
 - [x] `DESIGN.md` に Paper タブを追加：フェーズ色・タブバー（`1`–`7`、Intel は `7`）・画面レイアウト（ADR-0001 のフォローアップ）
 
 ## 1. Research Agent コア

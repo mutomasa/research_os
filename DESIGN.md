@@ -256,14 +256,15 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 Intel は並走トラックなので `│` で区切って右側に置く。
 
 ```
- Research OS  ·  vision tactile world model                        2026-10-01 09:12
- 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   6 Paper   │   7 Intel ●3
- ▔▔▔▔▔▔▔▔
+ Research OS  ·  vision tactile world model                             2026-10-01 09:12    /\_/\
+ 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   6 Paper   │   7 Intel ●3           ( o.o )
+ ▔▔▔▔▔▔▔▔                                                                                   > ^ <
 ```
 
 - 番号はキーバインド（§9）。番号は Muted、ラベルはアクティブ時 bold + Phase color
 - タブ横の `●3` は未読件数（Intel の新着、Papers の関心フィード新着）。Marked 色
 - ヘッダ中央は **現在の研究テーマ**（design.md §1 の③）。長い場合は `…` で省略
+- 右上の 3 行（ヘッダ〜マーカー行の右端 7 列）は **Neko**（§5.9）の定位置。時刻は Neko の左に寄せる
 
 ### 5.2 Paper List Item
 
@@ -391,6 +392,36 @@ Review の比較表、Run の結果表で共通。ヘッダは bold + 下線、�
 
 ---
 
+### 5.9 Neko（右上のマスコット）
+
+画面右上に常駐する小さな ASCII のネコ。**Agent の状態を表情で伝えるアバター**で、
+Agent 欄タイトル右端の状態表示（`idle` / `running` …）と同じ情報を、視線を上げたときにも拾えるようにする。
+
+```
+ /\_/\        /\_/\        /\_/\        /\_/\        /\_/\        /\_/\ z
+( o.o )      ( -.- )      ( O.O )      ( ^.^ )      ( o.O )      ( -.- )
+ > ^ <        > ^ <        > ^ <        > ^ <        > ? <        > ^ <
+  idle       thinking     running       done        confirm       sleep
+```
+
+| 状態 | 顔 | 色（顔の行） | いつ |
+|------|----|--------------|------|
+| idle | `( o.o )` | Agent | 既定。入力待ち |
+| thinking | `( -.- )` | Agent | Agent が計画中（`thinking…` 表示中） |
+| running | `( O.O )` | Agent | ツール / MCP 実行中（スピナー表示中） |
+| done | `( ^.^ )` | Success | 実行完了。5 秒後に idle へ戻る |
+| confirm | `( o.O )` + `> ? <` | Warning | 確認ダイアログ（§5.4）を表示中 |
+| error | `( x.x )` | Error | 実行失敗。次の入力で idle へ戻る |
+| sleep | `( -.- )` + 耳の横に `z` | Muted | 10 分以上操作がないとき |
+
+- **配置**：Header / Tabs / マーカーの 3 行の右端 7 列（右余白 0）。Main 枠の右端と揃える
+- **色**：耳と口の行は Agent 色（`#bb9af7` / 256: `141` / 16: `magenta`）。顔の行だけ上表の状態色。sleep は全体を Muted
+- **文字**：ASCII のみ（`/ \ _ ( ) . ^ > < ? o O x z -`）。絵文字・全角・Ambiguous 幅の文字は使わない → フォールバック不要、どの端末でも幅が崩れない
+- **動き**：状態が変わったときに顔を差し替えるだけ。まばたき・歩行などの常時アニメーションはしない（§10）
+- **狭い端末（< 100 列）**：1 行の `(o.o)` に縮めてヘッダ行の時刻の右に置く（タブ行の幅を確保するため）
+- **設定**：`mascot: full | compact | off`（既定 `full`）。`reduce_motion` とは独立（もともと動かないため）
+- **Mission Control テーマ**（§13）：Agent 色の代わりに Main 役割色を使う
+
 ## 6. Screens
 
 以下はすべて **120 列 × 36 行** を基準にした参考描画。ヘッダ・タブ・Agent 欄・ステータスバーは全画面共通（§7）。
@@ -398,9 +429,9 @@ Review の比較表、Run の結果表で共通。ヘッダは bold + 下線、�
 ### 6.1 全体フレーム
 
 ```
- Research OS  ·  vision tactile world model                                                          2026-10-01 09:12
- 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   6 Paper   │   7 Intel ●3
- ▔▔▔▔▔▔▔▔
+ Research OS  ·  vision tactile world model                                                 2026-10-01 09:12    /\_/\
+ 1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   6 Paper   │   7 Intel ●3                               ( o.o )
+ ▔▔▔▔▔▔▔▔                                                                                                       > ^ <
 ╭─ <メイン領域: フェーズごとの画面> ─────────────────────────────────────────────────────────────────────────────────╮
 │                                                                                                                    │
 │                                                                                                                    │
@@ -557,8 +588,8 @@ Draft / Submission のサブタブ。Submission では R6 の判定、要件の�
 ### 7.1 基本構造
 
 ```
-行  1        Header（アプリ名 · テーマ · 時刻）
-行  2–3      Phase Tabs + マーカー
+行  1        Header（アプリ名 · テーマ · 時刻）     ┐ 右端 7 列は Neko（§5.9）
+行  2–3      Phase Tabs + マーカー                 ┘
 行  4–(n-9)  Main（フェーズごとの画面。可変）
 行  (n-8)–(n-1) Agent Pane（既定 7 行。3〜全高で可変）
 行  n        Status Bar
@@ -683,6 +714,7 @@ vim 系を基本に、Agent 欄へのアクセスを最短にする。
 | 新着到着 | タブの `●n` を 1 回だけ reverse で点滅 | 300ms × 2 |
 | 画面遷移 | なし（即時切替） | — |
 | 進捗 | `█░` バー + パーセント + ETA（Run のみ） | 更新ごと |
+| Neko（§5.9） | Agent の状態遷移時に顔を差し替えるだけ（常時アニメなし） | 遷移時 |
 
 - `reduce_motion: true` でスピナーを静止記号 `…` に置換
 - ストリーミング出力は 1 行単位で追記（文字単位のタイプライター表現はしない）
@@ -706,6 +738,8 @@ Phases:   Papers #7aa2f7 · Review #7dcfff · Graph #73daca ·
 Border:   rounded ╭╮╰╯─│ (panels), double ╔╗╚╝═║ (confirm dialogs)
 Glyphs:   ✓ ✗ ⚠ ◯ ⠋ ★ ▌ ❯ ⟳ ◐ ●   (ASCII fallback required)
 Layout:   Header / Tabs / Main / Agent(7 rows) / Status bar, min 80x24
+Neko:     3-line ASCII cat at top-right (rows 1-3, 7 cols), face = agent state
+          o.o idle · -.- thinking · O.O running · ^.^ done · o.O confirm · x.x error
 Text:     UI labels English, content Japanese; CJK width = 2
 ```
 
@@ -737,7 +771,7 @@ Text:     UI labels English, content Japanese; CJK width = 2
 - 1 行に 3 色以上の強調色を置かない（Phase / Accent / 状態色のうち 2 つまで）
 - TrueColor 前提にしない。256 / 16 色のフォールバックを必ず定義する
 - Agent の出力で画面全体を書き換えない（ユーザーが見ていたパネルとカーソルを保持する）
-- 装飾目的のアニメーション・スプラッシュの待ち時間を入れない
+- 装飾目的のアニメーション・スプラッシュの待ち時間を入れない（Neko も状態遷移時以外は動かさない）
 - 日本語を文字数で切り詰めない（全角で列がずれる）
 
 ---
