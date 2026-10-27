@@ -283,3 +283,8 @@
 
 - 何を: §4.1・§5 に #15・#16 の対応と所要時間を追記し、todo.md を更新した。
 - なぜ: 仕様と実装を合わせるため。
+
+### 2026-10-27 `cdc6d82` docs: add Neko mascot at top-right of the TUI
+
+- 何を: `DESIGN.md` §5.9 に右上常駐の ASCII ネコ「Neko」を追加し、ヘッダ図・全体フレーム・レイアウト・アニメーション・Quick Reference を更新。`docs/design.md` §1 と `docs/todo.md` にも反映した。
+- なぜ: UI に親しみを持たせつつ、Agent の状態を表情で示すアバターとして機能させるため。絵文字禁止・装飾アニメ禁止の規約に合わせ ASCII のみ・状態遷移時のみ変化とした。
