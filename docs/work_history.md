@@ -313,3 +313,13 @@
 
 - 何を: `border_title` がマークアップ文字列を返すことを見落としたテストの失敗ログを残した。
 - なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `3bbcd5f` fix: keep focus off the Agent log and input at startup
+
+- 何を: RichLog をフォーカス不可にし、`AUTO_FOCUS = None` で起動時はどこにもフォーカスを置かないようにした。
+- なぜ: 起動直後に Agent ログへ自動フォーカスが当たり背景が明るくなっていた。入力行に当たると `1`–`7` や `q` が効かなくなる。
+
+### 2026-10-28 `46d6131` test: keep failure logs of startup focus fix
+
+- 何を: 修正の途中で入力行が自動フォーカスを取り、5 テストが落ちたログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
