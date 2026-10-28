@@ -343,3 +343,18 @@
 
 - 何を: ModalScreen の背景を半透明にし、ヘルプを開いても後ろの画面が見えるようにした。
 - なぜ: App の `Screen { background }` がモーダルにも効き、背景が塗りつぶされていた（Papers の捨てる理由ダイアログで気づいた）。
+
+### 2026-10-28 `b060527` refactor: move inbox reason formatting into intake module
+
+- 何を: スコア内訳を 1 行にする処理を `cli.py` から `data/intake.py` の `format_reason` に移した。
+- なぜ: TUI の Papers 画面でも同じ表示を使うため。挙動は変えていない。
+
+### 2026-10-28 `6681467` feat: show the Inbox on the Papers screen with triage keys
+
+- 何を: Papers 画面に Inbox 一覧・プレビュー・判断の操作（`r` 読む / `e` 読了 / `c` 中核 / `d` 捨てる＋理由）と一覧の切替（`[` `]`）を載せた。上限・遷移の誤りはトーストで知らせる。
+- なぜ: CLI でしか触れなかった Inbox を TUI で回せるようにするため（todo.md §0.1 PR D）。
+
+### 2026-10-28 `8c39b2f` test: keep failure log of Inbox row layout test
+
+- 何を: 掲載先を右寄せにした後もテストが古い並びを前提にしていた失敗ログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
