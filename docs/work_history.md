@@ -333,3 +333,8 @@
 
 - 何を: 80 列のヘッダに 1 行の Neko が付く仕様に変わったのに、テストが古い前提のままだった失敗ログを残した。
 - なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `12c15c4` docs: place Neko's sleep z inside the 7-column width
+
+- 何を: DESIGN.md §5.9 の sleep の図を、z を耳の右隣に置く実装に合わせた。
+- なぜ: Neko の幅を 7 列に保つため。
