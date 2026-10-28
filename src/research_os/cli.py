@@ -97,19 +97,6 @@ def _cmd_intake_suggest(args: argparse.Namespace) -> int:
     return 0
 
 
-def _format_reason(parts: dict) -> str:
-    source = "（LLM）" if parts.get("relevance_source") == "llm" else ""
-    items = [f"{parts.get('primary_rq')} 関連 {parts['relevance']:.2f}{source}"]
-    if parts.get("venue_priority"):
-        items.append(f"投稿先({parts['venue_priority']})")
-    if parts["gap"] > 0:
-        items.append(f"手薄 {parts['gap']:.2f}")
-    if parts.get("link"):
-        items.append(f"中核とつながり {parts['link']:.2f}")
-    items.append(f"被引用 {parts['citations_per_year']:g}/年")
-    return " · ".join(items)
-
-
 def _cmd_inbox(args: argparse.Namespace) -> int:
     registry, prof, store = _load(args)
     cfg = prof.intake
@@ -125,7 +112,7 @@ def _cmd_inbox(args: argparse.Namespace) -> int:
         print(f"      {row['paper_id']}")
         if row["breakdown"]:
             parts = json.loads(row["breakdown"])
-            print(f"      {_format_reason(parts)}")
+            print(f"      {intake.format_reason(parts)}")
             if parts.get("llm_reason"):
                 print(f"      {parts['llm_reason']}")
     return 0
