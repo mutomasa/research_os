@@ -138,6 +138,15 @@ def _cmd_triage(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_tui(args: argparse.Namespace) -> int:
+    from research_os.tui.app import ResearchOSApp
+
+    # プロファイルが無くても画面は開く（ヘッダのテーマ表示が消えるだけ）
+    research_theme = profile.load_profile(args.profile).theme if Path(args.profile).exists() else None
+    ResearchOSApp(research_theme=research_theme).run()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="research-os", description="Research OS")
     parser.add_argument("--version", action="version", version=f"research-os {__version__}")
@@ -178,6 +187,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("status", choices=sorted({s for t in papers.TRANSITIONS.values() for s in t}))
     p.add_argument("--reason", choices=papers.DISMISS_REASONS, help="捨てる理由（dismissed のとき必須）")
     p.set_defaults(func=_cmd_triage)
+
+    p = sub.add_parser("tui", help="TUI を起動する")
+    p.set_defaults(func=_cmd_tui)
     return parser
 
 
