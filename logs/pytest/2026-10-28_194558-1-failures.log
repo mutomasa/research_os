@@ -1,0 +1,52 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q tests/test_tui.py
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_tui.py::test_header_shows_theme_and_truncates (call) ===
+def test_header_shows_theme_and_truncates():
+        async def check(app, pilot):
+            line = text_of(app.query_one(HeaderLine))
+            assert line.startswith(" Research OS  ·  ")
+            assert line.endswith(app.query_one(HeaderLine).now.strftime("%Y-%m-%d %H:%M"))
+            assert "…" in line
+            assert cell_len(line) == 80  # 全角 = 2 列で数える（DESIGN.md §7.3）
+    
+>       run(check, ResearchOSApp(research_theme="失敗認識型の長期ロボットマニピュレーションに向けた視覚・触覚統合JEPA世界モデル"),
+            size=(80, 24))
+
+tests/test_tui.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:19: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:17: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        line = text_of(app.query_one(HeaderLine))
+        assert line.startswith(" Research OS  ·  ")
+>       assert line.endswith(app.query_one(HeaderLine).now.strftime("%Y-%m-%d %H:%M"))
+E       AssertionError: assert False
+E        +  where False = <built-in method endswith of str object at 0x736cb72a59b0>('2026-10-28 19:45')
+E        +    where <built-in method endswith of str object at 0x736cb72a59b0> = ' Research OS  ·  失敗認識型の長期ロボットマニピュレーシ…  2026-10-28 19:45 (o.o)'.endswith
+E        +    and   '2026-10-28 19:45' = <built-in method strftime of datetime.datetime object at 0x736cb70e4ae0>('%Y-%m-%d %H:%M')
+E        +      where <built-in method strftime of datetime.datetime object at 0x736cb70e4ae0> = datetime.datetime(2026, 10, 28, 19, 45, 57, 959197).strftime
+E        +        where datetime.datetime(2026, 10, 28, 19, 45, 57, 959197) = HeaderLine(id='header').now
+E        +          where HeaderLine(id='header') = query_one(HeaderLine)
+E        +            where query_one = ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'focus', 'dark'}).query_one
+
+tests/test_tui.py:68: AssertionError
