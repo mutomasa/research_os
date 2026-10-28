@@ -16,6 +16,8 @@ class ResearchOSApp(App):
     TITLE = "Research OS"
     CSS = """
     Screen { background: $background; }
+    /* モーダル（ヘルプ・確認）は後ろの画面を透かす。上の Screen の指定が ModalScreen にも効くため上書きする */
+    ModalScreen { background: $background 60%; }
     #main { height: 1fr; }
     #main > * {
         height: 1fr; padding: 0 1;

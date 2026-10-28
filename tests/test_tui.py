@@ -76,3 +76,11 @@ def test_status_bar_lists_connections_as_unset():
         assert line.rstrip().endswith("q quit")
 
     run(check)
+
+
+def test_help_keeps_the_screen_behind_visible():
+    async def check(app, pilot):
+        await pilot.press("question_mark")
+        assert app.screen.styles.background.a < 1
+
+    run(check)
