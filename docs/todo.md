@@ -35,11 +35,11 @@
 
 **PR B `feat/tui-agent-pane`：Agent 欄**
 
-- [ ] 枠タイトル `Agent · <フェーズ>`、右上に状態（`idle` など）
-- [ ] 入力行 `❯`、`>` / `i` でフォーカス、`Esc` で戻る、`↑` / `↓` で入力履歴
-- [ ] 待機中の提案（フェーズごとの指示例、`tab` で補完）
-- [ ] 送信した指示をログに残す。Agent コアは未接続なので「未接続」と明示する
-- [ ] Agent の状態（idle / thinking / running / done / confirm / error）をアプリ全体の状態として持つ（Neko が購読する）
+- [x] 枠タイトル `Agent · <フェーズ>`、右上に状態（`idle` など）
+- [x] 入力行 `❯`、`>` / `i` でフォーカス、`Esc` で戻る、`↑` / `↓` で入力履歴
+- [x] 待機中の提案（フェーズごとの指示例、`tab` で補完）
+- [x] 送信した指示をログに残す。Agent コアは未接続なので「未接続」と明示する
+- [x] Agent の状態（idle / thinking / running / done / confirm / error）をアプリ全体の状態として持つ（Neko が購読する）
 
 **PR C `feat/tui-neko`：右上の Neko**
 
