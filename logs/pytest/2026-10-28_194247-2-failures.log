@@ -1,0 +1,122 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q tests/test_tui.py
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_tui.py::test_agent_pane_input_history_and_unconnected_notice (call) ===
+def test_agent_pane_input_history_and_unconnected_notice():
+        from textual.widgets import RichLog
+    
+        from research_os.tui.agent import AgentInput, AgentPane
+    
+        async def check(app, pilot):
+            await pilot.press("greater_than_sign")
+            inp = app.query_one(AgentInput)
+            assert app.focused is inp
+            # フォーカス中の数字や q は入力される（タブ切替・終了にならない）
+            await pilot.press(*"q3", "enter")
+            assert app.phase == "papers" and app.is_running
+            log = "\n".join(line.text for line in app.query_one(RichLog).lines)
+            assert "❯ q3" in log and "未接続" in log
+            assert inp.value == ""
+            await pilot.press("up")
+            assert inp.value == "q3"
+            await pilot.press("down")
+            assert inp.value == ""
+            await pilot.press("escape")
+            assert app.focused is None
+            await pilot.press("4")
+            assert "Hypothesis" in app.query_one(AgentPane).border_title.plain
+    
+>       run(check)
+
+tests/test_tui.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:18: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:16: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        await pilot.press("greater_than_sign")
+        inp = app.query_one(AgentInput)
+        assert app.focused is inp
+        # フォーカス中の数字や q は入力される（タブ切替・終了にならない）
+        await pilot.press(*"q3", "enter")
+        assert app.phase == "papers" and app.is_running
+        log = "\n".join(line.text for line in app.query_one(RichLog).lines)
+        assert "❯ q3" in log and "未接続" in log
+        assert inp.value == ""
+        await pilot.press("up")
+        assert inp.value == "q3"
+        await pilot.press("down")
+        assert inp.value == ""
+        await pilot.press("escape")
+        assert app.focused is None
+        await pilot.press("4")
+>       assert "Hypothesis" in app.query_one(AgentPane).border_title.plain
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'str' object has no attribute 'plain'
+
+tests/test_tui.py:103: AttributeError
+
+=== tests/test_tui.py::test_agent_pane_completes_suggestion_and_shows_state (call) ===
+def test_agent_pane_completes_suggestion_and_shows_state():
+        from research_os.tui.agent import AgentInput, AgentPane
+    
+        async def check(app, pilot):
+            await pilot.press("i", *"今週", "tab")
+            assert app.query_one(AgentInput).value == "今週の Inbox"
+            pane = app.query_one(AgentPane)
+            assert pane.border_title.plain.endswith("idle")
+            app.agent_state = "running"
+            await pilot.pause()
+            assert pane.border_title.plain.endswith("running")
+            assert pane.has_class("-busy")
+            assert not pane.query_one("#suggestions").display
+    
+>       run(check)
+
+tests/test_tui.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:18: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:16: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        await pilot.press("i", *"今週", "tab")
+        assert app.query_one(AgentInput).value == "今週の Inbox"
+        pane = app.query_one(AgentPane)
+>       assert pane.border_title.plain.endswith("idle")
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'str' object has no attribute 'plain'
+
+tests/test_tui.py:115: AttributeError
