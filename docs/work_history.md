@@ -338,3 +338,8 @@
 
 - 何を: DESIGN.md §5.9 の sleep の図を、z を耳の右隣に置く実装に合わせた。
 - なぜ: Neko の幅を 7 列に保つため。
+
+### 2026-10-28 `9194829` fix: let modal screens show the screen behind them
+
+- 何を: ModalScreen の背景を半透明にし、ヘルプを開いても後ろの画面が見えるようにした。
+- なぜ: App の `Screen { background }` がモーダルにも効き、背景が塗りつぶされていた（Papers の捨てる理由ダイアログで気づいた）。
