@@ -308,3 +308,8 @@
 
 - 何を: 画面下部に Agent 欄を常駐させた。入力（`>` / `i`）・履歴（↑↓）・提案の補完（tab）・状態表示。状態はアプリ全体の `agent_state` として持つ。
 - なぜ: 「Agent が主役」（DESIGN.md §1）の入口を先に作るため。Agent コアは未接続なので、送信した指示はログに残して未接続と明示する（todo.md §0.1 PR B）。
+
+### 2026-10-28 `11ded6c` test: keep failure log of Agent pane tests
+
+- 何を: `border_title` がマークアップ文字列を返すことを見落としたテストの失敗ログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
