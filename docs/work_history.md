@@ -303,3 +303,8 @@
 
 - 何を: テーマの登録順・reactive の初回ウォッチャー・表示幅の測り方の誤りで落ちた 3 回分のログを残した。
 - なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `9194829` fix: let modal screens show the screen behind them
+
+- 何を: ModalScreen の背景を半透明にし、ヘルプを開いても後ろの画面が見えるようにした。
+- なぜ: App の `Screen { background }` がモーダルにも効き、背景が塗りつぶされていた（Papers の捨てる理由ダイアログで気づいた）。
