@@ -283,3 +283,78 @@
 
 - 何を: §4.1・§5 に #15・#16 の対応と所要時間を追記し、todo.md を更新した。
 - なぜ: 仕様と実装を合わせるため。
+
+### 2026-10-27 `cdc6d82` docs: add Neko mascot at top-right of the TUI
+
+- 何を: `DESIGN.md` §5.9 に右上常駐の ASCII ネコ「Neko」を追加し、ヘッダ図・全体フレーム・レイアウト・アニメーション・Quick Reference を更新。`docs/design.md` §1 と `docs/todo.md` にも反映した。
+- なぜ: UI に親しみを持たせつつ、Agent の状態を表情で示すアバターとして機能させるため。絵文字禁止・装飾アニメ禁止の規約に合わせ ASCII のみ・状態遷移時のみ変化とした。
+
+### 2026-10-28 `c34c654` docs: split TUI skeleton into four PRs in todo.md
+
+- 何を: `docs/todo.md` §0.1 に、TUI の骨組みを 4 本の PR（アプリの枠・Agent 欄・Neko・Papers の Inbox）に分けて書き出した。
+- なぜ: 機能ごとにブランチと PR を切って小さく積むため。Agent コアは未接続のまま、見た目と操作の器を先に作る。
+
+### 2026-10-28 `39e7c3c` feat: add TUI shell with header, phase tabs and status bar
+
+- 何を: `research-os tui` で Textual アプリを起動できるようにした。ヘッダ・フェーズタブ 1–7・メイン領域（未実装はプレースホルダ）・ステータスバー・`?` ヘルプ・Lab Ink 配色。
+- なぜ: Agent 欄・Neko・Papers 画面を載せる器を先に作るため（todo.md §0.1 PR A）。
+
+### 2026-10-28 `336f20e` test: keep failure logs of TUI shell tests
+
+- 何を: テーマの登録順・reactive の初回ウォッチャー・表示幅の測り方の誤りで落ちた 3 回分のログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `351dd9f` feat: add Agent pane with input history, suggestions and state
+
+- 何を: 画面下部に Agent 欄を常駐させた。入力（`>` / `i`）・履歴（↑↓）・提案の補完（tab）・状態表示。状態はアプリ全体の `agent_state` として持つ。
+- なぜ: 「Agent が主役」（DESIGN.md §1）の入口を先に作るため。Agent コアは未接続なので、送信した指示はログに残して未接続と明示する（todo.md §0.1 PR B）。
+
+### 2026-10-28 `11ded6c` test: keep failure log of Agent pane tests
+
+- 何を: `border_title` がマークアップ文字列を返すことを見落としたテストの失敗ログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `3bbcd5f` fix: keep focus off the Agent log and input at startup
+
+- 何を: RichLog をフォーカス不可にし、`AUTO_FOCUS = None` で起動時はどこにもフォーカスを置かないようにした。
+- なぜ: 起動直後に Agent ログへ自動フォーカスが当たり背景が明るくなっていた。入力行に当たると `1`–`7` や `q` が効かなくなる。
+
+### 2026-10-28 `46d6131` test: keep failure logs of startup focus fix
+
+- 何を: 修正の途中で入力行が自動フォーカスを取り、5 テストが落ちたログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `b1c6afd` feat: add Neko mascot that shows the Agent state at top-right
+
+- 何を: 右上 3 行に Neko を置き、`agent_state` に合わせて顔を差し替える。done は 5 秒で idle、10 分操作なしで sleep。100 列未満と `--mascot compact` は 1 行、`--mascot off` で非表示。
+- なぜ: DESIGN.md §5.9 の実装。Agent の状態を視線を上げたときにも拾えるようにするため（todo.md §0.1 PR C）。
+
+### 2026-10-28 `af35d51` test: keep failure log of header test after adding compact Neko
+
+- 何を: 80 列のヘッダに 1 行の Neko が付く仕様に変わったのに、テストが古い前提のままだった失敗ログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `12c15c4` docs: place Neko's sleep z inside the 7-column width
+
+- 何を: DESIGN.md §5.9 の sleep の図を、z を耳の右隣に置く実装に合わせた。
+- なぜ: Neko の幅を 7 列に保つため。
+
+### 2026-10-28 `9194829` fix: let modal screens show the screen behind them
+
+- 何を: ModalScreen の背景を半透明にし、ヘルプを開いても後ろの画面が見えるようにした。
+- なぜ: App の `Screen { background }` がモーダルにも効き、背景が塗りつぶされていた（Papers の捨てる理由ダイアログで気づいた）。
+
+### 2026-10-28 `b060527` refactor: move inbox reason formatting into intake module
+
+- 何を: スコア内訳を 1 行にする処理を `cli.py` から `data/intake.py` の `format_reason` に移した。
+- なぜ: TUI の Papers 画面でも同じ表示を使うため。挙動は変えていない。
+
+### 2026-10-28 `6681467` feat: show the Inbox on the Papers screen with triage keys
+
+- 何を: Papers 画面に Inbox 一覧・プレビュー・判断の操作（`r` 読む / `e` 読了 / `c` 中核 / `d` 捨てる＋理由）と一覧の切替（`[` `]`）を載せた。上限・遷移の誤りはトーストで知らせる。
+- なぜ: CLI でしか触れなかった Inbox を TUI で回せるようにするため（todo.md §0.1 PR D）。
+
+### 2026-10-28 `8c39b2f` test: keep failure log of Inbox row layout test
+
+- 何を: 掲載先を右寄せにした後もテストが古い並びを前提にしていた失敗ログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。

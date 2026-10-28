@@ -1,0 +1,48 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q tests/test_tui.py
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_tui.py::test_header_shows_theme_and_truncates (call) ===
+def test_header_shows_theme_and_truncates():
+        async def check(app, pilot):
+            line = text_of(app.query_one(HeaderLine))
+            assert line.startswith(" Research OS  ·  ")
+            assert line.endswith(app.query_one(HeaderLine).now.strftime("%Y-%m-%d %H:%M"))
+            assert "…" in line
+            assert len(line) == 80
+    
+>       run(check, ResearchOSApp(research_theme="失敗認識型の長期ロボットマニピュレーションに向けた視覚・触覚統合JEPA世界モデル"),
+            size=(80, 24))
+
+tests/test_tui.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:17: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:15: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'dark', 'focus'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'dark', 'focus'})>
+
+    async def check(app, pilot):
+        line = text_of(app.query_one(HeaderLine))
+        assert line.startswith(" Research OS  ·  ")
+        assert line.endswith(app.query_one(HeaderLine).now.strftime("%Y-%m-%d %H:%M"))
+        assert "…" in line
+>       assert len(line) == 80
+E       AssertionError: assert 58 == 80
+E        +  where 58 = len(' Research OS  ·  失敗認識型の長期ロボットマニピュレーションに…  2026-10-28 19:39')
+
+tests/test_tui.py:64: AssertionError

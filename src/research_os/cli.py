@@ -97,19 +97,6 @@ def _cmd_intake_suggest(args: argparse.Namespace) -> int:
     return 0
 
 
-def _format_reason(parts: dict) -> str:
-    source = "（LLM）" if parts.get("relevance_source") == "llm" else ""
-    items = [f"{parts.get('primary_rq')} 関連 {parts['relevance']:.2f}{source}"]
-    if parts.get("venue_priority"):
-        items.append(f"投稿先({parts['venue_priority']})")
-    if parts["gap"] > 0:
-        items.append(f"手薄 {parts['gap']:.2f}")
-    if parts.get("link"):
-        items.append(f"中核とつながり {parts['link']:.2f}")
-    items.append(f"被引用 {parts['citations_per_year']:g}/年")
-    return " · ".join(items)
-
-
 def _cmd_inbox(args: argparse.Namespace) -> int:
     registry, prof, store = _load(args)
     cfg = prof.intake
@@ -125,7 +112,7 @@ def _cmd_inbox(args: argparse.Namespace) -> int:
         print(f"      {row['paper_id']}")
         if row["breakdown"]:
             parts = json.loads(row["breakdown"])
-            print(f"      {_format_reason(parts)}")
+            print(f"      {intake.format_reason(parts)}")
             if parts.get("llm_reason"):
                 print(f"      {parts['llm_reason']}")
     return 0
@@ -135,6 +122,20 @@ def _cmd_triage(args: argparse.Namespace) -> int:
     _, prof, store = _load(args)
     store.decide(args.paper_id, args.status, datetime.now(), prof.intake.to_read_max, reason=args.reason)
     print(f"{args.paper_id} → {args.status}")
+    return 0
+
+
+def _cmd_tui(args: argparse.Namespace) -> int:
+    from research_os.tui.app import ResearchOSApp
+
+    from research_os.tui.papers import PapersContext
+
+    # プロファイルが無くても画面は開く（ヘッダのテーマと Papers の Inbox が出ないだけ）
+    research_theme, papers_ctx = None, None
+    if Path(args.profile).exists():
+        registry, prof, store = _load(args)
+        research_theme, papers_ctx = prof.theme, PapersContext(store, prof, registry)
+    ResearchOSApp(research_theme=research_theme, mascot=args.mascot, papers=papers_ctx).run()
     return 0
 
 
@@ -178,6 +179,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("status", choices=sorted({s for t in papers.TRANSITIONS.values() for s in t}))
     p.add_argument("--reason", choices=papers.DISMISS_REASONS, help="捨てる理由（dismissed のとき必須）")
     p.set_defaults(func=_cmd_triage)
+
+    p = sub.add_parser("tui", help="TUI を起動する")
+    p.add_argument("--mascot", choices=["full", "compact", "off"], default="full",
+                   help="右上の Neko（full: 3 行 / compact: ヘッダに 1 行 / off: 出さない）")
+    p.set_defaults(func=_cmd_tui)
     return parser
 
 

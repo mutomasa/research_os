@@ -8,15 +8,48 @@
 ## 0. 基盤 / プロジェクト骨格
 
 - [x] TUI フレームワーク選定：Python + Textual（ADR-0002）
-- [ ] アプリ骨格：① ヘッダ ② フェーズタブ ③ 研究対象 ④ Agent 欄 ⑤ ステータスバー の4層レイアウト
-- [ ] フェーズタブの切り替え（Papers / Review / Graph / Hypothesis / Run / Paper ＋ 並走トラックの Intel。Paper は ADR-0001）
+- [x] アプリ骨格：① ヘッダ ② フェーズタブ ③ 研究対象 ④ Agent 欄 ⑤ ステータスバー の4層レイアウト
+- [x] フェーズタブの切り替え（Papers / Review / Graph / Hypothesis / Run / Paper ＋ 並走トラックの Intel。Paper は ADR-0001）
 - [ ] グローバル状態管理（現在のテーマ・選択論文・接続状態）
 - [ ] 設定ファイル読み込み（API キー、MCP エンドポイント、保存先）
 - [ ] ロギング / エラーハンドリング基盤
 - [ ] テーマ実装：`DESIGN.md` の配色トークン（Hex / 256 / 16 色フォールバック）・枠線・アイコンの ASCII フォールバック
 - [ ] 表示幅ユーティリティ：East Asian Width（全角 = 2、Ambiguous 幅の設定）に基づく切り詰め・パディング
 - [ ] キーバインド定義（`DESIGN.md` §9）とヘルプ画面
+- [x] 右上の Neko（`DESIGN.md` §5.9）：Agent 状態に連動して顔を差し替える。狭い端末では 1 行化、`mascot: full | compact | off` 設定
 - [x] `DESIGN.md` に Paper タブを追加：フェーズ色・タブバー（`1`–`7`、Intel は `7`）・画面レイアウト（ADR-0001 のフォローアップ）
+
+### 0.1 TUI の骨組み（PR 単位）
+
+上の項目のうち、画面を最初に動かすのに要るものを 4 本の PR に分けて積む。Agent コア（§1）は未接続のまま、見た目と操作の器を先に作る。
+
+**PR A `feat/tui-shell`：アプリの枠**
+
+- [x] `research-os tui` で Textual アプリを起動する
+- [x] ヘッダ（アプリ名 · 研究テーマ · 時刻）、フェーズタブ `1`–`7`（アクティブはフェーズ色 + `▔` マーカー）
+- [x] フェーズごとのメイン領域（未実装の画面はプレースホルダ）
+- [x] ステータスバー：接続名と状態記号（いまは全て `–` 未設定）＋右端のキーヒント
+- [x] Lab Ink の配色トークン（`DESIGN.md` §2）を Textual CSS 変数で定義
+- [x] グローバルキー：`1`–`7` / `q` / `?`（キー一覧）
+- [x] テスト：Textual の `run_test` でタブ切替・ヘルプ表示を確かめる
+
+**PR B `feat/tui-agent-pane`：Agent 欄**
+
+- [x] 枠タイトル `Agent · <フェーズ>`、右上に状態（`idle` など）
+- [x] 入力行 `❯`、`>` / `i` でフォーカス、`Esc` で戻る、`↑` / `↓` で入力履歴
+- [x] 待機中の提案（フェーズごとの指示例、`tab` で補完）
+- [x] 送信した指示をログに残す。Agent コアは未接続なので「未接続」と明示する
+- [x] Agent の状態（idle / thinking / running / done / confirm / error）をアプリ全体の状態として持つ（Neko が購読する）
+
+**PR C `feat/tui-neko`：右上の Neko**
+
+- [x] ヘッダ〜マーカーの 3 行右端に Neko を置き、Agent 状態で顔を差し替える（`DESIGN.md` §5.9）
+- [x] done は 5 秒で idle に戻る。10 分操作がなければ sleep
+- [x] 100 列未満では 1 行の `(o.o)`、`--mascot full|compact|off`
+
+**PR D `feat/tui-papers-inbox`：Papers 画面の Inbox**
+
+- [x] 下記「UI（Papers 画面）」の 2 項目を実装する
 
 ## 1. Research Agent コア
 
@@ -102,8 +135,8 @@
 
 **UI（Papers 画面）**
 
-- [ ] Inbox 一覧（今週の枠・未処理数・読む数・RQ ごとの飽和メーター、スコア内訳）
-- [ ] 判断の操作（読む / 捨てる＋理由 / 中核にする）と上限到達時の表示
+- [x] Inbox 一覧（今週の枠・未処理数・読む数・RQ ごとの飽和メーター、スコア内訳）
+- [x] 判断の操作（読む / 捨てる＋理由 / 中核にする）と上限到達時の表示
 
 ## 4. Review — 論文を深く読む
 

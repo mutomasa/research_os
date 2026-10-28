@@ -1,0 +1,964 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q tests/test_tui.py
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_tui.py::test_starts_on_papers (call) ===
+async def main():
+        async with app.run_test(size=size) as pilot:
+>           await coro_fn(app, pilot)
+
+tests/test_tui.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:26: in check
+    assert app.phase == "papers"
+           ^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/reactive.py:304: in __get__
+    self._initialize_reactive(obj, self.name)
+.venv/lib/python3.13/site-packages/textual/reactive.py:228: in _initialize_reactive
+    self._check_watchers(obj, name, default)
+.venv/lib/python3.13/site-packages/textual/reactive.py:396: in _check_watchers
+    invoke_watcher(obj, public_watch_function, old_value, value)
+.venv/lib/python3.13/site-packages/textual/reactive.py:114: in invoke_watcher
+    watch_result = cast(WatchCallbackNewValueType, watch_function)(value)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/research_os/tui/app.py:50: in watch_phase
+    self.query_one(PhaseTabs).active = phase
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ResearchOSApp(title='Research OS', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'})
+selector = <class 'research_os.tui.widgets.PhaseTabs'>, expect_type = None
+
+    def query_one(
+        self,
+        selector: str | type[QueryType],
+        expect_type: type[QueryType] | None = None,
+    ) -> QueryType | Widget:
+        """Get a widget from this widget's children that matches a selector or widget type.
+    
+        Args:
+            selector: A selector or widget type.
+            expect_type: Require the object be of the supplied type, or None for any type.
+    
+        Raises:
+            WrongType: If the wrong type was found.
+            NoMatches: If no node matches the query.
+    
+        Returns:
+            A widget matching the selector.
+        """
+        _rich_traceback_omit = True
+    
+        base_node = self._get_dom_base()
+    
+        if isinstance(selector, str):
+            query_selector = selector
+        else:
+            query_selector = selector.__name__
+    
+        if is_id_selector(query_selector):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+            if (
+                node := walk_breadth_search_id(
+                    base_node, query_selector[1:], with_root=False
+                )
+            ) is not None:
+                if expect_type is not None and not isinstance(node, expect_type):
+                    raise WrongType(
+                        f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                    )
+                base_node._query_one_cache[cache_key] = node
+                return node
+            raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+    
+        try:
+            selector_set = parse_selectors(query_selector)
+        except TokenError:
+            raise InvalidQueryFormat(
+                f"Unable to parse {query_selector!r} as a query; check for syntax errors"
+            ) from None
+    
+        if all(selectors.is_simple for selectors in selector_set):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+        else:
+            cache_key = None
+    
+        for node in walk_breadth_first(base_node, with_root=False):
+            if not match(selector_set, node):
+                continue
+            if expect_type is not None and not isinstance(node, expect_type):
+                raise WrongType(
+                    f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                )
+            if cache_key is not None:
+                base_node._query_one_cache[cache_key] = node
+            return node
+    
+>       raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+E       textual.css.query.NoMatches: No nodes match 'PhaseTabs' on Screen(id='_default')
+
+.venv/lib/python3.13/site-packages/textual/dom.py:1533: NoMatches
+
+During handling of the above exception, another exception occurred:
+
+    def test_starts_on_papers():
+        async def check(app, pilot):
+            assert app.phase == "papers"
+            assert app.query_one(ContentSwitcher).current == "papers"
+            tabs, marker = text_of(app.query_one(PhaseTabs)).split("\n")
+            # マーカーは「1 Papers」の真下
+            assert tabs.index("1 Papers") == marker.index("▔")
+            assert marker.count("▔") == len("1 Papers")
+    
+>       run(check)
+
+tests/test_tui.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:17: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:14: in main
+    async with app.run_test(size=size) as pilot:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/contextlib.py:235: in __aexit__
+    await self.gen.athrow(value)
+.venv/lib/python3.13/site-packages/textual/app.py:2218: in run_test
+    raise self._exception
+.venv/lib/python3.13/site-packages/textual/app.py:3493: in _process_messages
+    await run_process_messages()
+.venv/lib/python3.13/site-packages/textual/app.py:3432: in run_process_messages
+    await self._dispatch_message(events.Compose())
+.venv/lib/python3.13/site-packages/textual/message_pump.py:727: in _dispatch_message
+    await self.on_event(message)
+.venv/lib/python3.13/site-packages/textual/app.py:4064: in on_event
+    await self._init_mode(self._current_mode)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/app.py:2621: in _init_mode
+    self._register(self, screen)
+.venv/lib/python3.13/site-packages/textual/app.py:3671: in _register
+    apply_stylesheet(widget, cache=cache)
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:496: in apply
+    rules_map = self.rules_map
+                ^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:187: in rules_map
+    for rule in self.rules:
+                ^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:173: in rules
+    self.parse()
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:390: in parse
+    css_rules = self._parse_rules(
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:269: in _parse_rules
+    rules = list(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:482: in parse
+    yield from parse_rule_set(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:194: in parse_rule_set
+    token = next(tokens)
+            ^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/parse.py:447: in substitute_references
+    _unresolved(variable_name, variables.keys(), token)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+variable_name = 'neutral-200'
+variables = dict_keys(['text-primary', 'text-secondary', 'text-warning', 'text-error', 'text-success', 'text-accent', 'primary-dar...focus-text-style', 'ansi-background', 'ansi-foreground', 'screen-selection-background', 'screen-selection-foreground'])
+token = <Token name='variable_ref' value='$neutral-200' read_from=('/home/mutomasa/research/research_os/src/research_os/tui/app.py', 'ResearchOSApp.CSS') code='\n    Screen { background: $background; }...' location=(5, 22)>
+
+    def _unresolved(variable_name: str, variables: Iterable[str], token: Token) -> NoReturn:
+        """Raise a TokenError regarding an unresolved variable.
+    
+        Args:
+            variable_name: A variable name.
+            variables: Possible choices used to generate suggestion.
+            token: The Token.
+    
+        Raises:
+            UnresolvedVariableError: Always raises a TokenError.
+        """
+        message = f"reference to undefined variable '${variable_name}'"
+        suggested_variable = get_suggestion(variable_name, list(variables))
+        if suggested_variable:
+            message += f"; did you mean '${suggested_variable}'?"
+    
+>       raise UnresolvedVariableError(
+            token.read_from,
+            token.code,
+            token.start,
+            message,
+            end=token.end,
+        )
+E       textual.css.errors.UnresolvedVariableError: reference to undefined variable '$neutral-200'
+
+.venv/lib/python3.13/site-packages/textual/css/parse.py:359: UnresolvedVariableError
+--- Captured stderr call ---
+ Error in stylesheet:
+ /home/mutomasa/research/research_os/src/research_os/tui/app.py, 
+ResearchOSApp.CSS:6:23
+╭──────────────────────────────────────────────────────────────────────────────╮
+│   4 │   #main > * {                                                          │
+│   5 │   │   height: 1fr; padding: 0 1;                                       │
+│ ❱ 6 │   │   border: round $neutral-200; color: $muted;                       │
+│   7 │   }                                                                    │
+│   8                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ • reference to undefined variable '$neutral-200'                               
+
+
+=== tests/test_tui.py::test_number_keys_switch_phase (call) ===
+async def main():
+        async with app.run_test(size=size) as pilot:
+>           await coro_fn(app, pilot)
+
+tests/test_tui.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:39: in check
+    assert app.phase == "graph"
+           ^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/reactive.py:304: in __get__
+    self._initialize_reactive(obj, self.name)
+.venv/lib/python3.13/site-packages/textual/reactive.py:228: in _initialize_reactive
+    self._check_watchers(obj, name, default)
+.venv/lib/python3.13/site-packages/textual/reactive.py:396: in _check_watchers
+    invoke_watcher(obj, public_watch_function, old_value, value)
+.venv/lib/python3.13/site-packages/textual/reactive.py:114: in invoke_watcher
+    watch_result = cast(WatchCallbackNewValueType, watch_function)(value)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/research_os/tui/app.py:50: in watch_phase
+    self.query_one(PhaseTabs).active = phase
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ResearchOSApp(title='Research OS', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'})
+selector = <class 'research_os.tui.widgets.PhaseTabs'>, expect_type = None
+
+    def query_one(
+        self,
+        selector: str | type[QueryType],
+        expect_type: type[QueryType] | None = None,
+    ) -> QueryType | Widget:
+        """Get a widget from this widget's children that matches a selector or widget type.
+    
+        Args:
+            selector: A selector or widget type.
+            expect_type: Require the object be of the supplied type, or None for any type.
+    
+        Raises:
+            WrongType: If the wrong type was found.
+            NoMatches: If no node matches the query.
+    
+        Returns:
+            A widget matching the selector.
+        """
+        _rich_traceback_omit = True
+    
+        base_node = self._get_dom_base()
+    
+        if isinstance(selector, str):
+            query_selector = selector
+        else:
+            query_selector = selector.__name__
+    
+        if is_id_selector(query_selector):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+            if (
+                node := walk_breadth_search_id(
+                    base_node, query_selector[1:], with_root=False
+                )
+            ) is not None:
+                if expect_type is not None and not isinstance(node, expect_type):
+                    raise WrongType(
+                        f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                    )
+                base_node._query_one_cache[cache_key] = node
+                return node
+            raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+    
+        try:
+            selector_set = parse_selectors(query_selector)
+        except TokenError:
+            raise InvalidQueryFormat(
+                f"Unable to parse {query_selector!r} as a query; check for syntax errors"
+            ) from None
+    
+        if all(selectors.is_simple for selectors in selector_set):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+        else:
+            cache_key = None
+    
+        for node in walk_breadth_first(base_node, with_root=False):
+            if not match(selector_set, node):
+                continue
+            if expect_type is not None and not isinstance(node, expect_type):
+                raise WrongType(
+                    f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                )
+            if cache_key is not None:
+                base_node._query_one_cache[cache_key] = node
+            return node
+    
+>       raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+E       textual.css.query.NoMatches: No nodes match 'PhaseTabs' on Screen(id='_default')
+
+.venv/lib/python3.13/site-packages/textual/dom.py:1533: NoMatches
+
+During handling of the above exception, another exception occurred:
+
+    def test_number_keys_switch_phase():
+        async def check(app, pilot):
+            await pilot.press("3")
+            assert app.phase == "graph"
+            assert app.query_one(ContentSwitcher).current == "graph"
+            await pilot.press("7")
+            tabs, marker = text_of(app.query_one(PhaseTabs)).split("\n")
+            assert tabs.index("7 Intel") == marker.index("▔")
+    
+>       run(check)
+
+tests/test_tui.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:17: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:14: in main
+    async with app.run_test(size=size) as pilot:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/contextlib.py:235: in __aexit__
+    await self.gen.athrow(value)
+.venv/lib/python3.13/site-packages/textual/app.py:2218: in run_test
+    raise self._exception
+.venv/lib/python3.13/site-packages/textual/app.py:3493: in _process_messages
+    await run_process_messages()
+.venv/lib/python3.13/site-packages/textual/app.py:3432: in run_process_messages
+    await self._dispatch_message(events.Compose())
+.venv/lib/python3.13/site-packages/textual/message_pump.py:727: in _dispatch_message
+    await self.on_event(message)
+.venv/lib/python3.13/site-packages/textual/app.py:4064: in on_event
+    await self._init_mode(self._current_mode)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/app.py:2621: in _init_mode
+    self._register(self, screen)
+.venv/lib/python3.13/site-packages/textual/app.py:3671: in _register
+    apply_stylesheet(widget, cache=cache)
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:496: in apply
+    rules_map = self.rules_map
+                ^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:187: in rules_map
+    for rule in self.rules:
+                ^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:173: in rules
+    self.parse()
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:390: in parse
+    css_rules = self._parse_rules(
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:269: in _parse_rules
+    rules = list(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:482: in parse
+    yield from parse_rule_set(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:194: in parse_rule_set
+    token = next(tokens)
+            ^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/parse.py:447: in substitute_references
+    _unresolved(variable_name, variables.keys(), token)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+variable_name = 'neutral-200'
+variables = dict_keys(['text-primary', 'text-secondary', 'text-warning', 'text-error', 'text-success', 'text-accent', 'primary-dar...focus-text-style', 'ansi-background', 'ansi-foreground', 'screen-selection-background', 'screen-selection-foreground'])
+token = <Token name='variable_ref' value='$neutral-200' read_from=('/home/mutomasa/research/research_os/src/research_os/tui/app.py', 'ResearchOSApp.CSS') code='\n    Screen { background: $background; }...' location=(5, 22)>
+
+    def _unresolved(variable_name: str, variables: Iterable[str], token: Token) -> NoReturn:
+        """Raise a TokenError regarding an unresolved variable.
+    
+        Args:
+            variable_name: A variable name.
+            variables: Possible choices used to generate suggestion.
+            token: The Token.
+    
+        Raises:
+            UnresolvedVariableError: Always raises a TokenError.
+        """
+        message = f"reference to undefined variable '${variable_name}'"
+        suggested_variable = get_suggestion(variable_name, list(variables))
+        if suggested_variable:
+            message += f"; did you mean '${suggested_variable}'?"
+    
+>       raise UnresolvedVariableError(
+            token.read_from,
+            token.code,
+            token.start,
+            message,
+            end=token.end,
+        )
+E       textual.css.errors.UnresolvedVariableError: reference to undefined variable '$neutral-200'
+
+.venv/lib/python3.13/site-packages/textual/css/parse.py:359: UnresolvedVariableError
+--- Captured stderr call ---
+ Error in stylesheet:
+ /home/mutomasa/research/research_os/src/research_os/tui/app.py, 
+ResearchOSApp.CSS:6:23
+╭──────────────────────────────────────────────────────────────────────────────╮
+│   4 │   #main > * {                                                          │
+│   5 │   │   height: 1fr; padding: 0 1;                                       │
+│ ❱ 6 │   │   border: round $neutral-200; color: $muted;                       │
+│   7 │   }                                                                    │
+│   8                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ • reference to undefined variable '$neutral-200'                               
+
+
+=== tests/test_tui.py::test_help_opens_and_closes (call) ===
+async def main():
+        async with app.run_test(size=size) as pilot:
+>           await coro_fn(app, pilot)
+
+tests/test_tui.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'})>
+
+    async def check(app, pilot):
+        await pilot.press("question_mark")
+>       assert isinstance(app.screen, HelpScreen)
+E       AssertionError: assert False
+E        +  where False = isinstance(Screen(id='_default'), HelpScreen)
+E        +    where Screen(id='_default') = ResearchOSApp(title='Research OS', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'}).screen
+
+tests/test_tui.py:51: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+    def test_help_opens_and_closes():
+        async def check(app, pilot):
+            await pilot.press("question_mark")
+            assert isinstance(app.screen, HelpScreen)
+            await pilot.press("escape")
+            assert not isinstance(app.screen, HelpScreen)
+    
+>       run(check)
+
+tests/test_tui.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:17: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:14: in main
+    async with app.run_test(size=size) as pilot:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/contextlib.py:235: in __aexit__
+    await self.gen.athrow(value)
+.venv/lib/python3.13/site-packages/textual/app.py:2218: in run_test
+    raise self._exception
+.venv/lib/python3.13/site-packages/textual/app.py:3493: in _process_messages
+    await run_process_messages()
+.venv/lib/python3.13/site-packages/textual/app.py:3432: in run_process_messages
+    await self._dispatch_message(events.Compose())
+.venv/lib/python3.13/site-packages/textual/message_pump.py:727: in _dispatch_message
+    await self.on_event(message)
+.venv/lib/python3.13/site-packages/textual/app.py:4064: in on_event
+    await self._init_mode(self._current_mode)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/app.py:2621: in _init_mode
+    self._register(self, screen)
+.venv/lib/python3.13/site-packages/textual/app.py:3671: in _register
+    apply_stylesheet(widget, cache=cache)
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:496: in apply
+    rules_map = self.rules_map
+                ^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:187: in rules_map
+    for rule in self.rules:
+                ^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:173: in rules
+    self.parse()
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:390: in parse
+    css_rules = self._parse_rules(
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:269: in _parse_rules
+    rules = list(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:482: in parse
+    yield from parse_rule_set(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:194: in parse_rule_set
+    token = next(tokens)
+            ^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/parse.py:447: in substitute_references
+    _unresolved(variable_name, variables.keys(), token)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+variable_name = 'neutral-200'
+variables = dict_keys(['text-primary', 'text-secondary', 'text-warning', 'text-error', 'text-success', 'text-accent', 'primary-dar...focus-text-style', 'ansi-background', 'ansi-foreground', 'screen-selection-background', 'screen-selection-foreground'])
+token = <Token name='variable_ref' value='$neutral-200' read_from=('/home/mutomasa/research/research_os/src/research_os/tui/app.py', 'ResearchOSApp.CSS') code='\n    Screen { background: $background; }...' location=(5, 22)>
+
+    def _unresolved(variable_name: str, variables: Iterable[str], token: Token) -> NoReturn:
+        """Raise a TokenError regarding an unresolved variable.
+    
+        Args:
+            variable_name: A variable name.
+            variables: Possible choices used to generate suggestion.
+            token: The Token.
+    
+        Raises:
+            UnresolvedVariableError: Always raises a TokenError.
+        """
+        message = f"reference to undefined variable '${variable_name}'"
+        suggested_variable = get_suggestion(variable_name, list(variables))
+        if suggested_variable:
+            message += f"; did you mean '${suggested_variable}'?"
+    
+>       raise UnresolvedVariableError(
+            token.read_from,
+            token.code,
+            token.start,
+            message,
+            end=token.end,
+        )
+E       textual.css.errors.UnresolvedVariableError: reference to undefined variable '$neutral-200'
+
+.venv/lib/python3.13/site-packages/textual/css/parse.py:359: UnresolvedVariableError
+--- Captured stderr call ---
+ Error in stylesheet:
+ /home/mutomasa/research/research_os/src/research_os/tui/app.py, 
+ResearchOSApp.CSS:6:23
+╭──────────────────────────────────────────────────────────────────────────────╮
+│   4 │   #main > * {                                                          │
+│   5 │   │   height: 1fr; padding: 0 1;                                       │
+│ ❱ 6 │   │   border: round $neutral-200; color: $muted;                       │
+│   7 │   }                                                                    │
+│   8                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ • reference to undefined variable '$neutral-200'                               
+
+
+=== tests/test_tui.py::test_header_shows_theme_and_truncates (call) ===
+async def main():
+        async with app.run_test(size=size) as pilot:
+>           await coro_fn(app, pilot)
+
+tests/test_tui.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:60: in check
+    line = text_of(app.query_one(HeaderLine))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ResearchOSApp(title='Research OS', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'})
+selector = <class 'research_os.tui.widgets.HeaderLine'>, expect_type = None
+
+    def query_one(
+        self,
+        selector: str | type[QueryType],
+        expect_type: type[QueryType] | None = None,
+    ) -> QueryType | Widget:
+        """Get a widget from this widget's children that matches a selector or widget type.
+    
+        Args:
+            selector: A selector or widget type.
+            expect_type: Require the object be of the supplied type, or None for any type.
+    
+        Raises:
+            WrongType: If the wrong type was found.
+            NoMatches: If no node matches the query.
+    
+        Returns:
+            A widget matching the selector.
+        """
+        _rich_traceback_omit = True
+    
+        base_node = self._get_dom_base()
+    
+        if isinstance(selector, str):
+            query_selector = selector
+        else:
+            query_selector = selector.__name__
+    
+        if is_id_selector(query_selector):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+            if (
+                node := walk_breadth_search_id(
+                    base_node, query_selector[1:], with_root=False
+                )
+            ) is not None:
+                if expect_type is not None and not isinstance(node, expect_type):
+                    raise WrongType(
+                        f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                    )
+                base_node._query_one_cache[cache_key] = node
+                return node
+            raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+    
+        try:
+            selector_set = parse_selectors(query_selector)
+        except TokenError:
+            raise InvalidQueryFormat(
+                f"Unable to parse {query_selector!r} as a query; check for syntax errors"
+            ) from None
+    
+        if all(selectors.is_simple for selectors in selector_set):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+        else:
+            cache_key = None
+    
+        for node in walk_breadth_first(base_node, with_root=False):
+            if not match(selector_set, node):
+                continue
+            if expect_type is not None and not isinstance(node, expect_type):
+                raise WrongType(
+                    f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                )
+            if cache_key is not None:
+                base_node._query_one_cache[cache_key] = node
+            return node
+    
+>       raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+E       textual.css.query.NoMatches: No nodes match 'HeaderLine' on Screen(id='_default')
+
+.venv/lib/python3.13/site-packages/textual/dom.py:1533: NoMatches
+
+During handling of the above exception, another exception occurred:
+
+    def test_header_shows_theme_and_truncates():
+        async def check(app, pilot):
+            line = text_of(app.query_one(HeaderLine))
+            assert line.startswith(" Research OS  ·  ")
+            assert line.endswith(app.query_one(HeaderLine).now.strftime("%Y-%m-%d %H:%M"))
+            assert "…" in line
+            assert len(line) == 80
+    
+>       run(check, ResearchOSApp(research_theme="失敗認識型の長期ロボットマニピュレーションに向けた視覚・触覚統合JEPA世界モデル"),
+            size=(80, 24))
+
+tests/test_tui.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:17: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:14: in main
+    async with app.run_test(size=size) as pilot:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/contextlib.py:235: in __aexit__
+    await self.gen.athrow(value)
+.venv/lib/python3.13/site-packages/textual/app.py:2218: in run_test
+    raise self._exception
+.venv/lib/python3.13/site-packages/textual/app.py:3493: in _process_messages
+    await run_process_messages()
+.venv/lib/python3.13/site-packages/textual/app.py:3432: in run_process_messages
+    await self._dispatch_message(events.Compose())
+.venv/lib/python3.13/site-packages/textual/message_pump.py:727: in _dispatch_message
+    await self.on_event(message)
+.venv/lib/python3.13/site-packages/textual/app.py:4064: in on_event
+    await self._init_mode(self._current_mode)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/app.py:2621: in _init_mode
+    self._register(self, screen)
+.venv/lib/python3.13/site-packages/textual/app.py:3671: in _register
+    apply_stylesheet(widget, cache=cache)
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:496: in apply
+    rules_map = self.rules_map
+                ^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:187: in rules_map
+    for rule in self.rules:
+                ^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:173: in rules
+    self.parse()
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:390: in parse
+    css_rules = self._parse_rules(
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:269: in _parse_rules
+    rules = list(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:482: in parse
+    yield from parse_rule_set(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:194: in parse_rule_set
+    token = next(tokens)
+            ^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/parse.py:447: in substitute_references
+    _unresolved(variable_name, variables.keys(), token)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+variable_name = 'neutral-200'
+variables = dict_keys(['text-primary', 'text-secondary', 'text-warning', 'text-error', 'text-success', 'text-accent', 'primary-dar...focus-text-style', 'ansi-background', 'ansi-foreground', 'screen-selection-background', 'screen-selection-foreground'])
+token = <Token name='variable_ref' value='$neutral-200' read_from=('/home/mutomasa/research/research_os/src/research_os/tui/app.py', 'ResearchOSApp.CSS') code='\n    Screen { background: $background; }...' location=(5, 22)>
+
+    def _unresolved(variable_name: str, variables: Iterable[str], token: Token) -> NoReturn:
+        """Raise a TokenError regarding an unresolved variable.
+    
+        Args:
+            variable_name: A variable name.
+            variables: Possible choices used to generate suggestion.
+            token: The Token.
+    
+        Raises:
+            UnresolvedVariableError: Always raises a TokenError.
+        """
+        message = f"reference to undefined variable '${variable_name}'"
+        suggested_variable = get_suggestion(variable_name, list(variables))
+        if suggested_variable:
+            message += f"; did you mean '${suggested_variable}'?"
+    
+>       raise UnresolvedVariableError(
+            token.read_from,
+            token.code,
+            token.start,
+            message,
+            end=token.end,
+        )
+E       textual.css.errors.UnresolvedVariableError: reference to undefined variable '$neutral-200'
+
+.venv/lib/python3.13/site-packages/textual/css/parse.py:359: UnresolvedVariableError
+--- Captured stderr call ---
+ Error in stylesheet:
+ /home/mutomasa/research/research_os/src/research_os/tui/app.py, 
+ResearchOSApp.CSS:6:23
+╭──────────────────────────────────────────────────────────────────────────────╮
+│   4 │   #main > * {                                                          │
+│   5 │   │   height: 1fr; padding: 0 1;                                       │
+│ ❱ 6 │   │   border: round $neutral-200; color: $muted;                       │
+│   7 │   }                                                                    │
+│   8                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ • reference to undefined variable '$neutral-200'                               
+
+
+=== tests/test_tui.py::test_status_bar_lists_connections_as_unset (call) ===
+async def main():
+        async with app.run_test(size=size) as pilot:
+>           await coro_fn(app, pilot)
+
+tests/test_tui.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:72: in check
+    line = text_of(app.query_one(StatusBar))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ResearchOSApp(title='Research OS', classes={'-dark-mode'}, pseudo_classes={'dark', 'focus'})
+selector = <class 'research_os.tui.widgets.StatusBar'>, expect_type = None
+
+    def query_one(
+        self,
+        selector: str | type[QueryType],
+        expect_type: type[QueryType] | None = None,
+    ) -> QueryType | Widget:
+        """Get a widget from this widget's children that matches a selector or widget type.
+    
+        Args:
+            selector: A selector or widget type.
+            expect_type: Require the object be of the supplied type, or None for any type.
+    
+        Raises:
+            WrongType: If the wrong type was found.
+            NoMatches: If no node matches the query.
+    
+        Returns:
+            A widget matching the selector.
+        """
+        _rich_traceback_omit = True
+    
+        base_node = self._get_dom_base()
+    
+        if isinstance(selector, str):
+            query_selector = selector
+        else:
+            query_selector = selector.__name__
+    
+        if is_id_selector(query_selector):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+            if (
+                node := walk_breadth_search_id(
+                    base_node, query_selector[1:], with_root=False
+                )
+            ) is not None:
+                if expect_type is not None and not isinstance(node, expect_type):
+                    raise WrongType(
+                        f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                    )
+                base_node._query_one_cache[cache_key] = node
+                return node
+            raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+    
+        try:
+            selector_set = parse_selectors(query_selector)
+        except TokenError:
+            raise InvalidQueryFormat(
+                f"Unable to parse {query_selector!r} as a query; check for syntax errors"
+            ) from None
+    
+        if all(selectors.is_simple for selectors in selector_set):
+            cache_key = (base_node._nodes._updates, query_selector, expect_type)
+            cached_result = base_node._query_one_cache.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+        else:
+            cache_key = None
+    
+        for node in walk_breadth_first(base_node, with_root=False):
+            if not match(selector_set, node):
+                continue
+            if expect_type is not None and not isinstance(node, expect_type):
+                raise WrongType(
+                    f"Node matching {query_selector!r} is the wrong type; expected type {expect_type.__name__!r}, found {node}"
+                )
+            if cache_key is not None:
+                base_node._query_one_cache[cache_key] = node
+            return node
+    
+>       raise NoMatches(f"No nodes match {query_selector!r} on {base_node!r}")
+E       textual.css.query.NoMatches: No nodes match 'StatusBar' on Screen(id='_default')
+
+.venv/lib/python3.13/site-packages/textual/dom.py:1533: NoMatches
+
+During handling of the above exception, another exception occurred:
+
+    def test_status_bar_lists_connections_as_unset():
+        async def check(app, pilot):
+            line = text_of(app.query_one(StatusBar))
+            for name in ["Paperpile", "arXiv", "alphaXiv", "GitHub", "Feeds", "MCP"]:
+                assert f"{name} –" in line
+            assert line.rstrip().endswith("q quit")
+    
+>       run(check)
+
+tests/test_tui.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:17: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:14: in main
+    async with app.run_test(size=size) as pilot:
+               ^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/contextlib.py:235: in __aexit__
+    await self.gen.athrow(value)
+.venv/lib/python3.13/site-packages/textual/app.py:2218: in run_test
+    raise self._exception
+.venv/lib/python3.13/site-packages/textual/app.py:3493: in _process_messages
+    await run_process_messages()
+.venv/lib/python3.13/site-packages/textual/app.py:3432: in run_process_messages
+    await self._dispatch_message(events.Compose())
+.venv/lib/python3.13/site-packages/textual/message_pump.py:727: in _dispatch_message
+    await self.on_event(message)
+.venv/lib/python3.13/site-packages/textual/app.py:4064: in on_event
+    await self._init_mode(self._current_mode)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/app.py:2621: in _init_mode
+    self._register(self, screen)
+.venv/lib/python3.13/site-packages/textual/app.py:3671: in _register
+    apply_stylesheet(widget, cache=cache)
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:496: in apply
+    rules_map = self.rules_map
+                ^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:187: in rules_map
+    for rule in self.rules:
+                ^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:173: in rules
+    self.parse()
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:390: in parse
+    css_rules = self._parse_rules(
+.venv/lib/python3.13/site-packages/textual/css/stylesheet.py:269: in _parse_rules
+    rules = list(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:482: in parse
+    yield from parse_rule_set(
+.venv/lib/python3.13/site-packages/textual/css/parse.py:194: in parse_rule_set
+    token = next(tokens)
+            ^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/textual/css/parse.py:447: in substitute_references
+    _unresolved(variable_name, variables.keys(), token)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+variable_name = 'neutral-200'
+variables = dict_keys(['text-primary', 'text-secondary', 'text-warning', 'text-error', 'text-success', 'text-accent', 'primary-dar...focus-text-style', 'ansi-background', 'ansi-foreground', 'screen-selection-background', 'screen-selection-foreground'])
+token = <Token name='variable_ref' value='$neutral-200' read_from=('/home/mutomasa/research/research_os/src/research_os/tui/app.py', 'ResearchOSApp.CSS') code='\n    Screen { background: $background; }...' location=(5, 22)>
+
+    def _unresolved(variable_name: str, variables: Iterable[str], token: Token) -> NoReturn:
+        """Raise a TokenError regarding an unresolved variable.
+    
+        Args:
+            variable_name: A variable name.
+            variables: Possible choices used to generate suggestion.
+            token: The Token.
+    
+        Raises:
+            UnresolvedVariableError: Always raises a TokenError.
+        """
+        message = f"reference to undefined variable '${variable_name}'"
+        suggested_variable = get_suggestion(variable_name, list(variables))
+        if suggested_variable:
+            message += f"; did you mean '${suggested_variable}'?"
+    
+>       raise UnresolvedVariableError(
+            token.read_from,
+            token.code,
+            token.start,
+            message,
+            end=token.end,
+        )
+E       textual.css.errors.UnresolvedVariableError: reference to undefined variable '$neutral-200'
+
+.venv/lib/python3.13/site-packages/textual/css/parse.py:359: UnresolvedVariableError
+--- Captured stderr call ---
+ Error in stylesheet:
+ /home/mutomasa/research/research_os/src/research_os/tui/app.py, 
+ResearchOSApp.CSS:6:23
+╭──────────────────────────────────────────────────────────────────────────────╮
+│   4 │   #main > * {                                                          │
+│   5 │   │   height: 1fr; padding: 0 1;                                       │
+│ ❱ 6 │   │   border: round $neutral-200; color: $muted;                       │
+│   7 │   }                                                                    │
+│   8                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ • reference to undefined variable '$neutral-200'                               
+

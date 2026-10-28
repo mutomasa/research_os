@@ -1,0 +1,227 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_tui.py::test_number_keys_switch_phase (call) ===
+def test_number_keys_switch_phase():
+        async def check(app, pilot):
+            await pilot.press("3")
+            assert app.phase == "graph"
+            assert app.query_one(ContentSwitcher).current == "graph"
+            await pilot.press("7")
+            tabs, marker = text_of(app.query_one(PhaseTabs)).split("\n")
+            assert tabs.index("7 Intel") == marker.index("▔")
+    
+>       run(check)
+
+tests/test_tui.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:19: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:17: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        await pilot.press("3")
+>       assert app.phase == "graph"
+E       AssertionError: assert 'papers' == 'graph'
+E         
+E         - graph
+E         + papers
+
+tests/test_tui.py:45: AssertionError
+
+=== tests/test_tui.py::test_help_opens_and_closes (call) ===
+def test_help_opens_and_closes():
+        async def check(app, pilot):
+            await pilot.press("question_mark")
+            assert isinstance(app.screen, HelpScreen)
+            await pilot.press("escape")
+            assert not isinstance(app.screen, HelpScreen)
+    
+>       run(check)
+
+tests/test_tui.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:19: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:17: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        await pilot.press("question_mark")
+>       assert isinstance(app.screen, HelpScreen)
+E       AssertionError: assert False
+E        +  where False = isinstance(Screen(id='_default'), HelpScreen)
+E        +    where Screen(id='_default') = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'}).screen
+
+tests/test_tui.py:57: AssertionError
+
+=== tests/test_tui.py::test_agent_pane_input_history_and_unconnected_notice (call) ===
+def test_agent_pane_input_history_and_unconnected_notice():
+        from textual.widgets import RichLog
+    
+        from research_os.tui.agent import AgentInput, AgentPane
+    
+        async def check(app, pilot):
+            await pilot.press("greater_than_sign")
+            inp = app.query_one(AgentInput)
+            assert app.focused is inp
+            # フォーカス中の数字や q は入力される（タブ切替・終了にならない）
+            await pilot.press(*"q3", "enter")
+            assert app.phase == "papers" and app.is_running
+            log = "\n".join(line.text for line in app.query_one(RichLog).lines)
+            assert "❯ q3" in log and "未接続" in log
+            assert inp.value == ""
+            await pilot.press("up")
+            assert inp.value == "q3"
+            await pilot.press("down")
+            assert inp.value == ""
+            await pilot.press("escape")
+            assert app.focused is None
+            await pilot.press("4")
+            assert "Hypothesis" in title_of(app.query_one(AgentPane))
+    
+>       run(check)
+
+tests/test_tui.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:19: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:17: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        await pilot.press("greater_than_sign")
+        inp = app.query_one(AgentInput)
+        assert app.focused is inp
+        # フォーカス中の数字や q は入力される（タブ切替・終了にならない）
+        await pilot.press(*"q3", "enter")
+        assert app.phase == "papers" and app.is_running
+        log = "\n".join(line.text for line in app.query_one(RichLog).lines)
+>       assert "❯ q3" in log and "未接続" in log
+E       AssertionError: assert ('❯ q3' in '❯ >q3\n  ◯ Agent コアは未接続です（docs/todo.md §1）')
+
+tests/test_tui.py:99: AssertionError
+
+=== tests/test_tui.py::test_agent_pane_completes_suggestion_and_shows_state (call) ===
+def test_agent_pane_completes_suggestion_and_shows_state():
+        from research_os.tui.agent import AgentInput, AgentPane
+    
+        async def check(app, pilot):
+            await pilot.press("i", *"今週", "tab")
+            assert app.query_one(AgentInput).value == "今週の Inbox"
+            pane = app.query_one(AgentPane)
+            assert title_of(pane).endswith("idle")
+            app.agent_state = "running"
+            await pilot.pause()
+            assert title_of(pane).endswith("running")
+            assert pane.has_class("-busy")
+            assert not pane.query_one("#suggestions").display
+    
+>       run(check)
+
+tests/test_tui.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:19: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:17: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        await pilot.press("i", *"今週", "tab")
+>       assert app.query_one(AgentInput).value == "今週の Inbox"
+E       AssertionError: assert 'i今週' == '今週の Inbox'
+E         
+E         - 今週の Inbox
+E         + i今週
+
+tests/test_tui.py:118: AssertionError
+
+=== tests/test_tui.py::test_nothing_is_focused_at_start (call) ===
+def test_nothing_is_focused_at_start():
+        async def check(app, pilot):
+            assert app.focused is None
+    
+>       run(check)
+
+tests/test_tui.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_tui.py:19: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_tui.py:17: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+>       assert app.focused is None
+E       AssertionError: assert AgentInput(id='agent-input') is None
+E        +  where AgentInput(id='agent-input') = ResearchOSApp(title='Research OS', classes={'-dark-mode', '-theme-lab-ink'}, pseudo_classes={'focus', 'dark'}).focused
+
+tests/test_tui.py:132: AssertionError

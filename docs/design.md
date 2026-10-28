@@ -70,6 +70,8 @@
 | ⑤ | Agent 操作 | 自然言語で Agent に指示する欄（**最重要**） |
 | ⑥ | 外部接続 | Paperpile / arXiv / alphaXiv / GitHub / Feeds / MCP の接続ステータス |
 
+> 画面右上には Agent の状態を表情で示す小さな ASCII のネコ（**Neko**）が常駐します。描き方は [`DESIGN.md` §5.9](../DESIGN.md#59-neko右上のマスコット)。
+
 > Intel は「検索 → 読解 → 比較 → 仮説化 → 実験」の直列フローには入らない **並走トラック** です。
 > 毎日の巡回で得た論文・技術動向を Papers へ、事業化の動向を Hypothesis（研究テーマ探索）へ流し込みます。
 

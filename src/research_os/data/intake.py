@@ -176,3 +176,17 @@ def surface(store: PaperStore, profile: ResearchProfile, now: datetime, judged_o
     store.commit()
     report.weekly_remaining = max(0, remaining)
     return report
+
+
+def format_reason(parts: dict) -> str:
+    """スコアの内訳を 1 行で表す（CLI の inbox と TUI の Papers 画面で共有）。"""
+    source = "（LLM）" if parts.get("relevance_source") == "llm" else ""
+    items = [f"{parts.get('primary_rq')} 関連 {parts['relevance']:.2f}{source}"]
+    if parts.get("venue_priority"):
+        items.append(f"投稿先({parts['venue_priority']})")
+    if parts["gap"] > 0:
+        items.append(f"手薄 {parts['gap']:.2f}")
+    if parts.get("link"):
+        items.append(f"中核とつながり {parts['link']:.2f}")
+    items.append(f"被引用 {parts['citations_per_year']:g}/年")
+    return " · ".join(items)
