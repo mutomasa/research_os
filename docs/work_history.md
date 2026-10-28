@@ -288,3 +288,8 @@
 
 - 何を: `DESIGN.md` §5.9 に右上常駐の ASCII ネコ「Neko」を追加し、ヘッダ図・全体フレーム・レイアウト・アニメーション・Quick Reference を更新。`docs/design.md` §1 と `docs/todo.md` にも反映した。
 - なぜ: UI に親しみを持たせつつ、Agent の状態を表情で示すアバターとして機能させるため。絵文字禁止・装飾アニメ禁止の規約に合わせ ASCII のみ・状態遷移時のみ変化とした。
+
+### 2026-10-28 `c34c654` docs: split TUI skeleton into four PRs in todo.md
+
+- 何を: `docs/todo.md` §0.1 に、TUI の骨組みを 4 本の PR（アプリの枠・Agent 欄・Neko・Papers の Inbox）に分けて書き出した。
+- なぜ: 機能ごとにブランチと PR を切って小さく積むため。Agent コアは未接続のまま、見た目と操作の器を先に作る。
