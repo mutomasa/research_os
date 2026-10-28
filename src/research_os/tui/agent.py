@@ -102,7 +102,9 @@ class AgentPane(Vertical):
     state: reactive[AgentState] = reactive("idle")
 
     def compose(self) -> ComposeResult:
-        yield RichLog(wrap=True, id="agent-log")
+        log = RichLog(wrap=True, id="agent-log")
+        log.can_focus = False  # 起動直後に自動でフォーカスを取らない（入力は > / i で始める）
+        yield log
         with Horizontal(id="prompt-row"):
             yield Static("❯", id="prompt")
             yield AgentInput(id="agent-input")

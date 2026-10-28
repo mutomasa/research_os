@@ -15,6 +15,8 @@ from research_os.tui.widgets import HeaderLine, HelpScreen, PhasePlaceholder, Ph
 
 class ResearchOSApp(App):
     TITLE = "Research OS"
+    # 起動直後はどこにもフォーカスを置かない。1–7 や q をそのままグローバルキーとして効かせるため
+    AUTO_FOCUS = None
     CSS = """
     Screen { background: $background; }
     #main { height: 1fr; }

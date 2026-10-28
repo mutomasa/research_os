@@ -125,3 +125,10 @@ def test_agent_pane_completes_suggestion_and_shows_state():
         assert not pane.query_one("#suggestions").display
 
     run(check)
+
+
+def test_nothing_is_focused_at_start():
+    async def check(app, pilot):
+        assert app.focused is None
+
+    run(check)
