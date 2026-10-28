@@ -143,7 +143,7 @@ def _cmd_tui(args: argparse.Namespace) -> int:
 
     # プロファイルが無くても画面は開く（ヘッダのテーマ表示が消えるだけ）
     research_theme = profile.load_profile(args.profile).theme if Path(args.profile).exists() else None
-    ResearchOSApp(research_theme=research_theme).run()
+    ResearchOSApp(research_theme=research_theme, mascot=args.mascot).run()
     return 0
 
 
@@ -189,6 +189,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=_cmd_triage)
 
     p = sub.add_parser("tui", help="TUI を起動する")
+    p.add_argument("--mascot", choices=["full", "compact", "off"], default="full",
+                   help="右上の Neko（full: 3 行 / compact: ヘッダに 1 行 / off: 出さない）")
     p.set_defaults(func=_cmd_tui)
     return parser
 

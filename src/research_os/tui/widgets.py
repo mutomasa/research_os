@@ -35,11 +35,12 @@ GLOBAL_KEYS = [
 
 
 class HeaderLine(Widget):
-    """1 行目：アプリ名 · 研究テーマ（左）と時刻（右）。"""
+    """1 行目：アプリ名 · 研究テーマ（左）と時刻（右）。狭い端末では時刻の右に 1 行の Neko を置く。"""
 
     DEFAULT_CSS = "HeaderLine { height: 1; }"
 
     now: reactive[datetime] = reactive(datetime.now)
+    mascot: reactive[Text | None] = reactive(None)
 
     def __init__(self, research_theme: str | None, **kwargs):
         super().__init__(**kwargs)
@@ -49,15 +50,17 @@ class HeaderLine(Widget):
         self.set_interval(30, lambda: setattr(self, "now", datetime.now()))
 
     def render(self) -> Text:
-        clock = self.now.strftime("%Y-%m-%d %H:%M")
+        clock = Text(self.now.strftime("%Y-%m-%d %H:%M"), style=theme.MUTED)
+        if self.mascot is not None:
+            clock += Text(" ") + self.mascot
         left = Text(" Research OS", style=f"bold {theme.FOREGROUND}")
         if self.research_theme:
             left.append("  ·  ", style=theme.MUTED)
             left.append(self.research_theme, style=theme.FOREGROUND)
         # 時刻との間に 2 列は空ける。テーマが長ければ表示幅で切って … を付ける（§7.3）
-        left.truncate(max(self.size.width - len(clock) - 2, 0), overflow="ellipsis")
-        gap = max(self.size.width - left.cell_len - len(clock), 1)
-        return left + Text(" " * gap) + Text(clock, style=theme.MUTED)
+        left.truncate(max(self.size.width - clock.cell_len - 2, 0), overflow="ellipsis")
+        gap = max(self.size.width - left.cell_len - clock.cell_len, 1)
+        return left + Text(" " * gap) + clock
 
 
 class PhaseTabs(Widget):

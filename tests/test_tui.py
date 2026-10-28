@@ -65,7 +65,8 @@ def test_header_shows_theme_and_truncates():
     async def check(app, pilot):
         line = text_of(app.query_one(HeaderLine))
         assert line.startswith(" Research OS  ·  ")
-        assert line.endswith(app.query_one(HeaderLine).now.strftime("%Y-%m-%d %H:%M"))
+        # 100 列未満なので Neko は時刻の右に 1 行で座る（DESIGN.md §5.9）
+        assert line.endswith(app.query_one(HeaderLine).now.strftime("%Y-%m-%d %H:%M") + " (o.o)")
         assert "…" in line
         assert cell_len(line) == 80  # 全角 = 2 列で数える（DESIGN.md §7.3）
 
@@ -132,3 +133,64 @@ def test_nothing_is_focused_at_start():
         assert app.focused is None
 
     run(check)
+
+
+def neko_text(app) -> str:
+    from research_os.tui.neko import Neko
+
+    return text_of(app.query_one(Neko))
+
+
+def test_neko_sits_top_right_and_follows_agent_state():
+    from research_os.tui.neko import Neko
+
+    async def check(app, pilot):
+        cat = app.query_one(Neko)
+        assert cat.display
+        # ヘッダ〜マーカーの 3 行の右端 7 列
+        assert (cat.region.x, cat.region.y, cat.region.width, cat.region.height) == (113, 0, 7, 3)
+        assert neko_text(app) == " /\\_/\\ \n( o.o )\n > ^ < "
+        for state, face in [("thinking", "( -.- )"), ("running", "( O.O )"), ("error", "( x.x )")]:
+            app.agent_state = state
+            await pilot.pause()
+            assert neko_text(app).split("\n")[1] == face
+        app.agent_state = "confirm"
+        await pilot.pause()
+        assert neko_text(app).split("\n")[1:] == ["( o.O )", " > ? < "]
+
+    run(check)
+
+
+def test_neko_done_returns_to_idle_and_sleeps_when_untouched():
+    app = ResearchOSApp()
+    app.done_seconds = 0.05
+    app.sleep_seconds = 0.1
+
+    async def check(app, pilot):
+        app.agent_state = "done"
+        await pilot.pause()
+        assert neko_text(app).split("\n")[1] == "( ^.^ )"
+        await pilot.pause(0.3)
+        assert app.agent_state == "idle"
+        assert app.sleeping
+        assert neko_text(app).split("\n")[0].endswith("z")
+        await pilot.press("3")
+        assert not app.sleeping
+        assert neko_text(app).split("\n")[1] == "( o.o )"
+
+    run(check, app)
+
+
+def test_neko_modes():
+    from research_os.tui.neko import Neko
+
+    async def compact(app, pilot):
+        assert not app.query_one(Neko).display
+        assert text_of(app.query_one(HeaderLine)).endswith(" (o.o)")
+
+    async def off(app, pilot):
+        assert not app.query_one(Neko).display
+        assert not text_of(app.query_one(HeaderLine)).endswith(")")
+
+    run(compact, ResearchOSApp(mascot="compact"))
+    run(off, ResearchOSApp(mascot="off"))
