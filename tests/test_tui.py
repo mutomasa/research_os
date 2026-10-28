@@ -1,6 +1,7 @@
 import asyncio
 
 from rich.cells import cell_len
+from textual.content import Content
 from textual.widgets import ContentSwitcher
 
 from research_os.tui.app import ResearchOSApp
@@ -20,6 +21,10 @@ def run(coro_fn, app=None, size=(120, 36)):
 
 def text_of(widget) -> str:
     return widget.render().plain
+
+
+def title_of(widget) -> str:
+    return Content.from_markup(widget.border_title).plain
 
 
 def test_starts_on_papers():
@@ -74,5 +79,49 @@ def test_status_bar_lists_connections_as_unset():
         for name in ["Paperpile", "arXiv", "alphaXiv", "GitHub", "Feeds", "MCP"]:
             assert f"{name} –" in line
         assert line.rstrip().endswith("q quit")
+
+    run(check)
+
+
+def test_agent_pane_input_history_and_unconnected_notice():
+    from textual.widgets import RichLog
+
+    from research_os.tui.agent import AgentInput, AgentPane
+
+    async def check(app, pilot):
+        await pilot.press("greater_than_sign")
+        inp = app.query_one(AgentInput)
+        assert app.focused is inp
+        # フォーカス中の数字や q は入力される（タブ切替・終了にならない）
+        await pilot.press(*"q3", "enter")
+        assert app.phase == "papers" and app.is_running
+        log = "\n".join(line.text for line in app.query_one(RichLog).lines)
+        assert "❯ q3" in log and "未接続" in log
+        assert inp.value == ""
+        await pilot.press("up")
+        assert inp.value == "q3"
+        await pilot.press("down")
+        assert inp.value == ""
+        await pilot.press("escape")
+        assert app.focused is None
+        await pilot.press("4")
+        assert "Hypothesis" in title_of(app.query_one(AgentPane))
+
+    run(check)
+
+
+def test_agent_pane_completes_suggestion_and_shows_state():
+    from research_os.tui.agent import AgentInput, AgentPane
+
+    async def check(app, pilot):
+        await pilot.press("i", *"今週", "tab")
+        assert app.query_one(AgentInput).value == "今週の Inbox"
+        pane = app.query_one(AgentPane)
+        assert title_of(pane).endswith("idle")
+        app.agent_state = "running"
+        await pilot.pause()
+        assert title_of(pane).endswith("running")
+        assert pane.has_class("-busy")
+        assert not pane.query_one("#suggestions").display
 
     run(check)

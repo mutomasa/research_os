@@ -25,6 +25,10 @@ CONNECTIONS = ["Paperpile", "arXiv", "alphaXiv", "GitHub", "Feeds", "MCP"]
 
 GLOBAL_KEYS = [
     ("1–7", "フェーズタブ切替（7 は Intel）"),
+    (">  i", "Agent 欄に入力"),
+    ("esc", "Agent 欄からメインに戻る"),
+    ("↑ ↓", "Agent 欄の入力履歴"),
+    ("tab", "Agent 欄で提案を補完"),
     ("?", "このヘルプ"),
     ("q", "終了"),
 ]
