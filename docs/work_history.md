@@ -323,3 +323,8 @@
 
 - 何を: 修正の途中で入力行が自動フォーカスを取り、5 テストが落ちたログを残した。
 - なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `9194829` fix: let modal screens show the screen behind them
+
+- 何を: ModalScreen の背景を半透明にし、ヘルプを開いても後ろの画面が見えるようにした。
+- なぜ: App の `Screen { background }` がモーダルにも効き、背景が塗りつぶされていた（Papers の捨てる理由ダイアログで気づいた）。

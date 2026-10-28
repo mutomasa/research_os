@@ -132,3 +132,11 @@ def test_nothing_is_focused_at_start():
         assert app.focused is None
 
     run(check)
+
+
+def test_help_keeps_the_screen_behind_visible():
+    async def check(app, pilot):
+        await pilot.press("question_mark")
+        assert app.screen.styles.background.a < 1
+
+    run(check)
