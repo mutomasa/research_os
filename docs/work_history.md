@@ -293,3 +293,13 @@
 
 - 何を: `docs/todo.md` §0.1 に、TUI の骨組みを 4 本の PR（アプリの枠・Agent 欄・Neko・Papers の Inbox）に分けて書き出した。
 - なぜ: 機能ごとにブランチと PR を切って小さく積むため。Agent コアは未接続のまま、見た目と操作の器を先に作る。
+
+### 2026-10-28 `39e7c3c` feat: add TUI shell with header, phase tabs and status bar
+
+- 何を: `research-os tui` で Textual アプリを起動できるようにした。ヘッダ・フェーズタブ 1–7・メイン領域（未実装はプレースホルダ）・ステータスバー・`?` ヘルプ・Lab Ink 配色。
+- なぜ: Agent 欄・Neko・Papers 画面を載せる器を先に作るため（todo.md §0.1 PR A）。
+
+### 2026-10-28 `336f20e` test: keep failure logs of TUI shell tests
+
+- 何を: テーマの登録順・reactive の初回ウォッチャー・表示幅の測り方の誤りで落ちた 3 回分のログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
