@@ -24,6 +24,8 @@ class ResearchOSApp(App):
     AUTO_FOCUS = None
     CSS = """
     Screen { background: $background; }
+    /* モーダル（ヘルプ・確認）は後ろの画面を透かす。上の Screen の指定が ModalScreen にも効くため上書きする */
+    ModalScreen { background: $background 60%; }
     #top { height: 3; }
     #neko { margin-left: 2; }
     #main { height: 1fr; }

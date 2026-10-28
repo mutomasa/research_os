@@ -194,3 +194,11 @@ def test_neko_modes():
 
     run(compact, ResearchOSApp(mascot="compact"))
     run(off, ResearchOSApp(mascot="off"))
+
+
+def test_help_keeps_the_screen_behind_visible():
+    async def check(app, pilot):
+        await pilot.press("question_mark")
+        assert app.screen.styles.background.a < 1
+
+    run(check)
