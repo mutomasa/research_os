@@ -14,6 +14,7 @@ from textual.widgets import ContentSwitcher
 from research_os.tui.agent import AgentInput, AgentPane, AgentState
 from research_os.tui import neko
 from research_os.tui.neko import MascotMode, Neko
+from research_os.tui.papers import PaperList, PapersContext, PapersView
 from research_os.tui.theme import LAB_INK, PHASES
 from research_os.tui.widgets import HeaderLine, HelpScreen, PhasePlaceholder, PhaseTabs, StatusBar
 
@@ -28,8 +29,10 @@ class ResearchOSApp(App):
     ModalScreen { background: $background 60%; }
     #top { height: 3; }
     #neko { margin-left: 2; }
+    /* トーストは右上（DESIGN.md §5.8）。Neko の 3 行は避ける */
+    ToastRack { align: right top; margin-top: 3; }
     #main { height: 1fr; }
-    #main > * {
+    #main > PhasePlaceholder {
         height: 1fr; padding: 0 1;
         border: round $neutral-200; color: $muted;
     }
@@ -49,10 +52,12 @@ class ResearchOSApp(App):
     done_seconds = 5.0  # done の顔を見せてから idle に戻すまで
     sleep_seconds = 600.0  # 操作がないまま経つと Neko が眠る
 
-    def __init__(self, research_theme: str | None = None, mascot: MascotMode = "full", **kwargs):
+    def __init__(self, research_theme: str | None = None, mascot: MascotMode = "full",
+                 papers: PapersContext | None = None, **kwargs):
         super().__init__(**kwargs)
         self.research_theme = research_theme
         self.mascot = mascot
+        self.papers = papers
         # CSS の $agent などはテーマの変数なので、CSS を読む前に登録する
         self.register_theme(LAB_INK)
         self.theme = LAB_INK.name
@@ -65,7 +70,10 @@ class ResearchOSApp(App):
             yield Neko(id="neko")
         with ContentSwitcher(initial=self.phase, id="main"):
             for p in PHASES:
-                yield PhasePlaceholder(p)
+                if p.id == "papers" and self.papers is not None:
+                    yield PapersView(self.papers, id="papers")
+                else:
+                    yield PhasePlaceholder(p)
         yield AgentPane(id="agent")
         yield StatusBar(id="status")
 
@@ -73,10 +81,20 @@ class ResearchOSApp(App):
         self.query_one(PhaseTabs).active = phase
         self.query_one(ContentSwitcher).current = phase
         self.query_one(AgentPane).phase = phase
+        self._focus_main()
 
     def on_mount(self) -> None:
         self._sleep_timer = self.set_timer(self.sleep_seconds, self._fall_asleep)
         self._update_mascot()
+        self._focus_main()
+
+    def _focus_main(self) -> None:
+        """メイン領域の一覧にフォーカスを置く。一覧のない画面ではどこにも置かない。"""
+        lists = self.query_one(ContentSwitcher).query(PaperList)
+        if self.phase == "papers" and lists:
+            lists.first().focus()
+        else:
+            self.set_focus(None)
 
     def on_resize(self, event: events.Resize) -> None:
         self._update_mascot()
@@ -122,7 +140,7 @@ class ResearchOSApp(App):
         self.query_one(AgentPane).focus_input()
 
     def on_agent_input_leave(self, event: AgentInput.Leave) -> None:
-        self.set_focus(None)
+        self._focus_main()
 
     def action_help(self) -> None:
         if not isinstance(self.screen, HelpScreen):

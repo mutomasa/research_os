@@ -29,6 +29,10 @@ GLOBAL_KEYS = [
     ("esc", "Agent 欄からメインに戻る"),
     ("↑ ↓", "Agent 欄の入力履歴"),
     ("tab", "Agent 欄で提案を補完"),
+    ("j k", "一覧の移動（Papers）"),
+    ("r e c", "読む / 読了 / 中核（Papers）"),
+    ("d", "捨てる＋理由（Papers）"),
+    ("[ ]", "一覧の切替 Inbox / To read / Read / Core"),
     ("?", "このヘルプ"),
     ("q", "終了"),
 ]

@@ -1,30 +1,9 @@
-import asyncio
-
 from rich.cells import cell_len
-from textual.content import Content
 from textual.widgets import ContentSwitcher
+from tui_helpers import run, text_of, title_of
 
 from research_os.tui.app import ResearchOSApp
 from research_os.tui.widgets import HeaderLine, HelpScreen, PhaseTabs, StatusBar
-
-
-def run(coro_fn, app=None, size=(120, 36)):
-    """Textual の run_test を pytest-asyncio なしで回す。"""
-    app = app or ResearchOSApp(research_theme="vision tactile world model")
-
-    async def main():
-        async with app.run_test(size=size) as pilot:
-            await coro_fn(app, pilot)
-
-    asyncio.run(main())
-
-
-def text_of(widget) -> str:
-    return widget.render().plain
-
-
-def title_of(widget) -> str:
-    return Content.from_markup(widget.border_title).plain
 
 
 def test_starts_on_papers():

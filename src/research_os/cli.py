@@ -128,9 +128,14 @@ def _cmd_triage(args: argparse.Namespace) -> int:
 def _cmd_tui(args: argparse.Namespace) -> int:
     from research_os.tui.app import ResearchOSApp
 
-    # プロファイルが無くても画面は開く（ヘッダのテーマ表示が消えるだけ）
-    research_theme = profile.load_profile(args.profile).theme if Path(args.profile).exists() else None
-    ResearchOSApp(research_theme=research_theme, mascot=args.mascot).run()
+    from research_os.tui.papers import PapersContext
+
+    # プロファイルが無くても画面は開く（ヘッダのテーマと Papers の Inbox が出ないだけ）
+    research_theme, papers_ctx = None, None
+    if Path(args.profile).exists():
+        registry, prof, store = _load(args)
+        research_theme, papers_ctx = prof.theme, PapersContext(store, prof, registry)
+    ResearchOSApp(research_theme=research_theme, mascot=args.mascot, papers=papers_ctx).run()
     return 0
 
 
