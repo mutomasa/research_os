@@ -16,7 +16,7 @@
 - [ ] テーマ実装：`DESIGN.md` の配色トークン（Hex / 256 / 16 色フォールバック）・枠線・アイコンの ASCII フォールバック
 - [ ] 表示幅ユーティリティ：East Asian Width（全角 = 2、Ambiguous 幅の設定）に基づく切り詰め・パディング
 - [ ] キーバインド定義（`DESIGN.md` §9）とヘルプ画面
-- [ ] 右上の Neko（`DESIGN.md` §5.9）：Agent 状態に連動して顔を差し替える。狭い端末では 1 行化、`mascot: full | compact | off` 設定
+- [x] 右上の Neko（`DESIGN.md` §5.9）：Agent 状態に連動して顔を差し替える。狭い端末では 1 行化、`mascot: full | compact | off` 設定
 - [x] `DESIGN.md` に Paper タブを追加：フェーズ色・タブバー（`1`–`7`、Intel は `7`）・画面レイアウト（ADR-0001 のフォローアップ）
 
 ### 0.1 TUI の骨組み（PR 単位）
@@ -43,9 +43,9 @@
 
 **PR C `feat/tui-neko`：右上の Neko**
 
-- [ ] ヘッダ〜マーカーの 3 行右端に Neko を置き、Agent 状態で顔を差し替える（`DESIGN.md` §5.9）
-- [ ] done は 5 秒で idle に戻る。10 分操作がなければ sleep
-- [ ] 100 列未満では 1 行の `(o.o)`、`--mascot full|compact|off`
+- [x] ヘッダ〜マーカーの 3 行右端に Neko を置き、Agent 状態で顔を差し替える（`DESIGN.md` §5.9）
+- [x] done は 5 秒で idle に戻る。10 分操作がなければ sleep
+- [x] 100 列未満では 1 行の `(o.o)`、`--mascot full|compact|off`
 
 **PR D `feat/tui-papers-inbox`：Papers 画面の Inbox**
 

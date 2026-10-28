@@ -323,3 +323,13 @@
 
 - 何を: 修正の途中で入力行が自動フォーカスを取り、5 テストが落ちたログを残した。
 - なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-28 `b1c6afd` feat: add Neko mascot that shows the Agent state at top-right
+
+- 何を: 右上 3 行に Neko を置き、`agent_state` に合わせて顔を差し替える。done は 5 秒で idle、10 分操作なしで sleep。100 列未満と `--mascot compact` は 1 行、`--mascot off` で非表示。
+- なぜ: DESIGN.md §5.9 の実装。Agent の状態を視線を上げたときにも拾えるようにするため（todo.md §0.1 PR C）。
+
+### 2026-10-28 `af35d51` test: keep failure log of header test after adding compact Neko
+
+- 何を: 80 列のヘッダに 1 行の Neko が付く仕様に変わったのに、テストが古い前提のままだった失敗ログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
