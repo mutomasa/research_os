@@ -1,0 +1,67 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q tests/test_tui_papers.py -k preview
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-38-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_tui_papers.py::test_inbox_lists_papers_with_preview (call) ===
+ctx = PapersContext(store=<research_os.data.papers.PaperStore object at 0x7ba18705ba10>, profile=ResearchProfile(schema_vers...docs/reference/paper_strategy.md', retrieved_at=datetime.date(2026, 10, 25), updated_at=datetime.date(2026, 10, 25))]))
+
+    def test_inbox_lists_papers_with_preview(ctx):
+        async def check(app, pilot):
+            view = app.query_one(PapersView)
+            assert title_of(view.query_one("#inbox-panel")) == "Inbox (3)"
+            summary = str(view.query_one("#inbox-summary", Static).render())
+            assert "今週 0/10" in summary and "未処理 3" in summary and "読む 0/5" in summary and "RQ1" in summary
+            assert app.focused is app.query_one(PaperList)
+            lines = list_text(app).split("\n")
+            assert lines[0].startswith("▌0.90  Tactile World Models for Slip Prediction  ")
+            assert lines[0].endswith("RA-L 2025")  # 掲載先は右寄せ
+            assert "RQ2 に強く関連（LLM） · 優先 1 位の投稿先 · 中核 8/15 本 · 被引用 12/年" in lines[1]
+            assert lines[2].startswith(" 0.80")
+            preview = str(view.query_one("#preview", Static).render())
+            assert "触覚で滑りを予測する" in preview and "doi:10.1/0" in preview
+            # 内訳は「項目・根拠・加点」の表（加点 = 重み × 要素の値）
+            table = {line.split()[0]: line.split() for line in preview.splitlines() if line.strip()}
+            assert table["RQ2"][-3:] == ["LLM", "判定", "+0.45"] or table["RQ2"][-1] == "+0.45"
+            assert "RA-L（優先 1 位）" in preview and "中核 8/15 本" in preview and "+0.20" in preview
+            assert "合計" in preview
+            await pilot.press("j")
+            assert list_text(app).split("\n")[2].startswith("▌0.80")
+            assert "Visuo-Tactile" in str(view.query_one("#preview", Static).render())
+    
+>       run(check, app_with(ctx))
+
+tests/test_tui_papers.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/tui_helpers.py:18: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/tui_helpers.py:16: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'dark', 'focus'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'dark', 'focus'})>
+
+    async def check(app, pilot):
+        view = app.query_one(PapersView)
+        assert title_of(view.query_one("#inbox-panel")) == "Inbox (3)"
+        summary = str(view.query_one("#inbox-summary", Static).render())
+        assert "今週 0/10" in summary and "未処理 3" in summary and "読む 0/5" in summary and "RQ1" in summary
+        assert app.focused is app.query_one(PaperList)
+        lines = list_text(app).split("\n")
+        assert lines[0].startswith("▌0.90  Tactile World Models for Slip Prediction  ")
+        assert lines[0].endswith("RA-L 2025")  # 掲載先は右寄せ
+>       assert "RQ2 に強く関連（LLM） · 優先 1 位の投稿先 · 中核 8/15 本 · 被引用 12/年" in lines[1]
+E       AssertionError: assert 'RQ2 に強く関連（LLM） · 優先 1 位の投稿先 · 中核 8/15 本 · 被引用 12/年' in '▌      RQ2 に強く関連（LLM） · 優先 1 位の投稿先 · 中核 8/15 本 ·  …'
+
+tests/test_tui_papers.py:56: AssertionError
