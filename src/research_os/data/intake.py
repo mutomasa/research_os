@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from research_os.data import scoring
 from research_os.data.papers import PaperStore
-from research_os.data.profile import ResearchProfile, effective_venues
+from research_os.data.profile import IntakeConfig, ResearchProfile, effective_venues
 from research_os.data.venues import VenueRegistry
 from research_os.llm.relevance import profile_hash
 from research_os.sources.openalex import OpenAlexClient
@@ -178,15 +178,46 @@ def surface(store: PaperStore, profile: ResearchProfile, now: datetime, judged_o
     return report
 
 
-def format_reason(parts: dict) -> str:
-    """スコアの内訳を 1 行で表す（CLI の inbox と TUI の Papers 画面で共有）。"""
-    source = "（LLM）" if parts.get("relevance_source") == "llm" else ""
-    items = [f"{parts.get('primary_rq')} 関連 {parts['relevance']:.2f}{source}"]
+def relevance_words(value: float) -> str:
+    if value >= 0.7:
+        return "強く関連"
+    if value >= 0.4:
+        return "関連"
+    return "やや関連"
+
+
+def core_count(parts: dict, config: IntakeConfig) -> int:
+    """gap（= 1 − core 数 / core_target）から、採点時の主 RQ の中核論文数を戻す。"""
+    return round((1 - parts["gap"]) * config.core_target)
+
+
+def format_reason(parts: dict, config: IntakeConfig) -> str:
+    """なぜこの論文が出てきたかを言葉で 1 行にする（CLI の inbox と TUI の一覧で共有）。"""
+    rq = parts.get("primary_rq")
+    source = "(LLM)" if parts.get("relevance_source") == "llm" else ""
+    items = [f"{rq} に{relevance_words(parts['relevance'])}{source}"]
     if parts.get("venue_priority"):
-        items.append(f"投稿先({parts['venue_priority']})")
+        items.append(f"投稿先 {parts['venue_priority']} 位")
     if parts["gap"] > 0:
-        items.append(f"手薄 {parts['gap']:.2f}")
+        items.append(f"中核 {core_count(parts, config)}/{config.core_target}")
     if parts.get("link"):
-        items.append(f"中核とつながり {parts['link']:.2f}")
+        items.append("中核と引用でつながる")
     items.append(f"被引用 {parts['citations_per_year']:g}/年")
     return " · ".join(items)
+
+
+def score_rows(parts: dict, config: IntakeConfig, venue: str) -> list[tuple[str, str, float]]:
+    """スコアの内訳を（項目・根拠・加点）の行にする。加点の合計がスコアになる（上限 1）。"""
+    w, rq = config.weights, parts.get("primary_rq")
+    how = "LLM 判定" if parts.get("relevance_source") == "llm" else "語の一致"
+    rows = [(f"{rq} との関連", f"{how} {parts['relevance']:.2f}", w.relevance * parts["relevance"])]
+    if parts.get("venue"):
+        rank = f"優先 {parts['venue_priority']} 位" if parts.get("venue_priority") else "優先度なし"
+        rows.append(("投稿先", f"{venue}（{rank}）", w.venue * parts["venue"]))
+    if parts["gap"] > 0:
+        rows.append((f"{rq} の不足", f"中核 {core_count(parts, config)}/{config.core_target} 本", w.gap * parts["gap"]))
+    if parts.get("link"):
+        rows.append(("中核とのつながり", "引用でつながる", w.link * parts["link"]))
+    if parts.get("velocity"):
+        rows.append(("注目度", f"被引用 {parts['citations_per_year']:g}/年", w.velocity * parts["velocity"]))
+    return rows

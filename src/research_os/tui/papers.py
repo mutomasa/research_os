@@ -22,7 +22,7 @@ from textual.widgets.option_list import Option
 
 from research_os.data import intake
 from research_os.data.papers import DISMISS_REASONS, InvalidTransition, LimitReached, PaperStore
-from research_os.data.profile import ResearchProfile
+from research_os.data.profile import IntakeConfig, ResearchProfile
 from research_os.data.venues import VenueRegistry
 from research_os.tui import theme
 
@@ -46,6 +46,7 @@ DISMISS_LABELS = {
 }
 PREVIEW_BELOW = 100  # これより狭い端末ではプレビューを隠す（DESIGN.md §6.2）
 METER_CELLS = 4
+SCORE_TABLE_WIDTH = 40  # プレビュー（120 列で約 42 列）に収まる幅
 
 
 def meter(n: int, target: int) -> Text:
@@ -72,7 +73,7 @@ def summary(ctx: PapersContext, now: datetime) -> Text:
     return line
 
 
-def item(row: sqlite3.Row, venue: str, cursor: bool, width: int) -> Text:
+def item(row: sqlite3.Row, venue: str, cursor: bool, width: int, config: IntakeConfig) -> Text:
     """1 論文 = 2 行。1 行目はスコア・原題・掲載先（右寄せ）、2 行目はスコアの内訳（DESIGN.md §5.2）。
 
     行は折り返さず、表示幅で切って … を付ける（§7.3）。
@@ -83,13 +84,13 @@ def item(row: sqlite3.Row, venue: str, cursor: bool, width: int) -> Text:
     title = Text(row["title"], style=f"bold {theme.FOREGROUND}" if cursor else theme.FOREGROUND)
     title.truncate(max(width - bar.cell_len - score.cell_len - where.cell_len, 1), overflow="ellipsis")
     gap = Text(" " * max(width - bar.cell_len - score.cell_len - title.cell_len - where.cell_len, 0))
-    reason = row["breakdown"] and intake.format_reason(json.loads(row["breakdown"]))
+    reason = row["breakdown"] and intake.format_reason(json.loads(row["breakdown"]), config)
     sub = bar + Text("      " + (reason or row["paper_id"]), style=theme.MUTED)
     sub.truncate(width, overflow="ellipsis")
     return Text("\n").join([bar + score + title + gap + where, sub])
 
 
-def preview(row: sqlite3.Row | None, venue: str) -> Text:
+def preview(row: sqlite3.Row | None, venue: str, config: IntakeConfig) -> Text:
     if row is None:
         return Text("論文を選ぶとここに詳細を表示します", style=theme.MUTED)
     body = Text(row["title"], style=f"bold {theme.FOREGROUND}")
@@ -101,13 +102,35 @@ def preview(row: sqlite3.Row | None, venue: str) -> Text:
         body.append("\n" + ", ".join(authors[:3]) + more, style=theme.MUTED)
     if row["breakdown"]:
         parts = json.loads(row["breakdown"])
-        body.append(f"\n\nスコア {row['score'] or 0:.2f}", style=theme.FOREGROUND)
-        body.append("\n" + intake.format_reason(parts), style=theme.MUTED)
+        body.append("\n\n")
+        body += score_table(parts, row["score"] or 0, venue, config)
         if parts.get("llm_reason"):
             body.append("\n" + parts["llm_reason"], style="#a9b1d6")
     if row["abstract"]:
         body.append("\n\n" + row["abstract"], style="#a9b1d6")
     return body
+
+
+def cell(text: str, width: int, justify: str = "left", style: str = theme.MUTED) -> Text:
+    """表示幅 width に切り詰め・埋める（全角は 2 列、DESIGN.md §7.3）。"""
+    t = Text(text, style=style)
+    t.truncate(width, overflow="ellipsis")
+    t.align(justify, width)
+    return t
+
+
+def score_table(parts: dict, score: float, venue: str, config: IntakeConfig) -> Text:
+    """スコアの内訳を「項目・根拠・加点」の表にし、加点の合計がスコアになることを示す。"""
+    rule = Text("─" * SCORE_TABLE_WIDTH, style=theme.NEUTRAL_200)
+    rows = intake.score_rows(parts, config, venue)
+    lines = [cell(f"スコア {score:.2f}", SCORE_TABLE_WIDTH, style=f"bold {theme.FOREGROUND}"), rule]
+    for label, detail, points in rows:
+        lines.append(cell(label, 16, style=theme.FOREGROUND) + cell(detail, 18)
+                     + cell(f"+{points:.2f}", SCORE_TABLE_WIDTH - 34, "right", theme.ACCENT))
+    capped = "（上限）" if sum(p for *_, p in rows) > 1 else ""
+    lines += [rule, cell("合計" + capped, 34, style=theme.FOREGROUND)
+              + cell(f"{score:.2f}", SCORE_TABLE_WIDTH - 34, "right", theme.ACCENT)]
+    return Text("\n").join(lines)
 
 
 class DismissScreen(ModalScreen[str | None]):
@@ -228,7 +251,7 @@ class PapersView(Horizontal):
     def _item(self, index: int) -> Text:
         row = self.rows[index]
         width = self.query_one(PaperList).scrollable_content_region.width
-        return item(row, self._venue(row), index == self._cursor, width or 80)
+        return item(row, self._venue(row), index == self._cursor, width or 80, self.ctx.profile.intake)
 
     def _redraw_items(self) -> None:
         """一覧の幅が決まって（変わって）から、行を幅に合わせて描き直す。"""
@@ -260,7 +283,7 @@ class PapersView(Horizontal):
         if self.rows:
             plist.highlighted = min(keep, len(self.rows) - 1)
         else:
-            self.query_one("#preview", Static).update(preview(None, ""))
+            self.query_one("#preview", Static).update(preview(None, "", self.ctx.profile.intake))
 
     def on_option_list_option_highlighted(self, event: OptionList.OptionHighlighted) -> None:
         plist = self.query_one(PaperList)
@@ -270,7 +293,7 @@ class PapersView(Horizontal):
             plist.replace_option_prompt_at_index(previous, self._item(previous))
         plist.replace_option_prompt_at_index(self._cursor, self._item(self._cursor))
         row = self.rows[self._cursor]
-        self.query_one("#preview", Static).update(preview(row, self._venue(row)))
+        self.query_one("#preview", Static).update(preview(row, self._venue(row), self.ctx.profile.intake))
 
     def on_paper_list_view(self, event: PaperList.View) -> None:
         keys = [k for k, _ in VIEWS]

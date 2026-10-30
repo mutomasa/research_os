@@ -53,10 +53,15 @@ def test_inbox_lists_papers_with_preview(ctx):
         lines = list_text(app).split("\n")
         assert lines[0].startswith("▌0.90  Tactile World Models for Slip Prediction  ")
         assert lines[0].endswith("RA-L 2025")  # 掲載先は右寄せ
-        assert "RQ2 関連 0.90（LLM）" in lines[1]
+        assert "RQ2 に強く関連(LLM) · 投稿先 1 位 · 中核 8/15 · 被引用 12/年" in lines[1]
         assert lines[2].startswith(" 0.80")
         preview = str(view.query_one("#preview", Static).render())
         assert "触覚で滑りを予測する" in preview and "doi:10.1/0" in preview
+        # 内訳は「項目・根拠・加点」の表（加点 = 重み × 要素の値）
+        relevance = next(line for line in preview.splitlines() if line.startswith("RQ2 との関連"))
+        assert "LLM 判定 0.90" in relevance and relevance.endswith("+0.45")
+        assert "RA-L（優先 1 位）" in preview and "中核 8/15 本" in preview and "+0.20" in preview
+        assert "合計" in preview
         await pilot.press("j")
         assert list_text(app).split("\n")[2].startswith("▌0.80")
         assert "Visuo-Tactile" in str(view.query_one("#preview", Static).render())
