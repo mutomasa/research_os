@@ -363,3 +363,18 @@
 
 - 何を: README.md に使い方（セットアップ、研究テーマの設定、論文の取り込み、TUI のキー操作と判断の遷移、CLI だけでの運用、テスト）を加え、「現在の状態」を実装済みの範囲に合わせて書き直した。
 - なぜ: 取り込みと TUI の Inbox が動くようになり、初めて触る人が手順を追えるようにするため。
+
+### 2026-10-30 `1c78f7c` feat: explain the Inbox score in words and as a points table
+
+- 何を: Inbox 一覧の 2 行目を数値の羅列（`関連 1.00 · 投稿先(1) · 手薄 1.00`）から言葉（`RQ2 に強く関連 · 投稿先 1 位 · 中核 0/15 · 被引用 9/年`）に変え、プレビューに項目・根拠・加点の表と合計を出した。CLI の `inbox` も同じ言葉の 1 行になる。
+- なぜ: 「手薄 1.00」の意味や、各要素がスコアにどれだけ効いたかが読み取れなかったため。
+
+### 2026-10-30 `c12bc5b` test: keep failure logs of score breakdown display change
+
+- 何を: 旧表示を前提にしたアサーションの失敗と、一覧の行が幅に収まらず切れた失敗のログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-30 `93832a6` docs: describe the worded score breakdown and points table
+
+- 何を: design.md と paper_intake.md の表示例を新しい内訳表示に合わせた。
+- なぜ: 仕様と実装を合わせるため。
