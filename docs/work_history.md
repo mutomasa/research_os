@@ -423,3 +423,13 @@
 
 - 何を: `docs/todo.md` の未着手項目の末尾に、対応する GitHub Issue 番号（#31〜#66、RSS は #10）を追記し、完了済みの README 項目を [x] にした。
 - なぜ: 未着手の項目を Issue（ラベル `feature` / `area:*`）で管理し始めたので、todo.md と Issue の対応をたどれるようにするため。
+
+### 2026-11-16 `8ee87ab` fix: show toasts at the top right below Neko
+
+- 何を: `tui/app.py` の `ToastRack` に `dock: top` を追加し、トーストを右上（Neko の 3 行の下）に出すようにした。位置を確かめるテストを `run_test(notifications=True)` で追加した。
+- なぜ: Textual 8.2.8 の `ToastRack` は既定で `dock: bottom` のため、`align: right top` だけでは右下に出ており、DESIGN.md §5.8 と食い違っていた（#30）。
+
+### 2026-11-16 `e3aba86` test: keep pytest failure logs of the toast position fix
+
+- 何を: 修正前（右下に出る）と、テストの条件が厳しすぎた段階の pytest 失敗ログを `logs/pytest/` に残した。
+- なぜ: 失敗ログを残す規約（CLAUDE.md「テストとログ」）に従うため。
