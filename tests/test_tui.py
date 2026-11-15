@@ -200,3 +200,23 @@ def test_help_keeps_the_screen_behind_visible():
         assert app.screen.styles.background.a < 1
 
     run(check)
+
+
+def test_toast_appears_top_right_below_neko():
+    # DESIGN.md §5.8：トーストは右上。ヘッダ〜マーカーの 3 行（Neko）は避ける（#30）
+    async def check(app, pilot):
+        app.notify("✓ test toast", timeout=10)
+        await pilot.pause()
+        await pilot.pause()
+        from textual.widgets._toast import Toast
+
+        toast = app.screen.query_one(Toast)
+        region = toast.region
+        width, height = app.size
+        # Neko の 3 行（y=0〜2）より下で、画面の上半分にある
+        assert region.y >= 3, region
+        assert region.bottom <= height // 2, region
+        # 右寄せ（Toast 自身の右マージンの分だけ端から離れる）
+        assert region.right >= width - 2, region
+
+    run(check, notifications=True)

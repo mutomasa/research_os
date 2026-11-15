@@ -29,8 +29,9 @@ class ResearchOSApp(App):
     ModalScreen { background: $background 60%; }
     #top { height: 3; }
     #neko { margin-left: 2; }
-    /* トーストは右上（DESIGN.md §5.8）。Neko の 3 行は避ける */
-    ToastRack { align: right top; margin-top: 3; }
+    /* トーストは右上（DESIGN.md §5.8）。Neko の 3 行は避ける。
+       Textual の ToastRack は既定で dock: bottom なので、align だけでなく dock も上書きする（#30） */
+    ToastRack { dock: top; align: right top; margin-top: 3; margin-bottom: 0; }
     #main { height: 1fr; }
     #main > PhasePlaceholder {
         height: 1fr; padding: 0 1;
