@@ -403,3 +403,18 @@
 
 - 何を: `pyproject.toml`・`__init__.py`・`uv.lock` を 0.1.2 にし、`test_smoke` を pyproject.toml との一致確認に変えた。
 - なぜ: ヘッダに出す版を 0.1.2 にするため。直書きの "0.1.0" で失敗したので（`logs/test_smoke/`）、版のずれを検出する形にした。
+
+### 2026-11-15 `29abc83` docs: add storyboard for the TUI manual video
+
+- 何を: `docs/manual/storyboard.md` に操作説明動画の場面・赤枠・説明を決めた。
+- なぜ: TUI の使い方を、UI を赤枠で示し画面下で説明する mp4 にするため、先に構成を固めた。
+
+### 2026-11-15 `67e13de` feat: add a script that renders the TUI manual video
+
+- 何を: `scripts/make_manual_video.py`。Pilot で操作 → SVG → 赤枠と説明を重ねて headless Chrome で PNG → ffmpeg で mp4。全角が詰まって重なる SVG 書き出しの幅を直し、トーストを有効にして撮る。
+- なぜ: 画面が変わっても動画を作り直せるようにするため。途中でトーストが右下に出る不具合を見つけた（#30）。
+
+### 2026-11-15 `bb6d2f6` docs: add the TUI manual video and link it from README
+
+- 何を: `docs/assets/manual.mp4`（1920×1080・約 90 秒・15 場面）を追加し、README からリンクした。
+- なぜ: 初めて使う人が、各 UI の意味とキー操作を順に確認できるようにするため。
