@@ -368,3 +368,18 @@
 
 - 何を: Papers の Inbox の操作・フェーズタブ・Agent 欄・キー一覧を映した 30 秒の GIF（`docs/assets/demo.gif`）を README の冒頭に置いた。Textual の Pilot で操作して SVG を書き出し、headless Chrome と ffmpeg で GIF にした。
 - なぜ: 初めて見る人が画面と操作をすぐ掴めるようにするため。
+
+### 2026-11-15 `a027f71` docs: show the app version at the top right of the header
+
+- 何を: DESIGN.md §5.1・§7.1 に、ヘッダ右側の時刻の左にバージョン（Muted）を置く仕様を追加した。
+- なぜ: TUI を見ただけで動いている版が分かるようにするため。
+
+### 2026-11-15 `3b3def4` feat: show the app version left of the clock in the TUI header
+
+- 何を: `HeaderLine` が `research_os.__version__` を時刻の左に表示する。幅が足りないときは出さない。テストを追加した。
+- なぜ: DESIGN.md §5.1 の仕様を実装するため。
+
+### 2026-11-15 `b6b5a54` chore: bump version to 0.1.2
+
+- 何を: `pyproject.toml`・`__init__.py`・`uv.lock` を 0.1.2 にし、`test_smoke` を pyproject.toml との一致確認に変えた。
+- なぜ: ヘッダに出す版を 0.1.2 にするため。直書きの "0.1.0" で失敗したので（`logs/test_smoke/`）、版のずれを検出する形にした。
