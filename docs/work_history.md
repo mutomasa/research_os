@@ -418,3 +418,8 @@
 
 - 何を: `docs/assets/manual.mp4`（1920×1080・約 90 秒・15 場面）を追加し、README からリンクした。
 - なぜ: 初めて使う人が、各 UI の意味とキー操作を順に確認できるようにするため。
+
+### 2026-11-16 `a9c2433` docs: link each open todo item to its GitHub issue
+
+- 何を: `docs/todo.md` の未着手項目の末尾に、対応する GitHub Issue 番号（#31〜#66、RSS は #10）を追記し、完了済みの README 項目を [x] にした。
+- なぜ: 未着手の項目を Issue（ラベル `feature` / `area:*`）で管理し始めたので、todo.md と Issue の対応をたどれるようにするため。
