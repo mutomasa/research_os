@@ -368,3 +368,8 @@
 
 - 何を: Papers の Inbox の操作・フェーズタブ・Agent 欄・キー一覧を映した 30 秒の GIF（`docs/assets/demo.gif`）を README の冒頭に置いた。Textual の Pilot で操作して SVG を書き出し、headless Chrome と ffmpeg で GIF にした。
 - なぜ: 初めて見る人が画面と操作をすぐ掴めるようにするため。
+
+### 2026-11-15 `d6ef54e` docs: mark OpenAlex metadata source as done in todo
+
+- 何を: `docs/todo.md` の OpenAlex 項目と「取得元を決定」を完了にし、Semantic Scholar を補助の未実装項目として分けた。
+- なぜ: ADR-0003 で決定し実装も済んでいたのに、todo.md が未完了のままで進み具合が実態とずれていたため。
