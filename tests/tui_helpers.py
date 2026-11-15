@@ -7,12 +7,12 @@ from textual.content import Content
 from research_os.tui.app import ResearchOSApp
 
 
-def run(coro_fn, app=None, size=(120, 36)):
+def run(coro_fn, app=None, size=(120, 36), notifications=False):
     """Textual の run_test を pytest-asyncio なしで回す。"""
     app = app or ResearchOSApp(research_theme="vision tactile world model")
 
     async def main():
-        async with app.run_test(size=size) as pilot:
+        async with app.run_test(size=size, notifications=notifications) as pilot:
             await coro_fn(app, pilot)
 
     asyncio.run(main())

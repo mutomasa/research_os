@@ -1,0 +1,70 @@
+$ uv run pytest tests/test_tui.py::test_toast_appears_top_right_below_neko -v
+変更: tests に右上トーストの位置テストを追加（#30）。修正前の app.py（ToastRack { align: right top; margin-top: 3; }）で実行
+============================= test session starts ==============================
+platform linux -- Python 3.13.7, pytest-9.1.1, pluggy-1.7.0 -- /home/mutomasa/research/research_os/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/mutomasa/research/research_os
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5
+collecting ... collected 1 item
+
+tests/test_tui.py::test_toast_appears_top_right_below_neko FAILED        [100%]
+
+=================================== FAILURES ===================================
+___________________ test_toast_appears_top_right_below_neko ____________________
+
+    def test_toast_appears_top_right_below_neko():
+        # DESIGN.md §5.8：トーストは右上。ヘッダ〜マーカーの 3 行（Neko）は避ける（#30）
+        async def check(app, pilot):
+            app.notify("✓ test toast", timeout=10)
+            await pilot.pause()
+            await pilot.pause()
+            from textual.widgets._toast import Toast
+    
+            toast = app.screen.query_one(Toast)
+            region = toast.region
+            width, height = app.size
+            assert region.y == 3, region
+            assert region.y + region.height < height // 2, region
+            assert region.right == width, region
+    
+>       run(check, notifications=True)
+
+tests/test_tui.py:220: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/tui_helpers.py:18: in run
+    asyncio.run(main())
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.13.7-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/tui_helpers.py:16: in main
+    await coro_fn(app, pilot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+app = ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'focus', 'dark'})
+pilot = <Pilot app=ResearchOSApp(title='Research OS', classes={'-theme-lab-ink', '-dark-mode'}, pseudo_classes={'focus', 'dark'})>
+
+    async def check(app, pilot):
+        app.notify("✓ test toast", timeout=10)
+        await pilot.pause()
+        await pilot.pause()
+        from textual.widgets._toast import Toast
+    
+        toast = app.screen.query_one(Toast)
+        region = toast.region
+        width, height = app.size
+>       assert region.y == 3, region
+E       AssertionError: Region(x=59, y=33, width=59, height=3)
+E       assert 33 == 3
+E        +  where 33 = Region(x=59, y=33, width=59, height=3).y
+
+tests/test_tui.py:216: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_tui.py::test_toast_appears_top_right_below_neko - Assertion...
+============================== 1 failed in 0.37s ===============================
