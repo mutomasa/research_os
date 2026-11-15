@@ -383,3 +383,8 @@
 
 - 何を: design.md と paper_intake.md の表示例を新しい内訳表示に合わせた。
 - なぜ: 仕様と実装を合わせるため。
+
+### 2026-11-15 `d6ef54e` docs: mark OpenAlex metadata source as done in todo
+
+- 何を: `docs/todo.md` の OpenAlex 項目と「取得元を決定」を完了にし、Semantic Scholar を補助の未実装項目として分けた。
+- なぜ: ADR-0003 で決定し実装も済んでいたのに、todo.md が未完了のままで進み具合が実態とずれていたため。
