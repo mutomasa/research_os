@@ -2,6 +2,8 @@
 
 ![Research OS の TUI デモ：Papers の Inbox で論文を判断し、フェーズタブと Agent 欄を操作する](docs/assets/demo.gif)
 
+操作ガイド動画（約 90 秒・各 UI を赤枠で示して画面下で説明）：[docs/assets/manual.mp4](docs/assets/manual.mp4)。作り直しは `uv run python scripts/make_manual_video.py`（絵コンテは [docs/manual/storyboard.md](docs/manual/storyboard.md)）
+
 Research OS は、文献検索から実験実行までの研究活動を、ひとつの TUI でつなぐ研究開発 IDE の構想です。
 
 文献データベース、Research Agent、MCP 経由の外部サービスを統合し、研究者が次のサイクルを一貫して進められる環境を目指します。
