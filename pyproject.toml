@@ -1,6 +1,6 @@
 [project]
 name = "research-os"
-version = "0.1.0"
+version = "0.1.2"
 description = "Research OS — 検索から実験・投稿までを回す研究開発 TUI"
 readme = "README.md"
 requires-python = ">=3.12"
