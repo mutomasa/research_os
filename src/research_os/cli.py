@@ -112,7 +112,7 @@ def _cmd_inbox(args: argparse.Namespace) -> int:
         print(f"      {row['paper_id']}")
         if row["breakdown"]:
             parts = json.loads(row["breakdown"])
-            print(f"      {intake.format_reason(parts)}")
+            print(f"      {intake.format_reason(parts, cfg)}")
             if parts.get("llm_reason"):
                 print(f"      {parts['llm_reason']}")
     return 0
