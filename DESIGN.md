@@ -256,7 +256,7 @@ AI エージェント（Claude Code など）がそのまま読んで TUI 実装
 Intel は並走トラックなので `│` で区切って右側に置く。
 
 ```
- Research OS  ·  vision tactile world model                             2026-10-01 09:12    /\_/\
+ Research OS  ·  vision tactile world model                     v0.1.2  2026-10-01 09:12    /\_/\
  1 Papers   2 Review   3 Graph   4 Hypothesis   5 Run   6 Paper   │   7 Intel ●3           ( o.o )
  ▔▔▔▔▔▔▔▔                                                                                   > ^ <
 ```
@@ -265,6 +265,7 @@ Intel は並走トラックなので `│` で区切って右側に置く。
 - タブ横の `●3` は未読件数（Intel の新着、Papers の関心フィード新着）。Marked 色
 - ヘッダ中央は **現在の研究テーマ**（design.md §1 の③）。長い場合は `…` で省略
 - 右上の 3 行（ヘッダ〜マーカー行の右端 7 列）は **Neko**（§5.9）の定位置。時刻は Neko の左に寄せる
+- 時刻の左に **バージョン**（`v0.1.2`、Muted）を 2 列空けて置く。値は `research_os.__version__`（`pyproject.toml` と揃える）。幅が足りずアプリ名まで削れるときはバージョンを出さない
 
 ### 5.2 Paper List Item
 
@@ -588,7 +589,7 @@ Draft / Submission のサブタブ。Submission では R6 の判定、要件の�
 ### 7.1 基本構造
 
 ```
-行  1        Header（アプリ名 · テーマ · 時刻）     ┐ 右端 7 列は Neko（§5.9）
+行  1        Header（アプリ名 · テーマ · 版 · 時刻）┐ 右端 7 列は Neko（§5.9）
 行  2–3      Phase Tabs + マーカー                 ┘
 行  4–(n-9)  Main（フェーズごとの画面。可変）
 行  (n-8)–(n-1) Agent Pane（既定 7 行。3〜全高で可変）

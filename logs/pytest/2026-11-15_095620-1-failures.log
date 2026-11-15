@@ -1,0 +1,17 @@
+command: /home/mutomasa/research/research_os/.venv/bin/pytest -q tests/test_smoke.py
+cwd: /home/mutomasa/research/research_os
+python: 3.13.7 (main, Aug 18 2025, 19:20:03) [Clang 20.1.4 ]
+platform: Linux-7.0.0-42-generic-x86_64-with-glibc2.39
+exitstatus: 1
+
+=== tests/test_smoke.py::test_version (call) ===
+def test_version():
+>       assert research_os.__version__ == "0.1.0"
+E       AssertionError: assert '0.1.2' == '0.1.0'
+E         
+E         - 0.1.0
+E         ?     ^
+E         + 0.1.2
+E         ?     ^
+
+tests/test_smoke.py:6: AssertionError

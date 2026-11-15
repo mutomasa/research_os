@@ -10,6 +10,7 @@ from textual.screen import ModalScreen
 from textual.widget import Widget
 from textual.widgets import Static
 
+from research_os import __version__
 from research_os.tui import theme
 from research_os.tui.theme import PHASES
 
@@ -39,7 +40,7 @@ GLOBAL_KEYS = [
 
 
 class HeaderLine(Widget):
-    """1 行目：アプリ名 · 研究テーマ（左）と時刻（右）。狭い端末では時刻の右に 1 行の Neko を置く。"""
+    """1 行目：アプリ名 · 研究テーマ（左）とバージョン・時刻（右）。狭い端末では時刻の右に 1 行の Neko を置く。"""
 
     DEFAULT_CSS = "HeaderLine { height: 1; }"
 
@@ -58,6 +59,10 @@ class HeaderLine(Widget):
         if self.mascot is not None:
             clock += Text(" ") + self.mascot
         left = Text(" Research OS", style=f"bold {theme.FOREGROUND}")
+        # 時刻の左にバージョン（§5.1）。アプリ名まで削れる幅ならバージョンは出さない
+        version = Text(f"v{__version__}  ", style=theme.MUTED)
+        if self.size.width - clock.cell_len - version.cell_len - 2 >= left.cell_len:
+            clock = version + clock
         if self.research_theme:
             left.append("  ·  ", style=theme.MUTED)
             left.append(self.research_theme, style=theme.FOREGROUND)

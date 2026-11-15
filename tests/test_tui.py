@@ -2,6 +2,7 @@ from rich.cells import cell_len
 from textual.widgets import ContentSwitcher
 from tui_helpers import run, text_of, title_of
 
+from research_os import __version__
 from research_os.tui.app import ResearchOSApp
 from research_os.tui.widgets import HeaderLine, HelpScreen, PhaseTabs, StatusBar
 
@@ -52,6 +53,24 @@ def test_header_shows_theme_and_truncates():
     run(check, ResearchOSApp(research_theme="失敗認識型の長期ロボットマニピュレーションに向けた視覚・触覚統合JEPA世界モデル"),
         size=(80, 24))
 
+
+
+def test_header_shows_version_left_of_clock():
+    async def check(app, pilot):
+        header = app.query_one(HeaderLine)
+        clock = header.now.strftime("%Y-%m-%d %H:%M")
+        assert f"v{__version__}  {clock}" in text_of(header)
+
+    run(check)
+
+
+def test_header_drops_version_when_too_narrow():
+    async def check(app, pilot):
+        line = text_of(app.query_one(HeaderLine))
+        assert line.startswith(" Research OS")
+        assert f"v{__version__}" not in line
+
+    run(check, size=(40, 24))
 
 def test_status_bar_lists_connections_as_unset():
     async def check(app, pilot):
