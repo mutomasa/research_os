@@ -23,7 +23,7 @@ def test_inbox_and_triage(root, tmp_path, capsys):
 
     assert main(_args(root, db, "inbox")) == 0
     out = capsys.readouterr().out
-    assert "未処理 1" in out and "RA-L 2025" in out and "RQ2 関連 1.00" in out
+    assert "未処理 1" in out and "RA-L 2025" in out and "RQ2 に強く関連 · 投稿先 1 位 · 中核 0/15 · 被引用 5/年" in out
 
     assert main(_args(root, db, "triage", pid, "dismissed")) == 1
     assert "理由" in capsys.readouterr().err
@@ -100,7 +100,7 @@ def test_explore_judges_with_claude_and_surfaces_judged(root, tmp_path, capsys, 
     assert "llm judged: 2 (1 calls)" in out and "surfaced: 1" in out
     assert main(_args(root, db, "inbox")) == 0
     out = capsys.readouterr().out
-    assert "RQ2 関連 0.90（LLM）" in out and "直接扱う" in out
+    assert "RQ2 に強く関連(LLM)" in out and "直接扱う" in out
 
 
 def test_llm_failure_falls_back_to_keyword(root, tmp_path, capsys, monkeypatch):

@@ -369,6 +369,26 @@
 - 何を: Papers の Inbox の操作・フェーズタブ・Agent 欄・キー一覧を映した 30 秒の GIF（`docs/assets/demo.gif`）を README の冒頭に置いた。Textual の Pilot で操作して SVG を書き出し、headless Chrome と ffmpeg で GIF にした。
 - なぜ: 初めて見る人が画面と操作をすぐ掴めるようにするため。
 
+### 2026-10-30 `1c78f7c` feat: explain the Inbox score in words and as a points table
+
+- 何を: Inbox 一覧の 2 行目を数値の羅列（`関連 1.00 · 投稿先(1) · 手薄 1.00`）から言葉（`RQ2 に強く関連 · 投稿先 1 位 · 中核 0/15 · 被引用 9/年`）に変え、プレビューに項目・根拠・加点の表と合計を出した。CLI の `inbox` も同じ言葉の 1 行になる。
+- なぜ: 「手薄 1.00」の意味や、各要素がスコアにどれだけ効いたかが読み取れなかったため。
+
+### 2026-10-30 `c12bc5b` test: keep failure logs of score breakdown display change
+
+- 何を: 旧表示を前提にしたアサーションの失敗と、一覧の行が幅に収まらず切れた失敗のログを残した。
+- なぜ: CLAUDE.md の失敗ログ保存規約に従うため。
+
+### 2026-10-30 `93832a6` docs: describe the worded score breakdown and points table
+
+- 何を: design.md と paper_intake.md の表示例を新しい内訳表示に合わせた。
+- なぜ: 仕様と実装を合わせるため。
+
+### 2026-11-15 `d6ef54e` docs: mark OpenAlex metadata source as done in todo
+
+- 何を: `docs/todo.md` の OpenAlex 項目と「取得元を決定」を完了にし、Semantic Scholar を補助の未実装項目として分けた。
+- なぜ: ADR-0003 で決定し実装も済んでいたのに、todo.md が未完了のままで進み具合が実態とずれていたため。
+
 ### 2026-11-15 `a027f71` docs: show the app version at the top right of the header
 
 - 何を: DESIGN.md §5.1・§7.1 に、ヘッダ右側の時刻の左にバージョン（Muted）を置く仕様を追加した。

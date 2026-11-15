@@ -67,7 +67,8 @@
 - [ ] Paperpile 連携（ライブラリ読み取り・重複確認・登録）
 - [ ] arXiv 検索クライアント
 - [ ] GitHub 連携（リポジトリ・コード検索）
-- [ ] Semantic Scholar / OpenAlex：掲載先（venue）メタデータの取得に使う（Venue フィルタに必要なため優先度を上げる。design.md §2.7）
+- [x] OpenAlex：掲載先（venue）メタデータの主な取得元として実装（`sources/openalex.py`。ADR-0003、design.md §2.7）
+- [ ] Semantic Scholar：補助の取得元（TLDR・被引用の推移）。ADR-0003 で補助と決めたが未実装
 - [ ] Neo4j 接続（Knowledge Graph 永続化）
 - [ ] ステータスバー：各接続のヘルスチェックと表示（`Paperpile ✓ arXiv ✓ alphaXiv ✓ GitHub ✓ Feeds ✓`）
 - [ ] Feeds 接続：Intel 監視対象ソースの巡回状態を集計して表示（`Feeds ✓ 8/9`、失敗ソースがあれば警告）
@@ -285,7 +286,7 @@ Technology Intelligence（技術革新）と Business Intelligence（ビジネ�
 
 ### 9.4 未決・テスト
 
-- [ ] 掲載先メタデータの取得元を決定（Semantic Scholar / OpenAlex / DBLP）
+- [x] 掲載先メタデータの取得元を決定：OpenAlex を主、Semantic Scholar・DBLP を補助（ADR-0003）
 - [ ] 締切抽出方式を決定（HTML 抽出か手動登録を既定にするか）
 - [ ] テスト：Venue レジストリ読み込み、R6 判定（要件充足・未充足）、Claim 差分（失敗ログは `logs/` に残す）
 
