@@ -364,6 +364,11 @@
 - 何を: README.md に使い方（セットアップ、研究テーマの設定、論文の取り込み、TUI のキー操作と判断の遷移、CLI だけでの運用、テスト）を加え、「現在の状態」を実装済みの範囲に合わせて書き直した。
 - なぜ: 取り込みと TUI の Inbox が動くようになり、初めて触る人が手順を追えるようにするため。
 
+### 2026-10-30 `1c6d280` docs: show a TUI demo GIF at the top of README
+
+- 何を: Papers の Inbox の操作・フェーズタブ・Agent 欄・キー一覧を映した 30 秒の GIF（`docs/assets/demo.gif`）を README の冒頭に置いた。Textual の Pilot で操作して SVG を書き出し、headless Chrome と ffmpeg で GIF にした。
+- なぜ: 初めて見る人が画面と操作をすぐ掴めるようにするため。
+
 ### 2026-10-30 `1c78f7c` feat: explain the Inbox score in words and as a points table
 
 - 何を: Inbox 一覧の 2 行目を数値の羅列（`関連 1.00 · 投稿先(1) · 手薄 1.00`）から言葉（`RQ2 に強く関連 · 投稿先 1 位 · 中核 0/15 · 被引用 9/年`）に変え、プレビューに項目・根拠・加点の表と合計を出した。CLI の `inbox` も同じ言葉の 1 行になる。
